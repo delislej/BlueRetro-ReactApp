@@ -6,9 +6,7 @@ function Presets() {
   return (
     <div className="Presets">
       <div id="divBtConn">
-    <button id="btConn" onClick={() => {Navigator.bluetooth.requestDevice(
-        {filters: [{name: 'BlueRetro'}],
-        optionalServices: [brUuid[0]]})}}>Connect BlueRetro</button><br/>
+    <button id="btConn" onClick={() => {btConn()}}>Connect BlueRetro</button><br/>
     <small><i>Disconnect all controllers from BlueRetro before connecting for configuration.</i></small>
 </div>
 <div id="divInputCfg" style={{display:'none',marginBottom:"1em"}}>
@@ -229,7 +227,7 @@ function saveInput() {
         cfg[j++] = 0;
         cfg[j++] = nbMapping;
 
-        console.log('Input: '+ cfgId + "\n" + 'Preset: ' + preset);
+        //console.log('Input: '+ cfgId + "\n" + 'Preset: ' + preset);
         for (var i = 0; i < nbMapping; i++) {
             cfg[j++] = btn[presets[preset].map[i][0]];
             cfg[j++] = btn[presets[preset].map[i][1]];
