@@ -1,22 +1,6 @@
-import React from "react";
-
+import React, { useState, Component } from "react";
+import Select from 'react-select'
 import { maxMainInput, btn, brUuid } from '../components/Utils';
-
-function Presets() {
-  return (
-    <div className="Presets">
-      <div id="divBtConn">
-    <button id="btConn" onClick={() => {btConn()}}>Connect BlueRetro</button><br/>
-    <small><i>Disconnect all controllers from BlueRetro before connecting for configuration.</i></small>
-</div>
-<div id="divInputCfg" style={{display:'none',marginBottom:"1em"}}>
-    <h2 style={{margin:0}}>Mapping Config</h2>
-    <p id="desc">placeholder</p>
-</div>
-    </div>
-  );
-}
-
 
 var presets = [];
 var bluetoothDevice;
@@ -24,87 +8,54 @@ let brService = null;
 var pageInit = 0;
 var consoles = []
 
-function initInputSelect() {
+function Presets() {
+const [selectionConsoles, setSelectionConsoles] = useState([
+    { value: -1, label: 'Select a console' }
+  ]);
+
+  const [selectionPresets, setSelectionPresets] = useState([
+    { value: -1, label: 'Select a Preset' }
+  ]);
+  return (
+    <div className="Presets">
+      <div id="divBtConn">
+    <button id="btBtn" onClick={() => {btConn(setSelectionConsoles)}}>Connect BlueRetro</button><br/>
+    </div>
+    if(){<button id="save" onClick={() => {saveInput()}}>save</button>}
+    <small><i>Disconnect all controllers from BlueRetro before connecting for configuration.</i></small>
+
+<div id="divInputCfg" style={{marginBottom:"1em"}}>
+    <h2 style={{margin:0}}>Mapping Config</h2>
+    <Select options={selectionConsoles} />
+</div>
+    </div>
+  );
+}
+
+
+
+function initInputSelect(hook) {
     //push all console names from JSON files
+    console.log("in console func");
     for (var i = 0; i < presets.length; i++) {
         consoles.push(presets[i].console)
     }
+    console.log(consoles)
+    let consoleArr = []
     //filter out non-unique items
     consoles = consoles.filter(onlyUnique)
-    //set placeholder description
-    document.getElementById("desc").textContent = "Select a system and then preset";
-    var div = document.createElement("outputandconsole");
-    var main = document.createElement("select");
-
-    for (let i = 0; i < maxMainInput; i++) {
-        var option  = document.createElement("option");
-        option.value = i;
-        option.text = "Output " + (i + 1);
-        main.add(option);
-    }
-    main.id = "inputSelect";
-    div.appendChild(main);
-
-    var main2 = document.createElement("select");
-    //add placeholder option
-    let option2  = document.createElement("option");
-        option2.value = -1;
-        option2.text = "All";
-        main2.add(option2);
-    //add console filter options    
     for (let i = 0; i < consoles.length; i++) {
-        let option3  = document.createElement("option");
-        option3.value = i;
-        option3.text = consoles[i];
-        main2.add(option3);
+        consoleArr.push({value: i, label: consoles[i]})
     }
-    main2.id = "consoleName";
-    main2.addEventListener("change", chooseConsole);
-    div.appendChild(main);
-    //add preset drop down menu
-    var main3 = document.createElement("select");
-    main3.id = "presetsName";
-    main3.addEventListener("change", selectInput);
-    div.appendChild(main3);
-
-    var divInputCfg = document.getElementById("divInputCfg");
-    divInputCfg.appendChild(div);
-    //populate preset list with all options by default
-    populateConsolePresets(undefined);
-}
-
-function initOutputMapping() {
-    
-    let divSave = document.createElement("saveButton");
-
-    var btn = document.createElement("button");
-    btn.id = "inputSave";
-    btn.innerText = 'Save';
-    btn.addEventListener("click", saveInput);
-    divSave.appendChild(btn);
-    divSave.setAttribute("style", "margin-top:1em;");
-
-    var div = document.createElement("div");
-    div.id = "inputSaveText";
-    div.setAttribute("style", "display:none;margin-top:1em;");
-    var p = document.createElement("p");
-    p.setAttribute("style", "font-style:italic;font-size:small;color:green;");
-    p.innerText = "Config saved, mapping changes take effect immediately.";
-
-    div.appendChild(p);
-    divSave.appendChild(div);
-
-    //Append first cfg
-    let divMappingGrp = document.createElement("save");
-    var divInputCfg = document.getElementById("divInputCfg");
-    divMappingGrp.appendChild(divSave);
-    divInputCfg.appendChild(divMappingGrp);
+    console.log(consoleArr);
+    hook(consoleArr);
 }
 
 function fetchMap(presets, files, idx) {
     return new Promise(function(resolve, reject) {
-        fetch("map/" + files[idx].name)
+        fetch("https://raw.githubusercontent.com/darthcloud/BlueRetroWebCfg/master/map/" + files[idx].name)
         .then(rsp => {
+            console.log(rsp);
             return rsp.json();
         })
         .then(data => {
@@ -129,6 +80,7 @@ function getMapList(url) {
             return rsp.json();
         })
         .then(data => {
+            console.log(data)
             resolve(data);
         })
         .catch(error => {
@@ -142,17 +94,18 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
-function initBlueRetroCfg() {
+function initBlueRetroCfg(hook) {
+    console.log("in init, hook: " + hook)
     getMapList('https://api.github.com/repos/darthcloud/BlueRetroWebCfg/contents/map/')
     .then(files => {
         return fetchMap(presets, files, 0);
     })
     .then(_ => {
-        initInputSelect();
-        initOutputMapping();
-        pageInit = 1;
+        console.log("not error")
+        initInputSelect(hook)
     })
     .catch(error => {
+        console.log("error")
         console.log('Argh! ' + error);
     });
 }
@@ -259,7 +212,7 @@ function onDisconnected() {
     document.getElementById("divInputCfg").style.display = 'none';
 }
 
-function btConn() {
+function btConn(hook) {
   console.log('Requesting Bluetooth Device...');
     navigator.bluetooth.requestDevice(
         {filters: [{name: 'BlueRetro'}],
@@ -278,10 +231,8 @@ function btConn() {
       console.log('Init Cfg DOM...');
         brService = service;
         if (!pageInit) {
-            initBlueRetroCfg();
+            initBlueRetroCfg(hook);
         }
-        document.getElementById("divBtConn").style.display = 'none';
-        document.getElementById("divInputCfg").style.display = 'block';
     })
     .catch(error => {
       console.log('Argh! ' + error);
