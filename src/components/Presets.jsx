@@ -1,65 +1,164 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from 'react-select'
-import { btn, brUuid } from '../components/Utils';
+import { brUuid, savePresetInput } from './Btutils';
 
-let mapListFile = require('../mapList.json');
-var presets = [];
 var bluetoothDevice;
-let brService = null;
-var consoles = []
-
 
 function Presets() {
+  
+  //blue retro service ID used for saving preset
+  const [brService, setBrService] = useState(null);
+  
+  //flag to render selection menus
   const [pageInit, setPageInit] = useState(false);
+  
+  //hook that controls the shown description
   const [description, setDescription] = useState("");
   
+  //array of presets
+  const [presets, setPresets] = useState(null);
+  
+  //hook that controls which controller we are configuring
+  const [input, setInput] = useState({value: 1});
+  
+  //list of unique consoles used to filter preset list
+  const [consoles, setConsoles] = useState(null);
+  
+  //list of selectable presets, can be filtered by selected console
+  const [presetList, setPresetList] = useState([
+    { value: -1, label: 'Select a Preset' }
+  ]);
+  
+  //list of selectable consoles, used to filter preset list
   const [selectionConsoles, setSelectionConsoles] = useState([
     { value: -1, label: 'Select a console', test: "lol"}
   ]);
 
-  const [selectionPresets, setSelectionPresets] = useState([
-    { value: -1, label: 'Select a Preset' }
-  ]);
+  //list of preset names used to load JSON files
+  const [presetsNames, setPresetNames] = useState("");
 
-  const [selectedPreset, setSelectedPreset] = useState(-1);
+  //hook to render game console lable
+  const [gameConsole, setGameConsole] = useState(-1);
   
+  //hook to render preset lable
+  const [selectedPreset, setSelectedPreset] = useState(-1);
+
+  const myrange = [1,2,3,4,5,6,7,8,9,10,11,12];
+  
+  //handle react select labels
+  const handleConsoleChange = (obj) => {
+    setGameConsole(obj);
+    setSelectedPreset(null);
+    setDescription(null);
+    setPresetList(populateConsolePresets(obj.value, presets, consoles));
+  };
+  
+  //handle react select label
+  const handlePresetChange = (obj) => {
+    setSelectedPreset(obj);
+    setDescription(getPresetDescription(presets[obj.value]));
+  };
+    
+  useEffect(() => {
+      //check if we have local file list, and that it is not too old
+        (async function() {
+            try {
+                let da = new Date();
+                if(localStorage.getItem("lastAccess") === null || localStorage.getItem("fileNames") === null || localStorage.getItem("fileNames") === {} || da.getTime() > (localStorage.getItem("lastAccess") + 15000)){
+                    //we either don't have the file names or the last update was a while ago
+                    //set access time to current time
+                    localStorage.setItem("lastAccess", da.getTime());
+
+                    const response = await fetch(
+                        'https://api.github.com/repos/darthcloud/BlueRetroWebCfg/contents/map/'
+                    ); 
+                    const json = await response.json();
+                    let arr = [];
+                    for(let i = 0; i < json.length; i++){
+                        arr.push(json[i].name);
+                    }
+                    localStorage.setItem("fileNames", JSON.stringify(arr));
+                    setPresetNames(arr);
+                }
+                else{
+                   setPresetNames(JSON.parse(localStorage.getItem("fileNames")));
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        })();
+ }, []);
+    
   return (
     <div className="Presets">
         <div id="divBtConn">  
-            <button id="btBtn" onClick={() => {btConn(setSelectionConsoles, setPageInit)}}>Connect BlueRetro</button><br/>
+            <button id="btBtn" onClick={() => {btConn(setSelectionConsoles, presetsNames, setPresets, setPageInit, setBrService, setConsoles)}}>Connect BlueRetro</button><br/>
+                <button id="clear data" onClick={() => {
+                localStorage.setItem("fileNames", "");
+                localStorage.setItem("lastAccess", 0);
+               }}>reset data</button><br/>
             <small><i>Disconnect all controllers from BlueRetro before connecting for configuration.</i></small>
         </div>
     {pageInit && <div id="divInputCfg" style={{marginBottom:"1em"}}>
-        {description}
+        
     <h2 style={{margin:0}}>Mapping Config</h2>
-    <Select options={selectionConsoles} onChange={(x)=>{setSelectionPresets(populateConsolePresets(x.value));}} />
-    <Select options={selectionPresets} onChange={(x)=>{setDescription(getPresetDescription(x.value))
-    setSelectedPreset(x.value);
-    }} />
-    </div>}
-    
-    <button id="save" onClick={() => {saveInput(selectedPreset)}}>save</button>
+    <div className="App">
+      <div style={{ width: 400, marginBottom: 20 }}>
+       <b>Input</b>
+        <Select
+          placeholder="1"
+          value={input}
+          options={myrange.map(merange => ({key: merange, text:merange, value: merange }))}
+          onChange={x => setInput(x)}
+          getOptionLabel={x => x.value}
+        />
+        <b>Console</b>
+        <Select
+          placeholder="Select Console"
+          value={gameConsole}
+          options={selectionConsoles}
+          onChange={x => handleConsoleChange(x)}
+          getOptionLabel={x => x.label}
+        />
+        <br />
+        <b>Preset</b>
+        <Select
+          placeholder="Select Preset"
+          value={selectedPreset}
+          options={presetList}
+          onChange={x => handlePresetChange(x)}
+          getOptionLabel={x => x.label}
+          getOptionValue={x => x}
+        />
+      </div>
+      {description}
+    </div>
+    </div>
+    }
+    <button id="save" onClick={() => {savePresetInput(presets, selectedPreset.value, brService, input.value)}}>save</button>
     </div>
   );
 }
 
-function getPresetDescription(presetNum){
-    if(presetNum === -1){
+function getPresetDescription(preset){
+    //if preset is undefined set to default otherwise retrun description
+    if(preset === undefined){
         return "Select a preset";
     }
     else{
-        return presets[presetNum].desc;
+        return preset.desc;
     }
 }
 
-function populateConsolePresets(selectedConsole) {
+
+function populateConsolePresets(selectedConsole, presets, consoles) {
     //add "select preset first as -1 to prevent trying to save the placeholder"
     let list = [{value:-1, label: "select a preset"}];
     //add presets to the list that match the selected console type
     if (selectedConsole !== -1) {
         for (let i = 0; i < presets.length; i++) {
             if (presets[i].console === consoles[selectedConsole]) {
-               list.push({value: i, label: presets[i].name}) 
+               list.push({value: i, label: presets[i].name})
             }
         }
     }
@@ -72,18 +171,19 @@ function populateConsolePresets(selectedConsole) {
     return list;
 }
 
-function getPresets(mapListFile) {
-    presets = []
-    for(let i = 0; i < mapListFile.length; i++){
-        presets.push(require('../map/' + mapListFile[i].name));
+function getPresets(presetNames) {
+    //get presets locally from preset names list
+    let presets = [];
+    for(let i = 0; i < presetNames.length; i++){
+        presets.push(require('../map/' + presetNames[i]));
     }
     return presets;
 }
 
-function initInputSelect(hook) {
+function initInputSelect(presetNamesHook, presetsHook, consoleListHook, consolesHook) {
     //push all console names from JSON files
-    presets = getPresets(mapListFile);
-    console.log("in console func");
+    let consoles = [];
+    let presets = getPresets(presetNamesHook);
     for (var i = 0; i < presets.length; i++) {
         consoles.push(presets[i].console)
     }
@@ -93,105 +193,14 @@ function initInputSelect(hook) {
     for (let i = 0; i < consoles.length; i++) {
         consoleArr.push({value: i, label: consoles[i]})
     }
-    hook(consoleArr);
+    presetsHook(presets);
+    consolesHook(consoles);
+    consoleListHook(consoleArr);
 }
 
 //standard function to filter out non-unique items from an array
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
-}
-
-function writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
-    return new Promise(function(resolve, reject) {
-      console.log('Set Input Ctrl CHRC... ' + inputCtrl[1]);
-        ctrl_chrc.writeValue(inputCtrl)
-        .then(_ => {
-            console.log('Writing Input Data CHRC...');
-            var tmpViewSize = cfg.byteLength - inputCtrl[1];
-            if (tmpViewSize > 512) {
-                tmpViewSize = 512;
-            }
-            var tmpView = new DataView(cfg.buffer, inputCtrl[1], tmpViewSize);
-            return data_chrc.writeValue(tmpView);
-        })
-        .then(_ => {
-            console.log('Input Data Written');
-            inputCtrl[1] += Number(512);
-            if (inputCtrl[1] < cfg.byteLength) {
-                resolve(writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc));
-            }
-            else {
-                resolve();
-            }
-        })
-        .catch(error => {
-            reject(error);
-        });
-    });
-}
-
-function writeInputCfg(cfgId, cfg) {
-    return new Promise(function(resolve, reject) {
-        let ctrl_chrc = null;
-        let data_chrc = null;
-        brService.getCharacteristic(brUuid[4])
-        .then(chrc => {
-            ctrl_chrc = chrc;
-            return brService.getCharacteristic(brUuid[5])
-        })
-        .then(chrc => {
-            var inputCtrl = new Uint16Array(2);
-            inputCtrl[0] = Number(cfgId);
-            inputCtrl[1] = 0;
-            data_chrc = chrc;
-            return writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc);
-        })
-        .then(_ => {
-            resolve(cfg);
-        })
-        .catch(error => {
-            reject(error);
-        });
-    });
-}
-
-function saveInput(presetNumber) {
-    console.log(presetNumber);
-    //get consoleName and preset name
-    //make sure preset is not placeholder before we do anything
-    if (presetNumber !== -1) {
-        var nbMapping = presets[presetNumber].map.length;
-        var cfgSize = nbMapping*8 + 3;
-        var cfg = new Uint8Array(cfgSize);
-        var cfgId = presetNumber;
-        var j = 0;
-        cfg[j++] = 0;
-        cfg[j++] = 0;
-        cfg[j++] = nbMapping;
-
-        //console.log('Input: '+ cfgId + "\n" + 'Preset: ' + preset);
-        for (var i = 0; i < nbMapping; i++) {
-            cfg[j++] = btn[presets[presetNumber].map[i][0]];
-            cfg[j++] = btn[presets[presetNumber].map[i][1]];
-            cfg[j++] = presets[presetNumber].map[i][2] + cfgId;
-            cfg[j++] = presets[presetNumber].map[i][3];
-            cfg[j++] = presets[presetNumber].map[i][4];
-            cfg[j++] = presets[presetNumber].map[i][5];
-            cfg[j++] = presets[presetNumber].map[i][6];
-            cfg[j++] = Number(presets[presetNumber].map[i][7]) | (Number(presets[presetNumber].map[i][8]) << 4);
-        }
-
-        return new Promise(function(resolve, reject) {
-            writeInputCfg(cfgId, cfg)
-            .then(_ => {
-                console.log('Input ' + cfgId + ' Config saved');
-                resolve();
-            })
-            .catch(error => {
-                reject(error);
-            });
-        });
-    }
 }
 
 function onDisconnected() {
@@ -200,7 +209,7 @@ function onDisconnected() {
     document.getElementById("divInputCfg").style.display = 'none';
 }
 
-function btConn(hook, pageInitHook) {
+function btConn(setConsoleListHook, presetNames, presetsHook, pageInitHook, brServiceHook, consolesHook) {
     console.log('Requesting Bluetooth Device...');
     navigator.bluetooth.requestDevice(
         {filters: [{name: 'BlueRetro'}],
@@ -217,9 +226,8 @@ function btConn(hook, pageInitHook) {
     })
     .then(service => {
       console.log('Init Cfg DOM...');
-        initInputSelect(hook);
-        brService = service;
-        console.log(presets)
+        initInputSelect(presetNames, presetsHook, setConsoleListHook, consolesHook);
+        brServiceHook(service);
         pageInitHook(true);
     })
     .catch(error => {
