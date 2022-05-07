@@ -52,7 +52,7 @@ function Presets() {
     setDescription(null);
     setPresetList(populateConsolePresets(obj.value, presets, consoles));
   };
-
+  
   //handle react select label
   const handlePresetChange = (obj) => {
     setSelectedPreset(obj);
@@ -212,7 +212,8 @@ function onDisconnected() {
 function btConn(setConsoleListHook, presetNames, presetsHook, pageInitHook, brServiceHook, consolesHook) {
     console.log('Requesting Bluetooth Device...');
     navigator.bluetooth.requestDevice(
-        {acceptAllDevices: true, optionalServices: [brUuid[0]]})
+        {filters: [{name: 'BlueRetro'}],
+        optionalServices: [brUuid[0]]})
     .then(device => {
         console.log('Connecting to GATT Server...');
         bluetoothDevice = device;
