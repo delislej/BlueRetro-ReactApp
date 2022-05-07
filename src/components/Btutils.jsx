@@ -174,3 +174,97 @@ export const maxOutput = 12;
 export const maxMax = 255;
 export const maxThres = 100;
 export const maxTurbo = 16;
+
+function writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
+    return new Promise(function(resolve, reject) {
+        console.log('Set Input Ctrl CHRC... ' + inputCtrl[1]);
+        ctrl_chrc.writeValue(inputCtrl)
+        .then(_ => {
+            console.log('Writing Input Data CHRC...');
+            var tmpViewSize = cfg.byteLength - inputCtrl[1];
+            if (tmpViewSize > 512) {
+                tmpViewSize = 512;
+            }
+            var tmpView = new DataView(cfg.buffer, inputCtrl[1], tmpViewSize);
+            return data_chrc.writeValue(tmpView);
+        })
+        .then(_ => {
+            console.log('Input Data Written');
+            inputCtrl[1] += Number(512);
+            if (inputCtrl[1] < cfg.byteLength) {
+                resolve(writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc));
+            }
+            else {
+                resolve();
+            }
+        })
+        .catch(error => {
+            reject(error);
+        });
+    });
+}
+
+
+function writeInputCfg(cfgId, cfg, brService) {
+    return new Promise(function(resolve, reject) {
+        let ctrl_chrc = null;
+        let data_chrc = null;
+        brService.getCharacteristic(brUuid[4])
+        .then(chrc => {
+            ctrl_chrc = chrc;
+            return brService.getCharacteristic(brUuid[5])
+        })
+        .then(chrc => {
+            var inputCtrl = new Uint16Array(2);
+            inputCtrl[0] = Number(cfgId);
+            inputCtrl[1] = 0;
+            data_chrc = chrc;
+            return writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc);
+        })
+        .then(_ => {
+            resolve(cfg);
+        })
+        .catch(error => {
+            reject(error);
+        });
+    });
+}
+
+
+export function savePresetInput(presets, presetNumber, brService, input) {
+    //make sure preset is not placeholder before we do anything
+    if (presetNumber !== -1) {
+        var nbMapping = presets[presetNumber].map.length;
+        var cfgSize = nbMapping*8 + 3;
+        var cfg = new Uint8Array(cfgSize);
+        var cfgId = input-1;
+        var j = 0;
+        cfg[j++] = 0;
+        cfg[j++] = 0;
+        cfg[j++] = nbMapping;
+        for (var i = 0; i < nbMapping; i++) {
+            cfg[j++] = btn[presets[presetNumber].map[i][0]];
+            cfg[j++] = btn[presets[presetNumber].map[i][1]];
+            cfg[j++] = presets[presetNumber].map[i][2] + cfgId;
+            cfg[j++] = presets[presetNumber].map[i][3];
+            cfg[j++] = presets[presetNumber].map[i][4];
+            cfg[j++] = presets[presetNumber].map[i][5];
+            cfg[j++] = presets[presetNumber].map[i][6];
+            cfg[j++] = Number(presets[presetNumber].map[i][7]) | (Number(presets[presetNumber].map[i][8]) << 4);
+        }
+
+        return new Promise(function(resolve, reject) {
+            writeInputCfg(cfgId, cfg, brService)
+            .then(_ => {
+                console.log(cfgId);
+                console.log('Input ' + cfgId + ' Config saved');
+                resolve();
+            })
+            .catch(error => {
+                reject(error);
+            });
+        });
+    }
+}
+
+

@@ -3,65 +3,35 @@ import React from "react";
 
 function Home() {
   return (
-    <div className="home">
-      <div className="container">
-        <div>
-          <button id= "derp" onClick={console.log("button")}></button>
+    <div className="about">
+      <div class="container">
+        <div class="row align-items-center my-5">
+          <div class="col-lg-7">
+            <img
+              class="img-fluid rounded mb-4 mb-lg-0"
+              src="http://placehold.it/900x400"
+              alt=""
+            />
+          </div>
+          <div class="col-lg-5">
+            <h1 class="font-weight-light">About BlueRetro</h1>
+            
+            <p>BlueRetro is a bluetooth adapter for a multitude of retro gaming consoles.</p>
+
+            <p>Advanced Config lets you manually bind controls in real time, along with more advanced settings for specific consoles.</p>
+
+            <p>n64 controller pak manager lets you manage N64 controller pak files.</p>
+
+            <p>Presets lets you flash a controller preset.</p>
+
+            <p>OTA Update lets you update your blueretro device right from your phone/PC over bluetooth.</p>
+
+            
           </div>
         </div>
       </div>
+    </div>
   );
 }
-/*
-function btConn() {
-  console.log('Requesting Bluetooth Device...');
-  navigator.bluetooth.requestDevice(
-      {filters: [{name: 'BlueRetro'}],
-      optionalServices: [brUuid[0]]})
-  .then(device => {
-    console.log('Connecting to GATT Server...');
-      bluetoothDevice = device;
-      bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
-      return bluetoothDevice.gatt.connect();
-  })
-  .then(server => {
-    console.log('Getting BlueRetro Service...');
-      return server.getPrimaryService(brUuid[0]);
-  })
-  .then(service => {
-      brService = service;
-      return getApiVersion();
-  })
-  .catch(error => {
-      if (error.name == 'NotFoundError') {
-          return;
-      }
-      throw error;
-  })
-  .then(() => {
-      if (!pageInit) {
-        console.log('Init Cfg DOM...');
-          initBlueRetroCfg();
-      }
-      return loadGlobalCfg();
-  })
-  .then(() => {
-      return loadOutputCfg(0);
-  })
-  .then(() => {
-      return loadInputCfg(0);
-  })
-  .then(() => {
-      document.getElementById("divBtConn").style.display = 'none';
-      //document.getElementById("divBtDisconn").style.display = 'block';
-      document.getElementById("divGlobalCfg").style.display = 'block';
-      document.getElementById("divOutputCfg").style.display = 'block';
-      document.getElementById("divInputCfg").style.display = 'block';
-  })
-  .catch(error => {
-    console.log('Argh! ' + error);
-  });
-}
 
-*/
 export default Home;

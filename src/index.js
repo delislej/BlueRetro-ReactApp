@@ -8,6 +8,7 @@ import N64ctrlpak from "./components/N64ctrlpak";
 import Home from "./components/Home";
 import Presets from "./components/Presets";
 import Navigation from "./components/Navigation";
+import Ota from "./components/Ota";
 
 ReactDOM.render(
   <Router>
@@ -17,6 +18,7 @@ ReactDOM.render(
       <Route path="/n64ctrlpak" element={<N64ctrlpak />} />
       <Route path="/blueretro" element={<Blueretro />} />
       <Route path="/presets" element={<Presets />} />
+      <Route path="/ota" element={<Ota />} />
     </Routes>
   </Router>,
 

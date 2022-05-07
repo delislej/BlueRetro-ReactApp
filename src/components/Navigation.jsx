@@ -7,7 +7,7 @@ function Navigation() {
       <nav className="navbar navbar-expand navbar-dark bg-dark">
         <div className="container">
           <NavLink className="navbar-brand" to="/">
-            React Multi-Page Website
+            BlueRetro Web Config
           </NavLink>
           <div>
             <ul className="navbar-nav ml-auto">
@@ -19,7 +19,7 @@ function Navigation() {
               </li>
               <li className="nav-item">
                 <NavLink className="nav-link" to="/blueretro">
-                  Blueretro
+                  Advanced Config
                 </NavLink>
               </li>
               <li className="nav-item">
@@ -30,6 +30,11 @@ function Navigation() {
               <li className="nav-item">
                 <NavLink className="nav-link" to="/presets">
                   Presets
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/ota">
+                  OTA Update
                 </NavLink>
               </li>
             </ul>

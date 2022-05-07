@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "gh-pages": "^3.2.3",
     "json-loader": "^0.5.7",
+    "local-storage": "^2.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-gamepads": "^1.0.0",
@@ -22,10 +23,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "purge": "rm -rf ../blueretroapp/static && cp -fR ./build/* ../blueretroapp",
-    "frontmatter": "echo '---\ntitle: blueretro react app\nlayout: null\n---\n' | cat - ../blueretroapp/index.html > temp && mv temp ../blueretroapp/index.html",
-    "deploy": "npm run purge && npm run frontmatter && gh-pages -d build"
+    "predeploy": "npm run build"
   },
   "eslintConfig": {
     "extends": [
