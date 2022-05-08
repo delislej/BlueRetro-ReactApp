@@ -1,6 +1,6 @@
 import React from "react";
 
-function Blueretro() {
+function Advancedconfig() {
   return (
     <div className="Blueretro">
       <div class="container">
@@ -27,4 +27,4 @@ function Blueretro() {
   );
 }
 
-export default Blueretro;
+export default Advancedconfig;

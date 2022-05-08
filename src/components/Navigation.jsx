@@ -5,7 +5,7 @@ function Navigation() {
   return (
     <div className="navigation">
       <nav className="navbar navbar-expand navbar-dark bg-dark">
-        <div className="container">
+        <div className="container" >
           <NavLink className="navbar-brand" to="/">
             BlueRetro Web Config
           </NavLink>
@@ -18,7 +18,7 @@ function Navigation() {
                 </NavLink>
               </li>
               <li className="nav-item">
-                <NavLink className="nav-link" to="/blueretro">
+                <NavLink className="nav-link" to="/Advancedconfig">
                   Advanced Config
                 </NavLink>
               </li>
@@ -30,6 +30,11 @@ function Navigation() {
               <li className="nav-item">
                 <NavLink className="nav-link" to="/presets">
                   Presets
+                </NavLink>
+              </li>
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/bindcontroller">
+                  Bind Controller
                 </NavLink>
               </li>
               <li className="nav-item">

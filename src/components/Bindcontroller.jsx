@@ -1,9 +1,7 @@
-import logo from './logo.svg';
-import './App.css';
 import React, { useState } from 'react';
 import { useGamepads } from 'react-gamepads';
 
-function App() {
+function Bindcontroller() {
   const [gamepads, setGamepads] = useState({});
   useGamepads(gamepads => setGamepads(gamepads));
 
@@ -40,4 +38,4 @@ function App() {
   );
 }
 
-export default App;
+export default Bindcontroller;
