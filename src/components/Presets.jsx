@@ -12,19 +12,15 @@ function Presets() {
   //flag to render selection menus
   const [pageInit, setPageInit] = useState(false);
   
-  //hook that controls the shown description
   const [description, setDescription] = useState("");
   
-  //array of presets
   const [presets, setPresets] = useState(null);
   
   //hook that controls which controller we are configuring
   const [input, setInput] = useState({value: 1});
   
-  //list of unique consoles used to filter preset list
   const [consoles, setConsoles] = useState(null);
   
-  //list of selectable presets, can be filtered by selected console
   const [presetList, setPresetList] = useState([
     { value: -1, label: 'Select a Preset' }
   ]);
@@ -91,21 +87,19 @@ function Presets() {
     
   return (
     <div className="Presets">
-        <div id="divBtConn">  
-            <button id="btBtn" onClick={() => {btConn(setSelectionConsoles, presetsNames, setPresets, setPageInit, setBrService, setConsoles)}}>Connect BlueRetro</button><br/>
-                <button id="clear data" onClick={() => {
-                localStorage.setItem("fileNames", "");
-                localStorage.setItem("lastAccess", 0);
-               }}>reset data</button><br/>
-            <small><i>Disconnect all controllers from BlueRetro before connecting for configuration.</i></small>
+        <div id="divBtConn" style={{paddingLeft:"20%", width:"50%", paddingRight:"20%"}}>  
+            <button style={{borderRadius:"12px"}} id="btBtn" onClick={() => {btConn(setSelectionConsoles, presetsNames, setPresets, setPageInit, setBrService, setConsoles)}}>Connect BlueRetro</button><br/>
+            <small>
+              <i>Disconnect all controllers from BlueRetro before connecting for configuration.</i>
+            </small>
         </div>
     {pageInit && <div id="divInputCfg" style={{marginBottom:"1em"}}>
         
-    <h2 style={{margin:0}}>Mapping Config</h2>
-    <div className="App">
-      <div style={{ width: 400, marginBottom: 20 }}>
+    <h2 >Mapping Config</h2>
+    <div>
+      <div style={{marginLeft:"20%", width:"50%"}}>
        <b>Input</b>
-        <Select
+        <Select 
           placeholder="1"
           value={input}
           options={myrange.map(merange => ({key: merange, text:merange, value: merange }))}
