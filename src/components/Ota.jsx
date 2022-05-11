@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar'
-import { brUuid, ChromeSamples, ota_abort, ota_end, ota_start, mtu } from './Btutils';
+import { brUuid, ota_abort, ota_end, ota_start, mtu } from './Btutils';
 import Logbox from './Logbox';
+import { ChromeSamples } from './Logbox';
 
 var bluetoothDevice;
 let brService;
@@ -169,20 +170,21 @@ const writeFwRecursive = (chrc, data, offset) => {
   return (
   <div className="about">
     <div className="container">
-      <div className="row align-items-center my-5">     
-        <div className="col-lg-5">
+      <div >     
+        <div style={{margin:"auto", width:"50%"}}>
           <h1 className="font-weight-light">OTA Firmware Update</h1>
-          <Logbox/>
           <div>
-            <div id="divBtConn">
-              <button id="btConn" onClick={() => {
-              setProgress(0);
-              btConn();
-              }
-              
-              }>Connect BlueRetro</button>
-              <small><i>Disconnect all controllers from BlueRetro before connecting for update.</i></small>
-            </div>
+            {!btConnected && <div id="divBtConn">
+              <button id="btConn" onClick={() => {setProgress(0); btConn();}}>
+              Connect BlueRetro
+              </button>
+              <br/>
+              <small>
+                <i>
+                  Disconnect all controllers from BlueRetro before connecting for update.
+                </i>
+              </small>
+            </div>}
               {btConnected && 
               <div>
                 <div id="progress_bar">
@@ -201,8 +203,10 @@ const writeFwRecursive = (chrc, data, offset) => {
               </div>
               }
           </div>
+        
         </div>
       </div>
+      <Logbox/>
     </div>
   </div>
       );

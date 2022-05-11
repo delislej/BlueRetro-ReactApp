@@ -21,32 +21,6 @@ export const ota_abort = 0xDE;
 
 export const ota_end = 0x5A;
 
-export const ChromeSamples = {
-    log: function() {
-      var line = Array.prototype.slice.call(arguments).map(function(argument) {
-        return typeof argument === 'string' ? argument : JSON.stringify(argument);
-      }).join(' ');
-  
-      document.querySelector('#log').textContent += line + '\n';
-    },
-  
-    clearLog: function() {
-      document.querySelector('#log').textContent = '';
-    },
-  
-    setStatus: function(status) {
-      document.querySelector('#status').textContent = status;
-    },
-  
-    setContent: function(newContent) {
-      var content = document.querySelector('#content');
-      while(content.hasChildNodes()) {
-        content.removeChild(content.lastChild);
-      }
-      content.appendChild(newContent);
-    }
-};
-
 export const btn = {
     "PAD_LX_LEFT":0,
     "PAD_LX_RIGHT":1,
