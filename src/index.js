@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
@@ -11,7 +11,9 @@ import Ota from "./components/Ota";
 import Advancedconfig from "./components/Advancedconfig";
 import BindController from "./components/Bindcontroller";
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
   <Router>
     <Navigation />
     <Routes>
@@ -22,9 +24,7 @@ ReactDOM.render(
       <Route path="/bindcontroller" element={<BindController />} />
       <Route path="/ota" element={<Ota />} />
     </Routes>
-  </Router>,
-
-  document.getElementById("root")
+  </Router>
 );
 
 serviceWorker.unregister();
