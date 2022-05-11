@@ -32,31 +32,11 @@ function Presets() {
   //hook to render preset lable
   const [selectedPreset, setSelectedPreset] = useState(-1);
 
+  const [validSave, setValidSave] = useState(false);
+
   const myrange = [1,2,3,4,5,6,7,8,9,10,11,12];
   
-  //handle react select labels
-  const handleConsoleChange = (obj) => {
-    setGameConsole(obj);
-    setSelectedPreset(null);
-    setDescription(null);
-    setPresetList(populateConsolePresets(obj.value, presets, consoles));
-  };
 
-  const getPresetDescription = (preset) => {
-    //if preset is undefined set to default otherwise retrun description
-    if(preset === undefined){
-        return "Select a preset";
-    }
-    else{
-        return preset.desc;
-    }
-  }
-  
-  //handle react select label
-  const handlePresetChange = (obj) => {
-    setSelectedPreset(obj);
-    setDescription(getPresetDescription(presets[obj.value]));
-  };
     
 useEffect(() => {
       //check if we have local file list, and that it is not too old
@@ -90,42 +70,7 @@ useEffect(() => {
         })();
  }, []);
 
- const getPresets = (presetNames) => {
-  //get presets locally from preset names list
-  let presets = [];
-  for(let i = 0; i < presetNames.length; i++){
-      presets.push(require('../map/' + presetNames[i]));
-  }
-  return presets;
-}
-
-const initInputSelect = () => {
-  //push all console names from JSON files
-  let consoles = [];
-  for (var i = 0; i < presets.length; i++) {
-      consoles.push(presets[i].console)
-  }
-  let consoleArr = [{value: -1, label: "Select Console"}]
-  //filter out non-unique items
-  consoles = consoles.filter(onlyUnique)
-  for (let i = 0; i < consoles.length; i++) {
-      consoleArr.push({value: i, label: consoles[i]}) 
-  }
-  setConsoles(consoleArr);
-}
-
-//standard function to filter out non-unique items from an array
-const onlyUnique = (value, index, self) => {
-  return self.indexOf(value) === index;
-}
-
-const onDisconnected = () => {
-ChromeSamples.log('> Bluetooth Device disconnected');
-  document.getElementById("divBtConn").style.display = 'block';
-  document.getElementById("divInputCfg").style.display = 'none';
-}
-
-const btConn = () => {
+ const btConn = () => {
   ChromeSamples.log('Requesting Bluetooth Device...');
   navigator.bluetooth.requestDevice(
       {filters: [{name: 'BlueRetro'}],
@@ -151,39 +96,107 @@ const btConn = () => {
   });
 }
 
- const populateConsolePresets = (selectedConsole) => {
-  //add "select preset first as -1 to prevent trying to save the placeholder"
-  let list = [{value:-1, label: "select a preset"}];
-  //add presets to the list that match the selected console type
-  if (selectedConsole !== -1 && consoles.length > 1) {
-      for (let i = 0; i < presets.length; i++) {
-          if (presets[i].console === consoles[selectedConsole+1].label) {
-             list.push({value: i, label: presets[i].name})
-          }
-      }
+const onDisconnected = () => {
+  ChromeSamples.log('> Bluetooth Device disconnected');
+  setPageInit(false);
   }
-  //no filter selected, show whole preset list
-  else {
-      for (let i = 0; i < presets.length; i++) {
-          list.push({value: i, label: presets[i].name});
-      }
+
+const initInputSelect = () => {
+  //push all console names from JSON files
+  let consoles = [];
+  for (var i = 0; i < presets.length; i++) {
+      consoles.push(presets[i].console)
   }
-  return list;
+  let consoleArr = [{value: -1, label: "Select Console"}]
+  //filter out non-unique items
+  consoles = consoles.filter(onlyUnique)
+  for (let i = 0; i < consoles.length; i++) {
+      consoleArr.push({value: i, label: consoles[i]}) 
+  }
+  setConsoles(consoleArr);
+  //initialize presets list to unfiltered
+  handleConsoleChange(consoleArr[0]);
 }
-    
+
+//standard function to filter out non-unique items from an array
+const onlyUnique = (value, index, self) => {
+  return self.indexOf(value) === index;
+}
+
+  //handle react select labels
+  const handleConsoleChange = (obj) => {
+    setGameConsole(obj);
+    setSelectedPreset(null);
+    setDescription(null);
+    setPresetList(populateConsolePresets(obj.value, presets, consoles));
+  };
+
+  const populateConsolePresets = (selectedConsole) => {
+    //add "select preset first as -1 to prevent trying to save the placeholder"
+    let list = [{value:-1, label: "select a preset"}];
+    //add presets to the list that match the selected console type
+    if (selectedConsole !== -1 && consoles.length > 1) {
+        for (let i = 0; i < presets.length; i++) {
+            if (presets[i].console === consoles[selectedConsole+1].label) {
+               list.push({value: i, label: presets[i].name})
+            }
+        }
+    }
+    //no filter selected, show whole preset list
+    else {
+        for (let i = 0; i < presets.length; i++) {
+            list.push({value: i, label: presets[i].name});
+        }
+    }
+    return list;
+  }
+
+  //handle react select label
+  const handlePresetChange = (obj) => {
+    setValidSave(false);
+    setSelectedPreset(obj);
+    setDescription(getPresetDescription(presets[obj.value]));
+    if(obj.value !== -1){
+      setValidSave(true);
+    }
+  };
+
+  const getPresetDescription = (preset) => {
+    //if preset is undefined set to default otherwise retrun description
+    if(preset === undefined){
+        return "";
+    }
+    else{
+        return preset.desc;
+    }
+  }
+
+  const getPresets = (presetNames) => {
+    //get presets locally from preset names list
+    let presets = [];
+    for(let i = 0; i < presetNames.length; i++){
+        presets.push(require('../map/' + presetNames[i]));
+    }
+    return presets;
+    }
+
   return (
-    <div className="Presets">
-        <div id="divBtConn" style={{margin:"auto", width:"50%"}}>  
-            <button style={{borderRadius:"12px"}} id="btBtn" onClick={() => {btConn()}}>Connect BlueRetro</button><br/>
+    <div className="Presets" style={{display: "flex",
+      justifyContent: "center",
+      alignItems:"center",
+      flexDirection: "column",
+      }}>
+        {!pageInit && <div id="divBtConn" >  
+            <button style={{borderRadius:"12px", margin:"auto"}} id="btBtn" onClick={() => {btConn()}}>Connect BlueRetro</button><br/>
             <small>
               <i>Disconnect all controllers from BlueRetro before connecting for configuration.</i>
             </small>
-        </div>
-    {pageInit && <div id="divInputCfg" style={{marginBottom:"1em"}}>
+        </div>}
+    {pageInit && <div id="divInputCfg" >
         
     <h2 >Preset Configuration</h2>
     <div>
-      <div style={{marginLeft:"20%", width:"50%"}}>
+      <div style={{width: "100%"}}>
        <b>Input</b>
         <Select 
           placeholder="1"
@@ -219,7 +232,7 @@ const btConn = () => {
     </div>
     }
     <Logbox/>
-    <button id="save" onClick={() => {savePresetInput(presets, selectedPreset.value, brService, input.value)}}>save</button>
+    {validSave && <button id="save" style={{width: '50%'}} onClick={() => {savePresetInput(presets, selectedPreset.value, brService, input.value)}}>save</button>}
     </div>
   );
 }
