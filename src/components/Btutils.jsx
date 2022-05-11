@@ -1,3 +1,4 @@
+import { ChromeSamples } from "./Logbox";
 export const brUuid = [
     '56830f56-5180-fab0-314b-2fa176799a00',
     '56830f56-5180-fab0-314b-2fa176799a01',
@@ -178,10 +179,10 @@ export const btn = {
 
 function writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
     return new Promise(function(resolve, reject) {
-        console.log('Set Input Ctrl CHRC... ' + inputCtrl[1]);
+        ChromeSamples.log('Set Input Ctrl CHRC... ' + inputCtrl[1]);
         ctrl_chrc.writeValue(inputCtrl)
         .then(_ => {
-            console.log('Writing Input Data CHRC...');
+            ChromeSamples.log('Writing Input Data CHRC...');
             var tmpViewSize = cfg.byteLength - inputCtrl[1];
             if (tmpViewSize > 512) {
                 tmpViewSize = 512;
@@ -190,7 +191,7 @@ function writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
             return data_chrc.writeValue(tmpView);
         })
         .then(_ => {
-            console.log('Input Data Written');
+            ChromeSamples.log('Input Data Written');
             inputCtrl[1] += Number(512);
             if (inputCtrl[1] < cfg.byteLength) {
                 resolve(writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc));
@@ -257,8 +258,7 @@ export function savePresetInput(presets, presetNumber, brService, input) {
         return new Promise(function(resolve, reject) {
             writeInputCfg(cfgId, cfg, brService)
             .then(_ => {
-                console.log(cfgId);
-                console.log('Input ' + cfgId + ' Config saved');
+                ChromeSamples.log('Input ' + cfgId + ' Config saved');
                 resolve();
             })
             .catch(error => {

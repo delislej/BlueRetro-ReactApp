@@ -71,7 +71,6 @@ const firmwareUpdate = () => {// Reset progress indicator on new file selection.
   .then(device => {
     ChromeSamples.log('Connecting to GATT Server...');
       bluetoothDevice = device;
-      console.log(bluetoothDevice);
       bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
       return bluetoothDevice.gatt.connect();
   })
@@ -95,7 +94,6 @@ const firmwareUpdate = () => {// Reset progress indicator on new file selection.
 const writeFirmware = (data) => {
   var cmd = new Uint8Array(1);
   let ctrl_chrc = null;
-  ChromeSamples.log("brService characteristics: " + brService);
   brService.getCharacteristic(brUuid[7])
   .then(chrc => {
       ctrl_chrc = chrc;
