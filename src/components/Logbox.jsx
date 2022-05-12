@@ -5,8 +5,8 @@ export const ChromeSamples = {
     var line = Array.prototype.slice.call(arguments).map(function(argument) {
       return typeof argument === 'string' ? argument : JSON.stringify(argument);
     }).join(' ');
-
-    document.querySelector('#log').textContent += line + '\n';
+    let temp  = document.querySelector('#log').textContent;
+    document.querySelector('#log').textContent = line + '\n' + temp;
   },
 
   clearLog: function() {
@@ -28,7 +28,7 @@ export const ChromeSamples = {
 
 function Logbox(){
     return (
-        <div id="output" className="output" style={{width: '50%'}}>
+        <div id="output" className="output">
             <div id="content" style={{backgroundColor: "#f0f0f0", borderRadius: "0.75em", display: "block", margin: "0.5em", padding: "0.5em"}}>
               <div id="status" style={{margin: ".5em 0", fontStyle: "italic", height: '100px', overflowY: 'scroll' }}>
                 <pre id="log" style={{margin: ".5em 0", whiteSpace: "pre-wrap"}}></pre>
