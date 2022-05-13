@@ -1,76 +1,58 @@
-import React from "react";
+import React, { useState } from "react";
 import Logbox, { ChromeSamples } from "./Logbox";
+import { brUuid, mtu } from "./Btutils";
+import ProgressBar from 'react-bootstrap/ProgressBar'
+import Select from 'react-select'
 function N64ctrlpak() {
-  //document.getElementById("btnPakRead").addEventListener('click', pakRead);
-  //document.getElementById("btnPakWrite").addEventListener('click', pakWrite);
-  //document.getElementById("btnPakFormat").addEventListener('click', pakFormat);
-  //document.getElementById("btnFileTransferCancel").addEventListener('click', abortFileTransfer);
-  //document.getElementById("btConn").addEventListener('click', function() {ChromeSamples.clearLog();btConn();});
-  return (
-    <div className="about">
-      <div className="container">
-        <Logbox/>
-        <div className="row align-items-center my-5">
-        <div id="divBtConn">
-    <button id="btConn" onClick={() =>{btConn()}}>Connect BlueRetro</button><br/>
-    <small><i>Disconnect all controllers from BlueRetro before connecting for pak management.</i></small>
-</div>
-<div id="divFileSelect">
-    Select BlueRetro controller pak bank:
-    <select id="pakSelect">
-        <option value="0">Pak 1</option>
-        <option value="1">Pak 2</option>
-        <option value="2">Pak 3</option>
-        <option value="3">Pak 4</option>
-    </select><br/><br/>
-    <button id="btnPakRead" onClick={() =>{pakRead()}}>Read</button><br/><br/>
-    <button id="btnPakFormat">Format</button><br/><br/>
-    <button id="btnPakWrite">Write</button>
-    Select .MPK file to write:
-    <input type="file" id="pakFile"/><br/><br/>
-    
-<div id="divFileTransfer" >
-    <div id="progress_bar"><div className="percent"></div></div>
-    <button id="btnFileTransferCancel">Cancel</button>
-</div>
-        </div>
-      </div>
-      </div>
-      </div>
-  );
-}
+  
+  const [btConnected, setBtConnected] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [pak, setPak] = useState(0);
+  const myrange = [1,2,3,4];
+  
+  const pakRead = (evt) => {
+    // Reset progress indicator on new file selection.
+    setProgress(0);
+    setShowProgress(true);
+    setShowButtons(false);
+    ChromeSamples.log("reading pak");
+    var data = new Uint8Array(pak_size);
+    readFile(data)
+    .then(value => {
+        downloadFile(new Blob([value.buffer], {type: "application/mpk"}),
+            'ctrl_pak' + eval(Number(pak) + 1) + '.mpk');
+        setShowProgress(false);
+        setShowButtons(true);
+    })
+    .catch(error => {
+        ChromeSamples.log('Argh! ' + error);
+        setShowProgress(false);
+        setShowButtons(true);
+        cancel = 0;
+    });
+  }
+  
+  const pakWrite = (evt) => {
+    // Reset progress indicator on new file selection.
+    //progress.style.width = '0%';
+    //progress.textContent = '0%';
+  
+    reader = new FileReader();
+    reader.onerror = errorHandler;
+    reader.onabort = function(e) {
+        ChromeSamples.log('File read cancelled');
+    };
+    reader.onload = function(e) {
+        writeFile(reader.result.slice(0, pak_size));
+    }
+  
+    // Read in the image file as a binary string.
+    reader.readAsArrayBuffer(document.getElementById("pakFile").files[0]);
+  }
 
-// Base on https://www.html5rocks.com/en/tutorials/file/dndfiles//
-
-var brUuid = [
-  '56830f56-5180-fab0-314b-2fa176799a00',
-  '56830f56-5180-fab0-314b-2fa176799a01',
-  '56830f56-5180-fab0-314b-2fa176799a02',
-  '56830f56-5180-fab0-314b-2fa176799a03',
-  '56830f56-5180-fab0-314b-2fa176799a04',
-  '56830f56-5180-fab0-314b-2fa176799a05',
-  '56830f56-5180-fab0-314b-2fa176799a06',
-  '56830f56-5180-fab0-314b-2fa176799a07',
-  '56830f56-5180-fab0-314b-2fa176799a08',
-  '56830f56-5180-fab0-314b-2fa176799a09',
-  '56830f56-5180-fab0-314b-2fa176799a0a',
-  '56830f56-5180-fab0-314b-2fa176799a0b',
-];
-
-const mtu = 244;
-const block = 4096;
-const pak_size = 32 * 1024;
-
-var bluetoothDevice;
-let brService = null;
-var reader;
-var progress = document.querySelector('.percent');
-var start;
-var end;
-var cancel = 0;
-var tmpViewSize = 0;
-
-// Source: https://newbedev.com/saving-binary-data-as-file-using-javascript-from-a-browser
+  // Source: https://newbedev.com/saving-binary-data-as-file-using-javascript-from-a-browser
 function downloadFile(blob, filename) {
   var url = window.URL.createObjectURL(blob);
 
@@ -91,7 +73,7 @@ function downloadFile(blob, filename) {
   }, 1000);
 }
 
-function getAppVersion() {
+const getAppVersion = () => {
   return new Promise(function(resolve, reject) {
       ChromeSamples.log('Get Api version CHRC...');
       brService.getCharacteristic(brUuid[9])
@@ -110,11 +92,11 @@ function getAppVersion() {
   });
 }
 
-function abortFileTransfer() {
+const abortFileTransfer = () => {
   cancel = 1;
 }
 
-function errorHandler(evt) {
+const errorHandler = (evt) => {
   switch(evt.target.error.code) {
       case evt.target.error.NOT_FOUND_ERR:
           ChromeSamples.log('File Not Found!');
@@ -129,59 +111,19 @@ function errorHandler(evt) {
   };
 }
 
-function transferProgress(total, loaded) {
+const transferProgress = (total, loaded) => {
   var percentLoaded = Math.round((loaded / total) * 100);
   // Increase the progress bar length.
   if (percentLoaded < 100) {
-      progress.style.width = percentLoaded + '%';
-      progress.textContent = percentLoaded + '%';
+    setProgress(percentLoaded);
   }
 }
 
-function pakRead(evt) {
-  // Reset progress indicator on new file selection.
-  //progress.style.width = '0%';
-  //progress.textContent = '0%';
-  console.log("reading pak");
-  var data = new Uint8Array(pak_size);
-  readFile(data)
-  .then(value => {
-      downloadFile(new Blob([value.buffer], {type: "application/mpk"}),
-          'ctrl_pak' + eval(Number(document.getElementById("pakSelect").value) + 1) + '.mpk');
-      //document.getElementById("divBtConn").style.display = 'none';
-      //document.getElementById("divFileSelect").style.display = 'block';
-      //document.getElementById("divFileTransfer").style.display = 'none';
-  })
-  .catch(error => {
-      ChromeSamples.log('Argh! ' + error);
-      //document.getElementById("divBtConn").style.display = 'none';
-      //document.getElementById("divFileSelect").style.display = 'block';
-      //document.getElementById("divFileTransfer").style.display = 'none';
-      cancel = 0;
-  });
-}
 
-function pakWrite(evt) {
-  // Reset progress indicator on new file selection.
-  progress.style.width = '0%';
-  progress.textContent = '0%';
-
-  reader = new FileReader();
-  reader.onerror = errorHandler;
-  reader.onabort = function(e) {
-      ChromeSamples.log('File read cancelled');
-  };
-  reader.onload = function(e) {
-      writeFile(reader.result.slice(0, pak_size));
-  }
-
-  // Read in the image file as a binary string.
-  reader.readAsArrayBuffer(document.getElementById("pakFile").files[0]);
-}
 
 // Init function taken from MPKEdit by bryc:
 // https://github.com/bryc/mempak/blob/dbd78db6ac55575838c6e107e5ea1e568981edc4/js/state.js#L8
-function pakFormat(evt) {
+const pakFormat = (evt) => {
       function writeAt(ofs) {for(let i = 0; i < 32; i++) data[ofs + i] = block[i];}
 
       const data = new Uint8Array(32768);
@@ -232,12 +174,12 @@ function pakFormat(evt) {
       writeFile(data.buffer);
 }
 
-function readRecursive(chrc, data, offset) {
+const readRecursive = (chrc, data, offset) => {
   return new Promise(function(resolve, reject) {
       if (cancel == 1) {
           throw 'Cancelled';
       }
-      //transferProgress(pak_size, offset);
+      transferProgress(pak_size, offset);
       chrc.readValue()
       .then(value => {
           var tmp = new Uint8Array(value.buffer);
@@ -248,8 +190,7 @@ function readRecursive(chrc, data, offset) {
           }
           else {
               end = performance.now();
-              //progress.style.width = '100%';
-              //progress.textContent = '100%';
+              setProgress(100);
               ChromeSamples.log('File download done. Took: '  + (end - start)/1000 + ' sec');
               resolve(data);
           }
@@ -260,7 +201,7 @@ function readRecursive(chrc, data, offset) {
   });
 }
 
-function writeRecursive(chrc, data, offset) {
+const writeRecursive = (chrc, data, offset) => {
   return new Promise(function(resolve, reject) {
       var curBlock = ~~(offset / block) + 1;
       if (cancel == 1) {
@@ -280,8 +221,7 @@ function writeRecursive(chrc, data, offset) {
           }
           else {
               end = performance.now();
-              progress.style.width = '100%';
-              progress.textContent = '100%';
+              setProgress(100);
               ChromeSamples.log('File upload done. Took: '  + (end - start)/1000 + ' sec');
               resolve();
           }
@@ -292,18 +232,15 @@ function writeRecursive(chrc, data, offset) {
   });
 }
 
-function readFile(data) {
+const readFile = (data) => {
   return new Promise(function(resolve, reject) {
       var offset = new Uint32Array(1);
       let ctrl_chrc = null;
-      //document.getElementById('progress_bar').className = 'loading';
-      //document.getElementById("divBtConn").style.display = 'none';
-      //document.getElementById("divFileSelect").style.display = 'none';
-      //document.getElementById("divFileTransfer").style.display = 'block';
+      setShowProgress(true);
       brService.getCharacteristic(brUuid[10])
       .then(chrc => {
           ctrl_chrc = chrc;
-          offset[0] = Number(document.getElementById("pakSelect").value) * pak_size;
+          offset[0] = Number(pak) * pak_size;
           return ctrl_chrc.writeValue(offset)
       })
       .then(_ => {
@@ -326,17 +263,16 @@ function readFile(data) {
   });
 }
 
-function writeFile(data) {
+const writeFile = (data) => {
+  setShowButtons(false);
+  setShowProgress(true);
   var offset = new Uint32Array(1);
   let ctrl_chrc = null;
-  //document.getElementById('progress_bar').className = 'loading';
-  //document.getElementById("divBtConn").style.display = 'none';
-  //document.getElementById("divFileSelect").style.display = 'none';
-  //document.getElementById("divFileTransfer").style.display = 'block';
+  
   brService.getCharacteristic(brUuid[10])
   .then(chrc => {
       ctrl_chrc = chrc;
-      offset[0] = Number(document.getElementById("pakSelect").value) * pak_size;
+      offset[0] = Number(pak) * pak_size;
       return ctrl_chrc.writeValue(offset)
   })
   .then(_ => {
@@ -344,6 +280,7 @@ function writeFile(data) {
   })
   .then(chrc => {
       start = performance.now();
+      setShowButtons(false);
       return writeRecursive(chrc, data, 0);
   })
   .then(_ => {
@@ -351,28 +288,25 @@ function writeFile(data) {
       return ctrl_chrc.writeValue(offset)
   })
   .then(_ => {
-      document.getElementById("divBtConn").style.display = 'none';
-      document.getElementById("divFileSelect").style.display = 'block';
-      document.getElementById("divFileTransfer").style.display = 'none';
+      setShowButtons(true);
   })
   .catch(error => {
       ChromeSamples.log('Argh! ' + error);
-      document.getElementById("divBtConn").style.display = 'none';
-      document.getElementById("divFileSelect").style.display = 'block';
-      document.getElementById("divFileTransfer").style.display = 'none';
+      setShowButtons(true);
+      setShowProgress(false);
       cancel = 0;
   });
 }
 
-function onDisconnected() {
+const onDisconnected = () => {
   ChromeSamples.log('> Bluetooth Device disconnected');
   cancel = 0;
-  document.getElementById("divBtConn").style.display = 'block';
-  document.getElementById("divFileSelect").style.display = 'none';
-  document.getElementById("divFileTransfer").style.display = 'none';
+  setShowProgress(false);
+  setShowButtons(false);
+  setBtConnected(false);
 }
 
-function btConn() {
+const btConn = () => {
   ChromeSamples.log('Requesting Bluetooth Device...');
   navigator.bluetooth.requestDevice(
       {filters: [{name: 'BlueRetro'}],
@@ -393,14 +327,68 @@ function btConn() {
   })
   .then(_ => {
       ChromeSamples.log('Init Cfg DOM...');
-      document.getElementById("divBtConn").style.display = 'none';
-      document.getElementById("divFileSelect").style.display = 'block';
-      document.getElementById("divFileTransfer").style.display = 'none';
+      setBtConnected(true);
+      setShowButtons(true);
   })
   .catch(error => {
       ChromeSamples.log('Argh! ' + error);
   });
 }
+
+  return (
+    <div className="about">
+      <div className="container">
+          <div className="row align-items-center my-5">
+            {!btConnected && <div id="divBtConn">
+              <button id="btConn" onClick={() =>{btConn()}}>Connect BlueRetro</button><br/>
+              <small><i>Disconnect all controllers from BlueRetro before connecting for pak management.</i></small>
+            </div>}
+            <div id="divFileSelect">
+                  Select BlueRetro controller pak bank:
+                  <Select 
+                    placeholder="1"
+                    isSearchable={false}
+                    value={pak}
+                    options={myrange.map(merange => ({key: merange, text:merange, value: merange }))}
+                    onChange={x => setPak(x)}
+                    getOptionLabel={x => x.value}
+                  />
+                {showButtons && 
+                <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
+                    <button id="btnPakRead" onClick={() =>{pakRead()}}>Read</button>
+                    <button id="btnPakFormat" onClick={() =>{pakFormat()}}>Format</button>
+                    <button id="btnPakWrite" onClick={() =>{pakWrite()}}>Write</button>
+                    Select .MPK file to write:
+                    <input type="file" id="pakFile"/>
+                </div>}
+                {showProgress && <div id="divFileTransfer" >
+                      <div id="progress_bar">
+                      <ProgressBar now={progress} label={`${progress}%`}/>
+                      </div>
+                      <button id="btnFileTransferCancel" onClick={() => {abortFileTransfer()}}>Cancel</button>
+                </div>}
+            </div>
+        </div>
+        <Logbox/>
+      </div>
+    </div>
+  );
+}
+
+// Base on https://www.html5rocks.com/en/tutorials/file/dndfiles//
+
+const block = 4096;
+const pak_size = 32 * 1024;
+
+var bluetoothDevice;
+let brService = null;
+var reader;
+var start;
+var end;
+var cancel = 0;
+var tmpViewSize = 0;
+
+
 
 
 export default N64ctrlpak;
