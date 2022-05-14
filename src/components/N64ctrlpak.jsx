@@ -1,26 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import Logbox, { ChromeSamples } from "./Logbox";
-import { brUuid, mtu } from "./Btutils";
+import { brUuid, mtu, block, pakSize } from "./Btutils";
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import { useFilePicker } from 'use-file-picker';
 import Select from 'react-select'
+
+
+var bluetoothDevice;
+let brService = null;
+var cancel = 0;
+
 function N64ctrlpak() {
+  const startTime = useRef(0);
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleFormat = () => setShow(true);
   const [btConnected, setBtConnected] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
   const [progress, setProgress] = useState(0);
   const [pak, setPak] = useState(0);
-  const [openFileSelector, { filesContent, loading }] = useFilePicker({
+  const [openFileSelector, { filesContent }] = useFilePicker({
     accept: '.mpk', multiple: false, readAs: 'ArrayBuffer'
   });
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
   const myrange = [1,2,3,4];
   
   const pakRead = (evt) => {
@@ -29,16 +34,19 @@ function N64ctrlpak() {
     setShowProgress(true);
     setShowButtons(false);
     ChromeSamples.log("reading pak");
-    var data = new Uint8Array(pak_size);
+    var data = new Uint8Array(pakSize);
     readFile(data)
     .then(value => {
+        let pakNum = pak + 1;
         downloadFile(new Blob([value.buffer], {type: "application/mpk"}),
-            'ctrl_pak' + eval(Number(pak) + 1) + '.mpk');
+            'ctrl_pak' + pakNum + '.mpk');
         setShowProgress(false);
+        setShowCancel(false);
         setShowButtons(true);
     })
     .catch(error => {
         ChromeSamples.log('Argh! ' + error);
+        setShowCancel(false);
         setShowProgress(false);
         setShowButtons(true);
         cancel = 0;
@@ -46,7 +54,7 @@ function N64ctrlpak() {
   }
   
   const pakWrite = (evt) => {
-    writeFile(filesContent[0].content.slice(0, pak_size));
+    writeFile(filesContent[0].content.slice(0, pakSize));
   }
 
   // Source: https://newbedev.com/saving-binary-data-as-file-using-javascript-from-a-browser
@@ -93,21 +101,6 @@ const abortFileTransfer = () => {
   cancel = 1;
 }
 
-const errorHandler = (evt) => {
-  switch(evt.target.error.code) {
-      case evt.target.error.NOT_FOUND_ERR:
-          ChromeSamples.log('File Not Found!');
-          break;
-      case evt.target.error.NOT_READABLE_ERR:
-          ChromeSamples.log('File is not readable');
-          break;
-      case evt.target.error.ABORT_ERR:
-          break; // noop
-      default:
-          ChromeSamples.log('An error occurred reading this file.');
-  };
-}
-
 const transferProgress = (total, loaded) => {
   var percentLoaded = Math.round((loaded / total) * 100);
   // Increase the progress bar length.
@@ -120,20 +113,21 @@ const transferProgress = (total, loaded) => {
 // https://github.com/bryc/mempak/blob/dbd78db6ac55575838c6e107e5ea1e568981edc4/js/state.js#L8
 const pakFormat = (evt) => {
       handleClose();
+      setProgress(0);
       function writeAt(ofs) {for(let i = 0; i < 32; i++) data[ofs + i] = block[i];}
 
       const data = new Uint8Array(32768);
       const block = new Uint8Array(32);
 
       // generate id block
-      block[1]  = 0 | Math.random() * 256 & 0x3F;
-      block[5]  = 0 | Math.random() * 256 & 0x7;
-      block[6]  = 0 | Math.random() * 256;
-      block[7]  = 0 | Math.random() * 256;
-      block[8]  = 0 | Math.random() * 256 & 0xF;
-      block[9]  = 0 | Math.random() * 256;
-      block[10] = 0 | Math.random() * 256;
-      block[11] = 0 | Math.random() * 256;
+      block[1]  = 0 | (Math.random() * 256 & 0x3F);
+      block[5]  = 0 | (Math.random() * 256 & 0x7);
+      block[6]  = 0 | (Math.random() * 256);
+      block[7]  = 0 | (Math.random() * 256);
+      block[8]  = 0 | (Math.random() * 256 & 0xF);
+      block[9]  = 0 | (Math.random() * 256);
+      block[10] = 0 | (Math.random() * 256);
+      block[11] = 0 | (Math.random() * 256);
       block[25] = 0x01; // device bit
       block[26] = 0x01; // bank size int (must be exactly '01')
 
@@ -172,22 +166,22 @@ const pakFormat = (evt) => {
 
 const readRecursive = (chrc, data, offset) => {
   return new Promise(function(resolve, reject) {
-      if (cancel == 1) {
-          throw 'Cancelled';
+      if (cancel === 1) {
+          throw new Error('Cancelled');
       }
-      transferProgress(pak_size, offset);
+      transferProgress(pakSize, offset);
       chrc.readValue()
       .then(value => {
           var tmp = new Uint8Array(value.buffer);
           data.set(tmp, offset);
           offset += value.byteLength;
-          if (offset < (pak_size)) {
+          if (offset < (pakSize)) {
               resolve(readRecursive(chrc, data, offset));
           }
           else {
-              end = performance.now();
               setProgress(100);
-              ChromeSamples.log('File download done. Took: '  + (end - start)/1000 + ' sec');
+              setShowCancel(false);
+              ChromeSamples.log('File download done. Took: '  + Math.round((performance.now() - startTime.current))/1000 + ' sec');
               resolve(data);
           }
       })
@@ -200,11 +194,11 @@ const readRecursive = (chrc, data, offset) => {
 const writeRecursive = (chrc, data, offset) => {
   return new Promise(function(resolve, reject) {
       var curBlock = ~~(offset / block) + 1;
-      if (cancel == 1) {
-          throw 'Cancelled';
+      if (cancel === 1) {
+          throw new Error('Cancelled');
       }
       transferProgress(data.byteLength, offset);
-      tmpViewSize = (curBlock * block) - offset;
+      let tmpViewSize = (curBlock * block) - offset;
       if (tmpViewSize > mtu) {
           tmpViewSize = mtu;
       }
@@ -216,9 +210,8 @@ const writeRecursive = (chrc, data, offset) => {
               resolve(writeRecursive(chrc, data, offset));
           }
           else {
-              end = performance.now();
               setProgress(100);
-              ChromeSamples.log('File upload done. Took: '  + (end - start)/1000 + ' sec');
+              ChromeSamples.log('File upload done. Took: '  + Math.round((performance.now() - startTime.current))/1000 + ' sec');
               resolve();
           }
       })
@@ -229,6 +222,7 @@ const writeRecursive = (chrc, data, offset) => {
 }
 
 const readFile = (data) => {
+    setShowCancel(true);
   return new Promise(function(resolve, reject) {
       var offset = new Uint32Array(1);
       let ctrl_chrc = null;
@@ -236,14 +230,14 @@ const readFile = (data) => {
       brService.getCharacteristic(brUuid[10])
       .then(chrc => {
           ctrl_chrc = chrc;
-          offset[0] = Number(pak) * pak_size;
+          offset[0] = Number(pak) * pakSize;
           return ctrl_chrc.writeValue(offset)
       })
       .then(_ => {
           return brService.getCharacteristic(brUuid[11])
       })
       .then(chrc => {
-          start = performance.now();
+          startTime.current = performance.now();
           return readRecursive(chrc, data, 0);
       })
       .then(_ => {
@@ -262,20 +256,22 @@ const readFile = (data) => {
 const writeFile = (data) => {
   setShowButtons(false);
   setShowProgress(true);
+  setShowCancel(true);
   var offset = new Uint32Array(1);
   let ctrl_chrc = null;
   
   brService.getCharacteristic(brUuid[10])
   .then(chrc => {
+      console.log("formatting")
       ctrl_chrc = chrc;
-      offset[0] = Number(pak) * pak_size;
+      offset[0] = Number(pak) * pakSize;
       return ctrl_chrc.writeValue(offset)
   })
   .then(_ => {
       return brService.getCharacteristic(brUuid[11])
   })
   .then(chrc => {
-      start = performance.now();
+      startTime.current = performance.now();
       setShowButtons(false);
       return writeRecursive(chrc, data, 0);
   })
@@ -285,10 +281,13 @@ const writeFile = (data) => {
   })
   .then(_ => {
       setShowButtons(true);
+      setShowCancel(false);
+      setShowProgress(false);
   })
   .catch(error => {
       ChromeSamples.log('Argh! ' + error);
       setShowButtons(true);
+      setShowCancel(false);
       setShowProgress(false);
       cancel = 0;
   });
@@ -303,6 +302,7 @@ const onDisconnected = () => {
 }
 
 const btConn = () => {
+  ChromeSamples.clearLog();
   ChromeSamples.log('Requesting Bluetooth Device...');
   navigator.bluetooth.requestDevice(
       {filters: [{name: 'BlueRetro'}],
@@ -355,10 +355,11 @@ const btConn = () => {
               <small><i>Disconnect all controllers from BlueRetro before connecting for pak management.</i></small>
             </div>}
             <div id="divFileSelect">
-                  Select BlueRetro controller pak bank:
+                  
                   
                 {showButtons && 
                 <div style={{display: 'flex', flexWrap:"wrap"}}>
+                    <p>Select BlueRetro controller pak bank:</p>
                     <Select 
                     placeholder="1"
                     isSearchable={false}
@@ -381,12 +382,14 @@ const btConn = () => {
                     }
                     
                 </div>}
-                {showProgress && <div id="divFileTransfer" >
+                {
+                showProgress && <div id="divFileTransfer" >
                       <div id="progress_bar">
                       <ProgressBar now={progress} label={`${progress}%`}/>
                       </div>
-                      <button id="btnFileTransferCancel" onClick={() => {abortFileTransfer()}}>Cancel</button>
-                </div>}
+                </div>
+                }
+                {showCancel && <button id="btnFileTransferCancel" onClick={() => {abortFileTransfer()}}>Cancel</button>}
             </div>
         </div>
         <Logbox/>
@@ -394,21 +397,5 @@ const btConn = () => {
     </div>
   );
 }
-
-// Base on https://www.html5rocks.com/en/tutorials/file/dndfiles//
-
-const block = 4096;
-const pak_size = 32 * 1024;
-
-var bluetoothDevice;
-let brService = null;
-var reader;
-var start;
-var end;
-var cancel = 0;
-var tmpViewSize = 0;
-
-
-
 
 export default N64ctrlpak;
