@@ -1,15 +1,26 @@
 import React, { useState } from "react";
+import { Modal, Button } from "react-bootstrap";
 import Logbox, { ChromeSamples } from "./Logbox";
 import { brUuid, mtu } from "./Btutils";
 import ProgressBar from 'react-bootstrap/ProgressBar'
+import { useFilePicker } from 'use-file-picker';
 import Select from 'react-select'
 function N64ctrlpak() {
-  
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleFormat = () => setShow(true);
   const [btConnected, setBtConnected] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
   const [progress, setProgress] = useState(0);
   const [pak, setPak] = useState(0);
+  const [openFileSelector, { filesContent, loading }] = useFilePicker({
+    accept: '.mpk', multiple: false, readAs: 'ArrayBuffer'
+  });
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   const myrange = [1,2,3,4];
   
   const pakRead = (evt) => {
@@ -35,21 +46,7 @@ function N64ctrlpak() {
   }
   
   const pakWrite = (evt) => {
-    // Reset progress indicator on new file selection.
-    //progress.style.width = '0%';
-    //progress.textContent = '0%';
-  
-    reader = new FileReader();
-    reader.onerror = errorHandler;
-    reader.onabort = function(e) {
-        ChromeSamples.log('File read cancelled');
-    };
-    reader.onload = function(e) {
-        writeFile(reader.result.slice(0, pak_size));
-    }
-  
-    // Read in the image file as a binary string.
-    reader.readAsArrayBuffer(document.getElementById("pakFile").files[0]);
+    writeFile(filesContent[0].content.slice(0, pak_size));
   }
 
   // Source: https://newbedev.com/saving-binary-data-as-file-using-javascript-from-a-browser
@@ -119,11 +116,10 @@ const transferProgress = (total, loaded) => {
   }
 }
 
-
-
 // Init function taken from MPKEdit by bryc:
 // https://github.com/bryc/mempak/blob/dbd78db6ac55575838c6e107e5ea1e568981edc4/js/state.js#L8
 const pakFormat = (evt) => {
+      handleClose();
       function writeAt(ofs) {for(let i = 0; i < 32; i++) data[ofs + i] = block[i];}
 
       const data = new Uint8Array(32768);
@@ -337,6 +333,21 @@ const btConn = () => {
 
   return (
     <div className="about">
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Format Memory Pak</Modal.Title>
+        </Modal.Header>
+        <Modal.Body><p>This will format your memory pak!</p> <p>There is no way to undo this!</p></Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={() => {pakFormat();}}>
+            Format Pak
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    
       <div className="container">
           <div className="row align-items-center my-5">
             {!btConnected && <div id="divBtConn">
@@ -345,7 +356,10 @@ const btConn = () => {
             </div>}
             <div id="divFileSelect">
                   Select BlueRetro controller pak bank:
-                  <Select 
+                  
+                {showButtons && 
+                <div style={{display: 'flex', flexWrap:"wrap"}}>
+                    <Select 
                     placeholder="1"
                     isSearchable={false}
                     value={pak}
@@ -353,13 +367,19 @@ const btConn = () => {
                     onChange={x => setPak(x)}
                     getOptionLabel={x => x.value}
                   />
-                {showButtons && 
-                <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
+                  <hr style={{width:"100%"}}/>
                     <button id="btnPakRead" onClick={() =>{pakRead()}}>Read</button>
-                    <button id="btnPakFormat" onClick={() =>{pakFormat()}}>Format</button>
+                    <button id="btnPakFormat" onClick={() =>{handleFormat()}}>Format</button>
                     <button id="btnPakWrite" onClick={() =>{pakWrite()}}>Write</button>
-                    Select .MPK file to write:
-                    <input type="file" id="pakFile"/>
+                    
+                    <p>{}</p>
+                    <hr style={{width:"100%"}}/>
+                    <button id="fileSelector" onClick={() =>{openFileSelector()}}>select .mpk</button>
+                    {filesContent.map((file, index) => (
+                        <p>{file.name}</p>
+                    ))
+                    }
+                    
                 </div>}
                 {showProgress && <div id="divFileTransfer" >
                       <div id="progress_bar">
