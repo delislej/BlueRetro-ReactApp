@@ -14,6 +14,10 @@ export const brUuid = [
     '56830f56-5180-fab0-314b-2fa176799a0b',
 ];
 
+export const block = 4096;
+
+export const pakSize = 32 * 1024;
+
 export const mtu = 244;
 
 export const ota_start = 0xA5;

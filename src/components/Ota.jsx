@@ -186,16 +186,14 @@ const writeFwRecursive = (chrc, data, offset) => {
               {btConnected && 
               <div>
                 <div id="progress_bar">
-                  <div className="percent">
-                    <ProgressBar now={progress} label={`${progress}%`}/>
-                  </div>
+                  <ProgressBar now={progress} label={`${progress}%`}/>
                 </div>
                 <div id="divFwSelect" >
                   Select firmware:
                   <input type="file" id="fwFile" name="fw.bin"/>
                   <button id="btnFwUpdate" onClick={() => firmwareUpdate(setProgress)}>Update Firmware</button>
                 </div>
-                <div id="divFwUpdate" >  
+                <div id="divFwUpdate" >
                   <button id="btnFwUpdateCancel" onClick={() => abortFwUpdate(setBtConnected)}>Cancel</button>
                 </div>
               </div>
