@@ -6,7 +6,6 @@ import ProgressBar from 'react-bootstrap/ProgressBar'
 import { useFilePicker } from 'use-file-picker';
 import Select from 'react-select'
 
-
 var bluetoothDevice;
 let brService = null;
 var cancel = 0;
@@ -339,10 +338,10 @@ const btConn = () => {
         </Modal.Header>
         <Modal.Body><p>This will format your memory pak!</p> <p>There is no way to undo this!</p></Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="primary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={() => {pakFormat();}}>
+          <Button variant="danger" onClick={() => {pakFormat();}}>
             Format Pak
           </Button>
         </Modal.Footer>
