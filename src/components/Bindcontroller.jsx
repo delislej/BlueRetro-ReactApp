@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import Select from 'react-select'
-import { brUuid, savePresetInput } from './Btutils';
+//import Select from 'react-select'
+import { brUuid } from './Btutils';
 import Logbox, {ChromeSamples} from "./Logbox";
 import { useGamepads } from 'awesome-react-gamepads';
 var bluetoothDevice;
