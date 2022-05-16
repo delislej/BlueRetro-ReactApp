@@ -6,16 +6,18 @@ import { useGamepads } from 'awesome-react-gamepads';
 var bluetoothDevice;
 
 const Bindcontroller = () => {
-  const [brService, setBrService] = useState(null);
+  //const [brService, setBrService] = useState(null);
   const [pageInit, setPageInit] = useState(false);
-  const [gamepad, setGamepad] = useState({});
-  const [gamepads, setGamepads] = useState(null);
   const [buttonList, setButtonList] = useState([]);
-  const [n64, setN64] = useState({});
+  const [boundList, setBoundList] = useState(Array(32).fill("not Set"));
+  const n64 = useRef([]);
+  const btnPressed = useRef(-1);
   const time = useRef(performance.now());
   const allowButtonRead = useRef(false);
-  const readButton = (button) => {allowButtonRead.current = true;
+  const readButton = (button) => {
     console.log(button);
+    allowButtonRead.current = true;
+    btnPressed.current = button;
   };
 
   const onDisconnected = () => {
@@ -58,18 +60,14 @@ const Bindcontroller = () => {
 
   const getBindButtons = (thing) => {
     let temp = [];
+    //console.log("boundList: " + boundList);
     for (let i = 0; i < thing.map.length; i++) {
-      console.log(thing.map[i][1] === "");
       if(thing.map[i][1] !== ""){
-        console.log("lawl");
         temp.push({element:<button onClick={()=>{
-          console.log(thing.map[i][1]);
           if(!allowButtonRead.current === true){
           readButton(i)}
           else{console.log("already binding button!")}
-        }
-        
-      }>bind {thing.map[i][1]} button</button>, key: i})
+        }}>bind {thing.map[i][1]} button: </button>, key: i})
       }
       
     }
@@ -81,21 +79,35 @@ const Bindcontroller = () => {
     //onUpdate: (gamepad) => console.log(gamepad),
     onGamepadButtonUp: (button) => {
       if(allowButtonRead.current === true){
-      console.log(button);
+      let temp = boundList;
+      temp[btnPressed.current] = button.buttonName;
+      setBoundList(temp);
       time.current = performance.now();
       allowButtonRead.current = false;
     }},
     onGamepadAxesChange: (axes) => {
-      if(allowButtonRead.current === true){
-      console.log(axes);
-      time.current = performance.now();
-      allowButtonRead.current = false;
-    }},
+      if((allowButtonRead.current === true && axes.value > .5) || (allowButtonRead.current === true && axes.value < -.5)){
+        let foundAxes = axes.axesName;
+        if(axes.value > 0){
+          foundAxes+="+";
+        }
+        else{
+          foundAxes+="-";
+        }
+        console.log("axes detected");
+        let temp = boundList;
+        temp[btnPressed.current] = foundAxes;
+        setBoundList(temp);
+        time.current = performance.now();
+        allowButtonRead.current = false;}
+      },
     onKonamiSuccess: () => console.log("konami Success")
   });
 
-  const makeButtons = () => {return buttonList.map(button => (
-    <div className="button" key={button.key}>{button.element}</div>
+  const makeButtons = () => {
+    
+    return buttonList.map(button => (
+    <div className={"button" + button.key} key={button.key}>{button.element} bound: {boundList[button.key]}</div>
   ))};
 
   return (
@@ -103,11 +115,6 @@ const Bindcontroller = () => {
       <div class="container">
         <div class="row align-items-center my-5">
           <div class="col-lg-7">
-            <img
-              className="img-fluid rounded mb-4 mb-lg-0"
-              src="http://placehold.it/900x400"
-              alt=""
-            />
           </div>
           <div class="col-lg-5">
             <h1 class="font-weight-light">Contact</h1>
