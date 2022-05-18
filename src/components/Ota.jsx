@@ -1,69 +1,66 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import { brUuid, ota_abort, ota_end, ota_start, mtu } from './Btutils';
 import Logbox from './Logbox';
 import { ChromeSamples } from './Logbox';
+import { useFilePicker } from 'use-file-picker';
 
 var bluetoothDevice;
 let brService;
 
 function Ota(){
   const [progress, setProgress] = useState(0);
+  const [showCancel, setShowCancel] = useState(false);
+  const [showUpdate, setShowUpdate] = useState(true);
   const [btConnected, setBtConnected] = useState(false);
-  var reader;
-  var start;
-  var end;
-  var cancel = 0;
-
+  const cancel = useRef(0);
+  const startTime = useRef(0);
+  const [openFileSelector, { filesContent, clear }] = useFilePicker({
+    accept: '.bin', multiple: false, readAs: 'ArrayBuffer'
+  });
+  
   const getAppVersion = () => {
     return new Promise(function(resolve, reject) {
-    ChromeSamples.log('Get Api version CHRC...');
-      brService.getCharacteristic(brUuid[9])
-      .then(chrc => {
-        ChromeSamples.log('Reading App version...');
-          return chrc.readValue();
-      })
-      .then(value => {
-          var enc = new TextDecoder("utf-8");
-          ChromeSamples.log('App version: ' + enc.decode(value));
-          resolve();
-      })
-      .catch(error => {
-          resolve();
-      });
-  });
-}
+      ChromeSamples.log('Get Api version CHRC...');
+        brService.getCharacteristic(brUuid[9])
+        .then(chrc => {
+          ChromeSamples.log('Reading App version...');
+            return chrc.readValue();
+        })
+        .then(value => {
+            var enc = new TextDecoder("utf-8");
+            ChromeSamples.log('App version: ' + enc.decode(value));
+            resolve();
+        })
+        .catch(error => {
+            resolve();
+        });
+    });
+  }
 
 const firmwareUpdate = () => {// Reset progress indicator on new file selection.
-    reader = new FileReader();
-    reader.onerror = errorHandler;
-    reader.onabort = function(e) {
-      ChromeSamples.log('File read cancelled');
-    };
-    reader.onload = function(e) {
-        writeFirmware(reader.result, setProgress);
-    }
-  
-    // Read in the image file as a binary string.
-    reader.readAsArrayBuffer(document.getElementById("fwFile").files[0]);
+    setProgress(0);
+    setShowCancel(true);
+    writeFirmware(filesContent[0].content);
   }
 
   const abortFwUpdate = () => {
     ChromeSamples.log("aborting");
-    cancel = 1;
+    cancel.current = 1;
+    setProgress(0);
+    setShowCancel(false);
     setBtConnected(false);
-    ChromeSamples.clearLog();
   }
 
   const onDisconnected = () => {
     ChromeSamples.log('> Bluetooth Device disconnected');
-    cancel = 0;
+    cancel.current = 0;
     setBtConnected(false);
   }
 
   const btConn = () => { 
     ChromeSamples.clearLog();
-    cancel = 0;
+    cancel.current = 0;
     ChromeSamples.log('Requesting Bluetooth Device...');
   navigator.bluetooth.requestDevice(
       {filters: [{name: 'BlueRetro'}],
@@ -92,6 +89,7 @@ const firmwareUpdate = () => {// Reset progress indicator on new file selection.
 }
 
 const writeFirmware = (data) => {
+  setShowUpdate(false);
   var cmd = new Uint8Array(1);
   let ctrl_chrc = null;
   brService.getCharacteristic(brUuid[7])
@@ -104,44 +102,30 @@ const writeFirmware = (data) => {
       return brService.getCharacteristic(brUuid[8])
   })
   .then(chrc => {
-      start = performance.now();
+      startTime.current = performance.now();
       return writeFwRecursive(chrc, data, 0);
   })
   .then(_ => {
       cmd[0] = ota_end;
+      setShowUpdate(true);
       return ctrl_chrc.writeValue(cmd)
   })
   .catch(error => {
     ChromeSamples.log('Argh! ' + error);
-      cancel = 0;
+      cancel.current = 0;
+      clear();
       cmd[0] = ota_abort;
+      setShowUpdate(true);
       return ctrl_chrc.writeValue(cmd)
   });
 }
 
-const errorHandler = (evt) => {
-  switch(evt.target.error.code) {
-      case evt.target.error.NOT_FOUND_ERR:
-        ChromeSamples.log('File Not Found!');
-          break;
-      case evt.target.error.NOT_READABLE_ERR:
-        ChromeSamples.log('File is not readable');
-          break;
-      case evt.target.error.ABORT_ERR:
-          break; // noop
-      default:
-        ChromeSamples.log('An error occurred reading this file.');
-  };
-}
-
 const writeFwRecursive = (chrc, data, offset) => {
   return new Promise(function(resolve, reject) {
-      if (cancel === 1) {
-        ChromeSamples.log("aborted");
-        new Error("Cancelled");
+      if(cancel.current === 1) {
+        throw new Error("Cancelled");
       }
       setProgress(Math.round((offset/data.byteLength)*100));
-      //updateProgress(data.byteLength, offset, progressBarHook);
       var tmpViewSize = data.byteLength - offset;
       if (tmpViewSize > mtu) {
           tmpViewSize = mtu;
@@ -154,8 +138,7 @@ const writeFwRecursive = (chrc, data, offset) => {
               resolve(writeFwRecursive(chrc, data, offset));
           }
           else {
-              end = performance.now();
-              ChromeSamples.log('FW upload done. Took: '  + (end - start)/1000 + ' sec');
+              ChromeSamples.log('FW upload done. Took: '  + (performance.now() - startTime.current)/1000 + ' sec');
               resolve();
           }
       })
@@ -185,16 +168,26 @@ const writeFwRecursive = (chrc, data, offset) => {
             </div>}
               {btConnected && 
               <div>
-                <div id="progress_bar">
-                  <ProgressBar now={progress} label={`${progress}%`}/>
-                </div>
+                
                 <div id="divFwSelect" >
                   Select firmware:
-                  <input type="file" id="fwFile" name="fw.bin"/>
-                  <button id="btnFwUpdate" onClick={() => firmwareUpdate(setProgress)}>Update Firmware</button>
+                  {!showCancel && <button id="fileSelector" onClick={() =>{openFileSelector()}}>select .bin file</button>}
+                    {filesContent.map((file, index) => (
+                        <p>{file.name}</p>
+                    ))
+                    }
+                  {filesContent.length > 0 ? 
+          
+                  showUpdate === true ? <button id="btnFwUpdate" onClick={() => firmwareUpdate()}>Update Firmware</button> : null
+                  : 
+                  null
+                  }
                 </div>
                 <div id="divFwUpdate" >
-                  <button id="btnFwUpdateCancel" onClick={() => abortFwUpdate(setBtConnected)}>Cancel</button>
+                <div id="progress_bar">
+                  {showCancel && <ProgressBar now={progress} label={`${progress}%`}/>}
+                </div>
+                  {showCancel && <button id="btnFwUpdateCancel" onClick={() => abortFwUpdate()}>Cancel</button>}
                 </div>
               </div>
               }
