@@ -15,7 +15,7 @@ function Ota(){
   const [btConnected, setBtConnected] = useState(false);
   const cancel = useRef(0);
   const startTime = useRef(0);
-  const [openFileSelector, { filesContent, clear }] = useFilePicker({
+  const [openFileSelector, { filesContent, clear, loading }] = useFilePicker({
     accept: '.bin', multiple: false, readAs: 'ArrayBuffer'
   });
   
@@ -170,12 +170,8 @@ const writeFwRecursive = (chrc, data, offset) => {
               <div>
                 
                 <div id="divFwSelect" >
-                  Select firmware:
-                  {!showCancel && <button id="fileSelector" onClick={() =>{openFileSelector()}}>select .bin file</button>}
-                    {filesContent.map((file, index) => (
-                        <p>{file.name}</p>
-                    ))
-                    }
+                  Select firmware: 
+                  {!showCancel && !loading && <button id="fileSelector" onClick={() =>{openFileSelector()}}>{filesContent.length > 0 ? filesContent[0].name: "Select .bin"}</button>}
                   {filesContent.length > 0 ? 
           
                   showUpdate === true ? <button id="btnFwUpdate" onClick={() => firmwareUpdate()}>Update Firmware</button> : null

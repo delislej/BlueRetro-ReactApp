@@ -21,7 +21,7 @@ function N64ctrlpak() {
   const [showButtons, setShowButtons] = useState(false);
   const [progress, setProgress] = useState(0);
   const [pak, setPak] = useState(0);
-  const [openFileSelector, { filesContent }] = useFilePicker({
+  const [openFileSelector, { filesContent, clear }] = useFilePicker({
     accept: '.mpk', multiple: false, readAs: 'ArrayBuffer'
   });
 
@@ -279,6 +279,7 @@ const writeFile = (data) => {
       return ctrl_chrc.writeValue(offset)
   })
   .then(_ => {
+      clear();
       setShowButtons(true);
       setShowCancel(false);
       setShowProgress(false);
@@ -371,15 +372,8 @@ const btConn = () => {
                     <button id="btnPakRead" onClick={() =>{pakRead()}}>Read</button>
                     <button id="btnPakFormat" onClick={() =>{handleFormat()}}>Format</button>
                     <button id="btnPakWrite" onClick={() =>{pakWrite()}}>Write</button>
-                    
-                    <p>{}</p>
                     <hr style={{width:"100%"}}/>
-                    <button id="fileSelector" onClick={() =>{openFileSelector()}}>select .mpk</button>
-                    {filesContent.map((file, index) => (
-                        <p>{file.name}</p>
-                    ))
-                    }
-                    
+                    <button id="fileSelector" onClick={() =>{openFileSelector()}}>{filesContent.length > 0 ? filesContent[0].name: "Select .bin"}</button>
                 </div>}
                 {
                 showProgress && <div id="divFileTransfer" >
