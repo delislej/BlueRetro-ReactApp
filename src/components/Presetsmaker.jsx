@@ -157,10 +157,13 @@ const Presetsmaker = () => {
   });*/
 
   const makeButtons = () => {
-    
-    return buttonList.map(button => (
-    <div className={"button" + button.key} key={button.key}>{button.element} bound: {/*boundList[button.key]*/}</div>
-  ))};
+    let buttons = buttonList.map(button => (
+      <div className={"button" + button.key} key={button.key}>{button.element} bound: {/*boundList[button.key]*/}</div>
+    ))
+    return <div>
+      {buttons}
+      <button onClick={() => {downloadJson(jsonTest)}}> Download Preset </button>
+      </div>};
 
   return (
     <div className="Blueretro">
@@ -169,7 +172,6 @@ const Presetsmaker = () => {
           <div className="col-lg-7">
           </div>
           <div className="col-lg-5">
-            <button onClick={() => {downloadJson(jsonTest)}}> lol </button>
             <h1 className="font-weight-light">Contact</h1>
             {!pageInit && <div id="divBtConn" >  
             <button style={{borderRadius:"12px", margin:"auto"}} id="btBtn" onClick={() => {btConn()}}>Connect BlueRetro</button><br/>

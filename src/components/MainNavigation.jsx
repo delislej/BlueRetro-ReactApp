@@ -90,7 +90,7 @@ function MainNavigation() {
                       <ListItemIcon>
                         <FolderIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
-                      <ListItemText primary="Preset Maker" />
+                      <ListItemText primary="Preset Maker (unfinished/ not working)" />
                     </ListItemButton>
                     </NavLink>
 

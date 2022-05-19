@@ -370,10 +370,11 @@ const btConn = () => {
                   />
                   <hr style={{width:"100%"}}/>
                     <button id="btnPakRead" onClick={() =>{pakRead()}}>Read</button>
-                    <button id="btnPakFormat" onClick={() =>{handleFormat()}}>Format</button>
                     <button id="btnPakWrite" onClick={() =>{pakWrite()}}>Write</button>
                     <hr style={{width:"100%"}}/>
                     <button id="fileSelector" onClick={() =>{openFileSelector()}}>{filesContent.length > 0 ? filesContent[0].name: "Select .bin"}</button>
+                    <hr style={{width:"100%"}}/>
+                    <Button variant="danger" id="btnPakFormat" onClick={() =>{handleFormat()}}>Format</Button>
                 </div>}
                 {
                 showProgress && <div id="divFileTransfer" >
