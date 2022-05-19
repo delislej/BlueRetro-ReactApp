@@ -164,13 +164,13 @@ const Presetsmaker = () => {
 
   return (
     <div className="Blueretro">
-      <div class="container">
-        <div class="row align-items-center my-5">
-          <div class="col-lg-7">
+      <div className="container">
+        <div className="row align-items-center my-5">
+          <div className="col-lg-7">
           </div>
-          <div class="col-lg-5">
+          <div className="col-lg-5">
             <button onClick={() => {downloadJson(jsonTest)}}> lol </button>
-            <h1 class="font-weight-light">Contact</h1>
+            <h1 className="font-weight-light">Contact</h1>
             {!pageInit && <div id="divBtConn" >  
             <button style={{borderRadius:"12px", margin:"auto"}} id="btBtn" onClick={() => {btConn()}}>Connect BlueRetro</button><br/>
             <small>

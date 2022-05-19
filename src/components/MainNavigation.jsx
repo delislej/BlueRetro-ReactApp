@@ -91,15 +91,15 @@ function MainNavigation() {
                 <Box sx={{
                   p: 2,
                   height: 1,
-                  backgroundColor: "#dbc8ff",
+                  backgroundColor: "#0000ff",
                 }}>
 
                   {/* 
                   when clicking the icon it calls the function toggleDrawer 
                   and closes the drawer by setting the variable open to false
                   */}
-                  <IconButton sx={{mb: 2}}>
-                    <CloseIcon onClick={toggleDrawer(false)} />
+                  <IconButton onClick={toggleDrawer(false)} sx={{mb: 2}}>
+                    <CloseIcon  />
                   </IconButton>
 
                   <Divider sx={{mb: 2}} />
