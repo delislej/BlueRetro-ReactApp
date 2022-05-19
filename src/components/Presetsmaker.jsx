@@ -51,7 +51,7 @@ const Presetsmaker = () => {
   //const [brService, setBrService] = useState(null);
   const [pageInit, setPageInit] = useState(false);
   const [buttonList, setButtonList] = useState([]);
-  const [boundList, setBoundList] = useState(Array(32).fill("not Set"));
+  //const [boundList, setBoundList] = useState(Array(32).fill("not Set"));
   const n64 = useRef([]);
   const btnPressed = useRef(-1);
   //const time = useRef(performance.now());
@@ -107,9 +107,7 @@ const Presetsmaker = () => {
   }
   
 
-  useEffect(()=>{n64.current = require('../controllers/n64.json');
-  setBoundList([]);
-})
+  useEffect(()=>{n64.current = require('../controllers/n64.json');})
 
   const getBindButtons = (thing) => {
     let temp = [];
@@ -161,7 +159,7 @@ const Presetsmaker = () => {
   const makeButtons = () => {
     
     return buttonList.map(button => (
-    <div className={"button" + button.key} key={button.key}>{button.element} bound: {boundList[button.key]}</div>
+    <div className={"button" + button.key} key={button.key}>{button.element} bound: {/*boundList[button.key]*/}</div>
   ))};
 
   return (
