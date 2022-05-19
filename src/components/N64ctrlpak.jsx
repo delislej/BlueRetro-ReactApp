@@ -343,7 +343,7 @@ const btConn = () => {
             Close
           </Button>
           <Button variant="danger" onClick={() => {pakFormat();}}>
-            Format Pak
+            Format Memory Pak
           </Button>
         </Modal.Footer>
       </Modal>
