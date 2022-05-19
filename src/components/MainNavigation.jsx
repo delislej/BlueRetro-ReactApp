@@ -51,60 +51,12 @@ function MainNavigation() {
               BlueRetro
             </Typography>
 
-            <Box component="div" sx={{
-              display: {
-                xs: 'none',
-                sm: 'block',
-              }
-            }}>
-              
-            </Box>
-
-            <IconButton 
-              edge="start" 
-              color="inherit" 
-              aria-label="open drawer" 
-              onClick={toggleDrawer(true)}
-              sx={{ 
-                mr: 2,
-                display: {
-                  xs: 'block',
+            <Box sx={{mb: 2, display: {
+                  xs: 'none',
                   sm: 'none',
-                }
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-
-            {/* The outside of the drawer */}
-            <Drawer
-              //from which side the drawer slides in
-              anchor="right"
-              //if open is true --> drawer is shown
-              open={open}
-              //function that is called when the drawer should close
-              onClose={toggleDrawer(false)}
-              //function that is called when the drawer should open
-              onOpen={toggleDrawer(true)}
-            >
-                {/* The inside of the drawer */}
-                <Box sx={{
-                  p: 2,
-                  height: 1,
-                  backgroundColor: "#0000ff",
-                }}>
-
-                  {/* 
-                  when clicking the icon it calls the function toggleDrawer 
-                  and closes the drawer by setting the variable open to false
-                  */}
-                  <IconButton onClick={toggleDrawer(false)} sx={{mb: 2}}>
-                    <CloseIcon  />
-                  </IconButton>
-
-                  <Divider sx={{mb: 2}} />
-
-                  <Box sx={{mb: 2}}>
+                  md: 'none',
+                  lg: 'flex'
+                }}}>
                   <NavLink to="/advancedconfig">
                     <ListItemButton>
                       <ListItemIcon>
@@ -112,15 +64,6 @@ function MainNavigation() {
                       </ListItemIcon>
                       <ListItemText primary="Advanced Config" />
                       
-                    </ListItemButton>
-                    </NavLink>
-
-                    <NavLink to="/presets">
-                    <ListItemButton>
-                      <ListItemIcon>
-                        <DescriptionIcon sx={{color: "primary.main"}}/>
-                      </ListItemIcon >
-                      <ListItemText primary="Presets" />
                     </ListItemButton>
                     </NavLink>
 
@@ -150,6 +93,110 @@ function MainNavigation() {
                       <ListItemText primary="Preset Maker" />
                     </ListItemButton>
                     </NavLink>
+
+                    <NavLink to="/ota">
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <DescriptionIcon sx={{color: "primary.main"}}/>
+                      </ListItemIcon >
+                      <ListItemText primary="OTA update" />
+                    </ListItemButton>
+                    </NavLink>
+
+                  </Box>
+
+            <IconButton 
+              edge="start" 
+              color="inherit"
+              aria-label="open drawer" 
+              onClick={toggleDrawer(true)}
+              sx={{
+                mr: 2,
+                display: {
+                  xs: 'block',
+                  sm: 'block',
+                  md: 'none',
+                }
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+
+            {/* The outside of the drawer */}
+            <Drawer
+              //from which side the drawer slides in
+              anchor="right"
+              //if open is true --> drawer is shown
+              open={open}
+              //function that is called when the drawer should close
+              onClose={toggleDrawer(false)}
+              //function that is called when the drawer should open
+              onOpen={toggleDrawer(true)}
+            >
+                {/* The inside of the drawer */}
+                <Box sx={{
+                  p: 2,
+                  height: 1,
+                  backgroundColor: "#09d3ff",
+                }}>
+
+                  {/* 
+                  when clicking the icon it calls the function toggleDrawer 
+                  and closes the drawer by setting the variable open to false
+                  */}
+                  <IconButton onClick={toggleDrawer(false)} sx={{mb: 2}}>
+                    <CloseIcon  />
+                  </IconButton>
+
+                  <Divider sx={{mb: 2}} />
+
+                  <Box sx={{mb: 2}}>
+                  <NavLink to="/advancedconfig">
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <ImageIcon sx={{color: "primary.main"}}/>
+                      </ListItemIcon>
+                      <ListItemText primary="Advanced Config" />
+                      
+                    </ListItemButton>
+                    </NavLink>
+
+                    <NavLink to="/n64ctrlpak">
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <FolderIcon sx={{color: "primary.main"}} />
+                      </ListItemIcon>
+                      <ListItemText primary="N64 controller pak manager" />
+                    </ListItemButton>
+                    </NavLink>
+
+                    <NavLink to="/presets">
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <FolderIcon sx={{color: "primary.main"}} />
+                      </ListItemIcon>
+                      <ListItemText primary="Presets" />
+                    </ListItemButton>
+                    </NavLink>
+
+                    <NavLink to="/presetsmaker">
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <FolderIcon sx={{color: "primary.main"}} />
+                      </ListItemIcon>
+                      <ListItemText primary="Preset Maker" />
+                    </ListItemButton>
+                    </NavLink>
+
+                    <NavLink to="/ota">
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <DescriptionIcon sx={{color: "primary.main"}}/>
+                      </ListItemIcon >
+                      <ListItemText primary="OTA update" />
+                    </ListItemButton>
+                    </NavLink>
+
                   </Box>
 
                   <Box sx={{
