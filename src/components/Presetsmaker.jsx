@@ -54,7 +54,7 @@ const Presetsmaker = () => {
   const [boundList, setBoundList] = useState(Array(32).fill("not Set"));
   const n64 = useRef([]);
   const btnPressed = useRef(-1);
-  const time = useRef(performance.now());
+  //const time = useRef(performance.now());
   const allowButtonRead = useRef(false);
   const readButton = (button) => {
     console.log(button);
@@ -107,7 +107,9 @@ const Presetsmaker = () => {
   }
   
 
-  useEffect(()=>{n64.current = require('../controllers/n64.json')})
+  useEffect(()=>{n64.current = require('../controllers/n64.json');
+  setBoundList([]);
+})
 
   const getBindButtons = (thing) => {
     let temp = [];
