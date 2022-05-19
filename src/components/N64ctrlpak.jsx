@@ -372,7 +372,7 @@ const btConn = () => {
                     <button id="btnPakRead" onClick={() =>{pakRead()}}>Read</button>
                     <button id="btnPakWrite" onClick={() =>{pakWrite()}}>Write</button>
                     <hr style={{width:"100%"}}/>
-                    <button id="fileSelector" onClick={() =>{openFileSelector()}}>{filesContent.length > 0 ? filesContent[0].name: "Select .bin"}</button>
+                    <button id="fileSelector" onClick={() =>{openFileSelector()}}>{filesContent.length > 0 ? filesContent[0].name: "Select .mpk"}</button>
                     <hr style={{width:"100%"}}/>
                     <Button variant="danger" id="btnPakFormat" onClick={() =>{handleFormat()}}>Format</Button>
                 </div>}
