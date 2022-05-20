@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import ProgressBar from 'react-bootstrap/ProgressBar'
-import { brUuid, ota_abort, ota_end, ota_start, mtu } from './Btutils';
+import { brUuid, ota_abort, ota_end, ota_start, mtu, getAppVersion } from './Btutils';
 import Logbox from './Logbox';
 import { ChromeSamples } from './Logbox';
 import { useFilePicker } from 'use-file-picker';
@@ -19,24 +19,6 @@ function Ota(){
     accept: '.bin', multiple: false, readAs: 'ArrayBuffer'
   });
   
-  const getAppVersion = () => {
-    return new Promise(function(resolve, reject) {
-      ChromeSamples.log('Get Api version CHRC...');
-        brService.getCharacteristic(brUuid[9])
-        .then(chrc => {
-          ChromeSamples.log('Reading App version...');
-            return chrc.readValue();
-        })
-        .then(value => {
-            var enc = new TextDecoder("utf-8");
-            ChromeSamples.log('App version: ' + enc.decode(value));
-            resolve();
-        })
-        .catch(error => {
-            resolve();
-        });
-    });
-  }
 
 const firmwareUpdate = () => {// Reset progress indicator on new file selection.
     setProgress(0);
@@ -77,7 +59,7 @@ const firmwareUpdate = () => {// Reset progress indicator on new file selection.
   })
   .then(service => {
       brService = service;
-      return getAppVersion();
+      return getAppVersion(brService);
   })
   .then(_ => {
     ChromeSamples.log('Init Cfg DOM...');

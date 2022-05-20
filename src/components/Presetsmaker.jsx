@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 //import Select from 'react-select'
-import { brUuid } from './Btutils';
+import { brUuid, getAppVersion } from './Btutils';
 import Logbox, {ChromeSamples} from "./Logbox";
 //import { useGamepads } from 'awesome-react-gamepads';
 var bluetoothDevice;
+var brService;
 
 const Presetsmaker = () => {
 
@@ -93,8 +94,8 @@ const Presetsmaker = () => {
         return server.getPrimaryService(brUuid[0]);
     })
     .then(service => {
-        //brService = service;
-        //return getAppVersion();
+        brService = service;
+        return getAppVersion(brService);
     })
     .then(_ => {
         ChromeSamples.log('Init Cfg DOM...');

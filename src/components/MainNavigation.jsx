@@ -47,9 +47,11 @@ function MainNavigation() {
       <Container maxWidth="lg" disableGutters="true">
         <Toolbar>
 
+        <NavLink to="/">
             <Typography variant="h6" sx={{flexGrow: 1, fontWeight: 700}}>
               BlueRetro
             </Typography>
+            </NavLink>
 
             <Box sx={{mb: 2, display: {
                   xs: 'none',

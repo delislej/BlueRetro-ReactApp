@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
 import Logbox, { ChromeSamples } from "./Logbox";
-import { brUuid, mtu, block, pakSize } from "./Btutils";
+import { brUuid, mtu, block, pakSize, getAppVersion } from "./Btutils";
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import { useFilePicker } from 'use-file-picker';
 import Select from 'react-select'
@@ -75,25 +75,6 @@ function downloadFile(blob, filename) {
   setTimeout(function() {
       window.URL.revokeObjectURL(url);
   }, 1000);
-}
-
-const getAppVersion = () => {
-  return new Promise(function(resolve, reject) {
-      ChromeSamples.log('Get Api version CHRC...');
-      brService.getCharacteristic(brUuid[9])
-      .then(chrc => {
-          ChromeSamples.log('Reading App version...');
-          return chrc.readValue();
-      })
-      .then(value => {
-          var enc = new TextDecoder("utf-8");
-          ChromeSamples.log('App version: ' + enc.decode(value));
-          resolve();
-      })
-      .catch(error => {
-          resolve();
-      });
-  });
 }
 
 const abortFileTransfer = () => {
@@ -185,6 +166,7 @@ const readRecursive = (chrc, data, offset) => {
           }
       })
       .catch(error => {
+        console.log("error in readRecursive: " + error);
           reject(error);
       });
   });
@@ -319,7 +301,7 @@ const btConn = () => {
   })
   .then(service => {
       brService = service;
-      return getAppVersion();
+      return getAppVersion(brService);
   })
   .then(_ => {
       ChromeSamples.log('Init Cfg DOM...');
