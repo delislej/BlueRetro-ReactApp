@@ -5,6 +5,7 @@ import { brUuid, mtu, block, pakSize, getAppVersion } from "./Btutils";
 import ProgressBar from 'react-bootstrap/ProgressBar'
 import { useFilePicker } from 'use-file-picker';
 import Select from 'react-select'
+import { Box } from "@mui/material";
 
 var bluetoothDevice;
 let brService = null;
@@ -336,9 +337,8 @@ const btConn = () => {
               <button id="btConn" onClick={() =>{btConn()}}>Connect BlueRetro</button><br/>
               <small><i>Disconnect all controllers from BlueRetro before connecting for pak management.</i></small>
             </div>}
+            <Box></Box>
             <div id="divFileSelect">
-                  
-                  
                 {showButtons && 
                 <div style={{display: 'flex', flexWrap:"wrap"}}>
                     <p>Select BlueRetro controller pak bank:</p>

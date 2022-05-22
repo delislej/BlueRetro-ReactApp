@@ -46,12 +46,32 @@ function MainNavigation() {
     <AppBar position="static">
       <Container maxWidth="lg" disableGutters="true">
         <Toolbar>
+        
 
-        <NavLink to="/">
+            
+
+        
             <Typography variant="h6" sx={{flexGrow: 1, fontWeight: 700}}>
               BlueRetro
             </Typography>
-            </NavLink>
+            
+
+            <IconButton 
+              edge="start" 
+              color="inherit"
+              aria-label="open drawer" 
+              onClick={toggleDrawer(true)}
+              sx={{
+                mr: 2,
+                display: {
+                  xs: 'block',
+                  sm: 'block',
+                  md: 'none',
+                }
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
 
             <Box sx={{mb: 2, display: {
                   xs: 'none',
@@ -105,24 +125,11 @@ function MainNavigation() {
                     </ListItemButton>
                     </NavLink>
 
+                    
+
                   </Box>
 
-            <IconButton 
-              edge="start" 
-              color="inherit"
-              aria-label="open drawer" 
-              onClick={toggleDrawer(true)}
-              sx={{
-                mr: 2,
-                display: {
-                  xs: 'block',
-                  sm: 'block',
-                  md: 'none',
-                }
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
+            
 
             {/* The outside of the drawer */}
             <Drawer
@@ -139,7 +146,7 @@ function MainNavigation() {
                 <Box sx={{
                   p: 2,
                   height: 1,
-                  backgroundColor: "#09d3ff",
+                  backgroundColor: "#c9d3ff",
                 }}>
 
                   {/* 
@@ -154,7 +161,7 @@ function MainNavigation() {
 
                   <Box sx={{mb: 2}}>
                   <NavLink to="/advancedconfig">
-                    <ListItemButton>
+                    <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
                         <ImageIcon sx={{color: "primary.main"}}/>
                       </ListItemIcon>
@@ -164,7 +171,7 @@ function MainNavigation() {
                     </NavLink>
 
                     <NavLink to="/n64ctrlpak">
-                    <ListItemButton>
+                    <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
                         <FolderIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
