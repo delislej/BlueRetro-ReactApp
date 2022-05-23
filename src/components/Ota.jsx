@@ -5,6 +5,7 @@ import Logbox from './Logbox';
 import { ChromeSamples } from './Logbox';
 import { useFilePicker } from 'use-file-picker';
 
+
 var bluetoothDevice;
 let brService;
 
@@ -132,6 +133,8 @@ const writeFwRecursive = (chrc, data, offset) => {
 
   return (
   <div className="about">
+    
+    
     <div className="container">
       <div >     
         <div style={{margin:"auto", width:"50%"}}>

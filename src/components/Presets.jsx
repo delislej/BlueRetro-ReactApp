@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import Select from 'react-select'
 import { brUuid, savePresetInput } from './Btutils';
 import Logbox, {ChromeSamples} from "./Logbox";
+import Box from '@mui/material/Box';
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import Paper from '@mui/material/Paper';
+import { Divider, Typography } from "@mui/material";
 
 var bluetoothDevice;
 
@@ -182,22 +187,34 @@ const onlyUnique = (value, index, self) => {
     }
 
   return (
-    <div className="Presets" style={{display: "flex",
-      justifyContent: "center",
-      alignItems:"center",
-      flexDirection: "column",
-      }}>
-        {!pageInit && <div id="divBtConn" >  
+    <div className="Presets">
+        {!pageInit && 
+        
+        <div id="divBtConn" >  
             <button style={{borderRadius:"12px", margin:"auto"}} id="btBtn" onClick={() => {btConn()}}>Connect BlueRetro</button><br/>
             <small>
               <i>Disconnect all controllers from BlueRetro before connecting for configuration.</i>
             </small>
-        </div>}
+        </div>
+        
+        }
     {pageInit && <div id="divInputCfg" >
         
     <h2 >Preset Configuration</h2>
     <div>
-      <div style={{width: "100%"}}>
+    <Paper sx={{
+          mx: 'auto',
+          p: 2,
+          width: '90%',
+          backgroundColor: '#e6eaf3'
+        }}>
+      <Box sx={{
+          mx: 'auto',
+          p: 2,
+          width: '75%'
+        }}>
+         <Stack spacing={2}>
+          
        <b>Input</b>
         <Select 
           placeholder="1"
@@ -227,13 +244,21 @@ const onlyUnique = (value, index, self) => {
           getOptionLabel={x => x.label}
           getOptionValue={x => x}
         />
-      </div>
-      {description}
+
+        <Typography sx = {{height: "100px",overflowY: 'scroll'}}>{description}</Typography>
+      </Stack> 
+      <Divider/>
+      {validSave && 
+      <Box sx={{textAlign: 'center'}}><Button  id="save" onClick={() => {savePresetInput(presets, selectedPreset.value, brService, input.value)}}>save</Button></Box>
+      }
+      
+    </Box>
+    </Paper>
     </div>
     </div>
     }
     <Logbox/>
-    {validSave && <button id="save" style={{width: '50%'}} onClick={() => {savePresetInput(presets, selectedPreset.value, brService, input.value)}}>save</button>}
+    
     </div>
   );
 }

@@ -1,4 +1,6 @@
 import React from "react";
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
 
 export const ChromeSamples = {
   log: function() {
@@ -29,11 +31,24 @@ export const ChromeSamples = {
 function Logbox(){
     return (
         <div id="output" className="output">
-            <div id="content" style={{backgroundColor: "#f0f0f0", borderRadius: "0.75em", display: "block", margin: "0.5em", padding: "0.5em"}}>
+          <Box sx={{
+          my: 1,
+          mx: 'auto',
+          p: 2,
+          width: '75%'
+        }}>
+          <Paper>
+            
               <div id="status" style={{margin: ".5em 0", fontStyle: "italic", height: '100px', overflowY: 'scroll' }}>
-                <pre id="log" style={{margin: ".5em 0", whiteSpace: "pre-wrap"}}></pre>
+                <pre sx={{
+          my: 1,
+          mx: 'auto',
+          p: 2,
+        }} id="log" style={{margin: ".5em 0", whiteSpace: "pre-wrap"}}></pre>
               </div>
-            </div>
+            
+            </Paper>
+          </Box>
           </div>
     );
 }
