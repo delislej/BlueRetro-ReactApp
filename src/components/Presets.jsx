@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Select from "react-select";
+//import Select from "react-select";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 import { brUuid, savePresetInput } from "./Btutils";
 import Logbox, { ChromeSamples } from "./Logbox";
 import Box from "@mui/material/Box";
@@ -21,8 +25,10 @@ function Presets() {
 
   const [presets, setPresets] = useState(null);
 
+  const [spiffs, setSpiffs] = useState("lolSpiffs");
+
   //hook that controls which game controller we are configuring
-  const [input, setInput] = useState({ value: 1 });
+  const [controller, setController] = useState(1);
 
   const [consoles, setConsoles] = useState(null);
 
@@ -99,12 +105,41 @@ function Presets() {
       .then((service) => {
         ChromeSamples.log("Init Cfg DOM...");
         initInputSelect();
+        getAppVersion(service);
         setBrService(service);
         setPageInit(true);
       })
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
       });
+  };
+
+  const getAppVersion = (brService) => {
+    return new Promise(function (resolve, reject) {
+      ChromeSamples.log("Get Api version CHRC...");
+      brService
+        .getCharacteristic(brUuid[9])
+        .then((chrc) => {
+          ChromeSamples.log("Reading App version...");
+          return chrc.readValue();
+        })
+        .then((value) => {
+          var enc = new TextDecoder("utf-8");
+          ChromeSamples.log("App version: " + enc.decode(value));
+          console.log(
+            "split: " + enc.decode(value).split(" ")[1].split("_spiffs")
+          );
+          setSpiffs(enc.decode(value).split(" "));
+          resolve();
+        })
+        .catch((error) => {
+          resolve();
+        });
+    });
+  };
+
+  const handleControllerChange = (event) => {
+    setController(event.target.value);
   };
 
   const onDisconnected = () => {
@@ -121,12 +156,12 @@ function Presets() {
     let consoleArr = [{ value: -1, label: "Select Console" }];
     //filter out non-unique items
     consoles = consoles.filter(onlyUnique);
+
     for (let i = 0; i < consoles.length; i++) {
       consoleArr.push({ value: i, label: consoles[i] });
     }
+    console.log(consoleArr);
     setConsoles(consoleArr);
-    //initialize presets list to unfiltered
-    handleConsoleChange(consoleArr[0]);
   };
 
   //standard function to filter out non-unique items from an array
@@ -136,10 +171,12 @@ function Presets() {
 
   //handle react select labels
   const handleConsoleChange = (obj) => {
-    setGameConsole(obj);
-    setSelectedPreset(null);
-    setDescription(null);
-    setPresetList(populateConsolePresets(obj.value, presets, consoles));
+    console.log(obj);
+    setGameConsole(obj.target.value);
+    setSelectedPreset(-1);
+    setDescription("");
+    setPresetList(populateConsolePresets(obj.target.value, presets, consoles));
+    console.log(presetList);
   };
 
   const populateConsolePresets = (selectedConsole) => {
@@ -165,9 +202,9 @@ function Presets() {
   //handle react select label
   const handlePresetChange = (obj) => {
     setValidSave(false);
-    setSelectedPreset(obj);
-    setDescription(getPresetDescription(presets[obj.value]));
-    if (obj.value !== -1) {
+    setSelectedPreset(obj.target.value);
+    setDescription(getPresetDescription(presets[obj.target.value]));
+    if (obj.target.value !== -1) {
       setValidSave(true);
     }
   };
@@ -214,6 +251,11 @@ function Presets() {
       )}
       {pageInit && (
         <div id="divInputCfg">
+          <Paper elevation={5}>
+            <Typography sx={{ height: "100px", overflowY: "scroll" }}>
+              {spiffs}
+            </Typography>
+          </Paper>
           <h2>Preset Configuration</h2>
           <div>
             <Paper
@@ -232,43 +274,59 @@ function Presets() {
                 }}
               >
                 <Stack spacing={2}>
-                  <b>Input</b>
-                  <Select
-                    placeholder="1"
-                    isSearchable={false}
-                    value={input}
-                    options={myrange.map((merange) => ({
-                      key: merange,
-                      text: merange,
-                      value: merange,
-                    }))}
-                    onChange={(x) => setInput(x)}
-                    getOptionLabel={(x) => x.value}
-                  />
+                  <b>Controller</b>
+                  <FormControl sx={{ m: 1, width: 300, mt: 3 }}>
+                    <InputLabel id="demo-simple-select-helper-label">
+                      Controller
+                    </InputLabel>
+                    <Select
+                      value={controller}
+                      onChange={(x) => handleControllerChange(x)}
+                    >
+                      {myrange.map((number, index) => (
+                        <MenuItem key={index} value={number}>
+                          {number}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                   <b>Console</b>
-                  <Select
-                    placeholder="Select Console"
-                    isSearchable={false}
-                    value={gameConsole}
-                    options={consoles}
-                    onChange={(x) => handleConsoleChange(x)}
-                    getOptionLabel={(x) => x.label}
-                  />
+                  <FormControl>
+                    <InputLabel id="demo-simple-select-helper-label">
+                      Console
+                    </InputLabel>
+                    <Select
+                      value={gameConsole}
+                      onChange={(x) => handleConsoleChange(x)}
+                    >
+                      {consoles.map((console, index) => (
+                        <MenuItem key={index + 13} value={console.value}>
+                          {console.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                   <br />
                   <b>Preset</b>
+                  <InputLabel id="demo-simple-select-helper-label">
+                    Preset
+                  </InputLabel>
                   <Select
-                    placeholder="Select Preset"
-                    isSearchable={false}
                     value={selectedPreset}
-                    options={presetList}
                     onChange={(x) => handlePresetChange(x)}
-                    getOptionLabel={(x) => x.label}
-                    getOptionValue={(x) => x}
-                  />
+                  >
+                    {presetList.map((presetItem, index) => (
+                      <MenuItem key={index + 13} value={presetItem.value}>
+                        {presetItem.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
 
-                  <Typography sx={{ height: "100px", overflowY: "scroll" }}>
-                    {description}
-                  </Typography>
+                  <Paper elevation={5}>
+                    <Typography sx={{ height: "100px", overflowY: "scroll" }}>
+                      {description}
+                    </Typography>
+                  </Paper>
                 </Stack>
                 <Divider />
                 {validSave && (
@@ -278,13 +336,13 @@ function Presets() {
                       onClick={() => {
                         savePresetInput(
                           presets,
-                          selectedPreset.value,
+                          selectedPreset,
                           brService,
-                          input.value
+                          controller
                         );
                       }}
                     >
-                      save
+                      Save Preset
                     </Button>
                   </Box>
                 )}
