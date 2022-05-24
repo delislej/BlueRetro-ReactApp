@@ -44,18 +44,11 @@ function MainNavigation() {
   return (
 
     <AppBar position="static">
-      <Container maxWidth="lg" disableGutters="true">
+      <Container maxWidth="lg" disableGutters = {true} >
         <Toolbar>
-        
-
-            
-
-        
             <Typography variant="h6" sx={{flexGrow: 1, fontWeight: 700}}>
               BlueRetro
             </Typography>
-            
-
             <IconButton 
               edge="start" 
               color="inherit"
