@@ -4,6 +4,6 @@ my main goals are to make the interface prettier, and more fucntional than the o
 
 I will be using React for this.
 
-install using `npm install`
+install using `npm ci`
 
 run using `npm run start`
