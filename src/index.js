@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
+import ReactDOM from "react-dom";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
@@ -11,9 +11,7 @@ import Advancedconfig from "./components/Advancedconfig";
 import Presetsmaker from "./components/Presetsmaker";
 import MainNavigation from "./components/MainNavigation";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-
-root.render(
+ReactDOM.render(
   <div>
   <Router>
     <MainNavigation/>
@@ -26,7 +24,8 @@ root.render(
       <Route path="/ota" element={<Ota />} />
     </Routes>
   </Router>
-  </div>
-);
+  </div>,
+  document.getElementById("root"));
+
 
 serviceWorker.unregister();
