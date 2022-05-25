@@ -44,7 +44,7 @@ function Logbox() {
           width: "75%",
         }}
       >
-        <Paper>
+        <Paper sx={{backgroundColor: "#bbdefb" }}>
           <div
             id="status"
             style={{
