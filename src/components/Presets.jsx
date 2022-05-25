@@ -37,7 +37,7 @@ function Presets() {
   ]);
 
   //hook to render game console lable
-  const [gameConsole, setGameConsole] = useState(-1);
+  const [gameConsole, setGameConsole] = useState("Select Console");
 
   //hook to render preset lable
   const [selectedPreset, setSelectedPreset] = useState(-1);
@@ -114,6 +114,8 @@ function Presets() {
       });
   };
 
+
+
   const getAppVersion = (brService) => {
     return new Promise(function (resolve, reject) {
       ChromeSamples.log("Get Api version CHRC...");
@@ -126,10 +128,8 @@ function Presets() {
         .then((value) => {
           var enc = new TextDecoder("utf-8");
           ChromeSamples.log("App version: " + enc.decode(value));
-          console.log(
-            "split: " + enc.decode(value).split(" ")[1].split("_spiffs")
-          );
-          setSpiffs(enc.decode(value).split(" "));
+          setSpiffs(enc.decode(value).split(" ")[1].split("_spiffs")[0]);
+          console.log(getBrConsole());
           resolve();
         })
         .catch((error) => {
@@ -137,6 +137,25 @@ function Presets() {
         });
     });
   };
+
+  const getBrConsole = () => {
+    switch (spiffs) {
+      case "n64":
+        return "N64";
+      case "nes":
+        return "NES";
+      case "cdi":
+        return "CD-i"
+      case "dc":
+        return "DC";
+      case "gc":
+        return "GC";
+      case "jag":
+        return "Jaguar";
+      default:
+        return "Select Console";
+    }
+  }
 
   const handleControllerChange = (event) => {
     setController(event.target.value);
@@ -153,15 +172,15 @@ function Presets() {
     for (var i = 0; i < presets.length; i++) {
       consoles.push(presets[i].console);
     }
-    let consoleArr = [{ value: -1, label: "Select Console" }];
+    let consoleArr = [{ value: "Select Console" }];
     //filter out non-unique items
     consoles = consoles.filter(onlyUnique);
-
     for (let i = 0; i < consoles.length; i++) {
-      consoleArr.push({ value: i, label: consoles[i] });
+      consoleArr.push({ value: consoles[i] });
     }
-    console.log(consoleArr);
+    let initConsole = {target: {value: "Select Console"}};
     setConsoles(consoleArr);
+    handleConsoleChange(initConsole);
   };
 
   //standard function to filter out non-unique items from an array
@@ -171,21 +190,19 @@ function Presets() {
 
   //handle react select labels
   const handleConsoleChange = (obj) => {
-    console.log(obj);
     setGameConsole(obj.target.value);
     setSelectedPreset(-1);
     setDescription("");
     setPresetList(populateConsolePresets(obj.target.value, presets, consoles));
-    console.log(presetList);
   };
 
   const populateConsolePresets = (selectedConsole) => {
     //add "select preset first as -1 to prevent trying to save the placeholder"
     let list = [{ value: -1, label: "select a preset" }];
     //add presets to the list that match the selected console type
-    if (selectedConsole !== -1 && consoles.length > 1) {
+    if (selectedConsole !== "Select Console" && consoles.length > 1) {
       for (let i = 0; i < presets.length; i++) {
-        if (presets[i].console === consoles[selectedConsole + 1].label) {
+        if (presets[i].console === selectedConsole) {
           list.push({ value: i, label: presets[i].name });
         }
       }
@@ -274,7 +291,6 @@ function Presets() {
                 }}
               >
                 <Stack spacing={2}>
-                  <b>Controller</b>
                   <FormControl sx={{ m: 1, width: 300, mt: 3 }}>
                     <InputLabel id="demo-simple-select-helper-label">
                       Controller
@@ -290,7 +306,6 @@ function Presets() {
                       ))}
                     </Select>
                   </FormControl>
-                  <b>Console</b>
                   <FormControl>
                     <InputLabel id="demo-simple-select-helper-label">
                       Console
@@ -300,15 +315,15 @@ function Presets() {
                       onChange={(x) => handleConsoleChange(x)}
                     >
                       {consoles.map((console, index) => (
-                        <MenuItem key={index + 13} value={console.value}>
-                          {console.label}
+                        <MenuItem key={index + 50} value={console.value}>
+                          {console.value}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
                   <br />
-                  <b>Preset</b>
-                  <InputLabel id="demo-simple-select-helper-label">
+                  <FormControl>
+                  <InputLabel id="demo-simple-select-helper-derp">
                     Preset
                   </InputLabel>
                   <Select
@@ -316,11 +331,12 @@ function Presets() {
                     onChange={(x) => handlePresetChange(x)}
                   >
                     {presetList.map((presetItem, index) => (
-                      <MenuItem key={index + 13} value={presetItem.value}>
+                      <MenuItem key={index + 100} value={presetItem.value}>
                         {presetItem.label}
                       </MenuItem>
                     ))}
                   </Select>
+                  </FormControl>
 
                   <Paper elevation={5}>
                     <Typography sx={{ height: "100px", overflowY: "scroll" }}>
