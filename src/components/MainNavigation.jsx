@@ -133,7 +133,6 @@ function MainNavigation() {
               //function that is called when the drawer should close
               onClose={toggleDrawer(false)}
               //function that is called when the drawer should open
-              onOpen={toggleDrawer(true)}
             >
                 {/* The inside of the drawer */}
                 <Box sx={{
@@ -173,7 +172,7 @@ function MainNavigation() {
                     </NavLink>
 
                     <NavLink to="/presets">
-                    <ListItemButton>
+                    <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
                         <FolderIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
@@ -182,7 +181,7 @@ function MainNavigation() {
                     </NavLink>
 
                     <NavLink to="/presetsmaker">
-                    <ListItemButton>
+                    <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
                         <FolderIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
@@ -190,7 +189,7 @@ function MainNavigation() {
                     </ListItemButton>
                     </NavLink>
 
-                    <NavLink to="/ota">
+                    <NavLink to="/ota" onClick={toggleDrawer(false)}>
                     <ListItemButton>
                       <ListItemIcon>
                         <DescriptionIcon sx={{color: "primary.main"}}/>

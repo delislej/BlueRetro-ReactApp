@@ -6,6 +6,12 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 import { useFilePicker } from "use-file-picker";
 import Select from "react-select";
 import { Box } from "@mui/material";
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 
 var bluetoothDevice;
 let brService = null;
@@ -14,12 +20,21 @@ var cancel = 0;
 function N64ctrlpak() {
   const startTime = useRef(0);
   const [show, setShow] = useState(false);
+  const [showLowVersionError, setShowLowVersionError] = useState(false);
   const handleClose = () => setShow(false);
+  const handleCloseWarning = () => {
+    setShowLowVersionError(false);
+    if (bluetoothDevice.gatt.connected) {
+      bluetoothDevice.gatt.disconnect();
+    }
+    setBtConnected(false);
+  };
   const handleFormat = () => setShow(true);
   const [btConnected, setBtConnected] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
+  const [okVersion, setOkVersion] = useState(false);
   const [progress, setProgress] = useState(0);
   const [pak, setPak] = useState(0);
   const [openFileSelector, { filesContent, clear }] = useFilePicker({
@@ -29,6 +44,66 @@ function N64ctrlpak() {
   });
 
   const myrange = [1, 2, 3, 4];
+
+  const getBrVersion = (brService) => {
+    return new Promise(function (resolve, reject) {
+      ChromeSamples.log("Get Api version CHRC...");
+      brService
+        .getCharacteristic(brUuid[9])
+        .then((chrc) => {
+          ChromeSamples.log("Reading App version...");
+          return chrc.readValue();
+        })
+        .then((value) => {
+          var enc = new TextDecoder("utf-8");
+          ChromeSamples.log("App version: " + enc.decode(value));
+          let temp = enc.decode(value).split(" ")[0].split("v")[1];
+          if (versionCompare("1.6.1", temp) <= 0) {
+            setOkVersion(true);
+          }
+          setShowLowVersionError(true);
+          resolve();
+        })
+        .catch((error) => {
+          resolve();
+        });
+    });
+  };
+
+  const versionCompare = (v1, v2) => {
+    // vnum stores each numeric
+    // part of version
+    var vnum1 = 0,
+      vnum2 = 0;
+
+    // loop until both string are
+    // processed
+    for (var i = 0, j = 0; i < v1.length || j < v2.length; ) {
+      // storing numeric part of
+      // version 1 in vnum1
+      while (i < v1.length && v1[i] !== ".") {
+        vnum1 = vnum1 * 10 + (v1[i] - "0");
+        i++;
+      }
+
+      // storing numeric part of
+      // version 2 in vnum2
+      while (j < v2.length && v2[j] !== ".") {
+        vnum2 = vnum2 * 10 + (v2[j] - "0");
+        j++;
+      }
+
+      if (vnum1 > vnum2) return 1;
+      if (vnum2 > vnum1) return -1;
+
+      // if equal, reset variables and
+      // go for next numeric part
+      vnum1 = vnum2 = 0;
+      i++;
+      j++;
+    }
+    return 0;
+  };
 
   const pakRead = (evt) => {
     // Reset progress indicator on new file selection.
@@ -324,6 +399,7 @@ function N64ctrlpak() {
       })
       .then((service) => {
         brService = service;
+        getBrVersion(service);
         return getAppVersion(brService);
       })
       .then((_) => {
@@ -361,103 +437,124 @@ function N64ctrlpak() {
         </Modal.Footer>
       </Modal>
 
+      <Dialog
+        open={showLowVersionError}
+        onClose={handleCloseWarning}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Low Version Warning!"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            This version is not compatible with N64 controller pak managment! make sure to flash version 1.6.1 or higher!
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseWarning}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
       <div className="container">
-        <div className="row align-items-center my-5">
-          {!btConnected && (
-            <div id="divBtConn">
-              <button
-                id="btConn"
-                onClick={() => {
-                  btConn();
-                }}
-              >
-                Connect BlueRetro
-              </button>
-              <br />
-              <small>
-                <i>
-                  Disconnect all controllers from BlueRetro before connecting
-                  for pak management.
-                </i>
-              </small>
-            </div>
-          )}
-          <Box></Box>
-          <div id="divFileSelect">
-            {showButtons && (
-              <div style={{ display: "flex", flexWrap: "wrap" }}>
-                <p>Select BlueRetro controller pak bank:</p>
-                <Select
-                  placeholder="1"
-                  isSearchable={false}
-                  value={pak}
-                  options={myrange.map((merange) => ({
-                    key: merange,
-                    text: merange,
-                    value: merange,
-                  }))}
-                  onChange={(x) => setPak(x)}
-                  getOptionLabel={(x) => x.value}
-                />
-                <hr style={{ width: "100%" }} />
-                <button
-                  id="btnPakRead"
-                  onClick={() => {
-                    pakRead();
-                  }}
-                >
-                  Read
-                </button>
-                <button
-                  id="btnPakWrite"
-                  onClick={() => {
-                    pakWrite();
-                  }}
-                >
-                  Write
-                </button>
-                <hr style={{ width: "100%" }} />
-                <button
-                  id="fileSelector"
-                  onClick={() => {
-                    openFileSelector();
-                  }}
-                >
-                  {filesContent.length > 0
-                    ? filesContent[0].name
-                    : "Select .mpk"}
-                </button>
-                <hr style={{ width: "100%" }} />
-                <Button
-                  variant="danger"
-                  id="btnPakFormat"
-                  onClick={() => {
-                    handleFormat();
-                  }}
-                >
-                  Format
-                </Button>
-              </div>
-            )}
-            {showProgress && (
-              <div id="divFileTransfer">
-                <div id="progress_bar">
-                  <ProgressBar now={progress} label={`${progress}%`} />
-                </div>
-              </div>
-            )}
-            {showCancel && (
-              <button
-                id="btnFileTransferCancel"
-                onClick={() => {
-                  abortFileTransfer();
-                }}
-              >
-                Cancel
-              </button>
-            )}
+        {!btConnected && (
+          <div id="divBtConn">
+            <button
+              id="btConn"
+              onClick={() => {
+                btConn();
+              }}
+            >
+              Connect BlueRetro
+            </button>
+            <br />
+            <small>
+              <i>
+                Disconnect all controllers from BlueRetro before connecting for
+                pak management.
+              </i>
+            </small>
           </div>
-        </div>
+        )}
+        {okVersion && (
+          <div className="row align-items-center my-5">
+            <Box></Box>
+            <div id="divFileSelect">
+              {showButtons && (
+                <div style={{ display: "flex", flexWrap: "wrap" }}>
+                  <p>Select BlueRetro controller pak bank:</p>
+                  <Select
+                    placeholder="1"
+                    isSearchable={false}
+                    value={pak}
+                    options={myrange.map((merange) => ({
+                      key: merange,
+                      text: merange,
+                      value: merange,
+                    }))}
+                    onChange={(x) => setPak(x)}
+                    getOptionLabel={(x) => x.value}
+                  />
+                  <hr style={{ width: "100%" }} />
+                  <button
+                    id="btnPakRead"
+                    onClick={() => {
+                      pakRead();
+                    }}
+                  >
+                    Read
+                  </button>
+                  <button
+                    id="btnPakWrite"
+                    onClick={() => {
+                      pakWrite();
+                    }}
+                  >
+                    Write
+                  </button>
+                  <hr style={{ width: "100%" }} />
+                  <button
+                    id="fileSelector"
+                    onClick={() => {
+                      openFileSelector();
+                    }}
+                  >
+                    {filesContent.length > 0
+                      ? filesContent[0].name
+                      : "Select .mpk"}
+                  </button>
+                  <hr style={{ width: "100%" }} />
+                  <Button
+                    variant="danger"
+                    id="btnPakFormat"
+                    onClick={() => {
+                      handleFormat();
+                    }}
+                  >
+                    Format
+                  </Button>
+                </div>
+              )}
+              {showProgress && (
+                <div id="divFileTransfer">
+                  <div id="progress_bar">
+                    <ProgressBar now={progress} label={`${progress}%`} />
+                  </div>
+                </div>
+              )}
+              {showCancel && (
+                <button
+                  id="btnFileTransferCancel"
+                  onClick={() => {
+                    abortFileTransfer();
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         <Logbox />
       </div>
     </div>
