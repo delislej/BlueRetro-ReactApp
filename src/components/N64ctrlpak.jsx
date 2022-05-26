@@ -6,12 +6,11 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 import { useFilePicker } from "use-file-picker";
 import Select from "react-select";
 import { Box } from "@mui/material";
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 
 var bluetoothDevice;
 let brService = null;
@@ -47,21 +46,21 @@ function N64ctrlpak() {
 
   const getBrVersion = (brService) => {
     return new Promise(function (resolve, reject) {
-      ChromeSamples.log("Get Api version CHRC...");
       brService
         .getCharacteristic(brUuid[9])
         .then((chrc) => {
-          ChromeSamples.log("Reading App version...");
           return chrc.readValue();
         })
         .then((value) => {
           var enc = new TextDecoder("utf-8");
-          ChromeSamples.log("App version: " + enc.decode(value));
           let temp = enc.decode(value).split(" ")[0].split("v")[1];
-          if (versionCompare("1.6.1", temp) <= 0) {
+          console.log(temp);
+          if (versionCompare("1.6.1", temp) <= 0 || temp === "1.6-1-gaaaadc3") {
             setOkVersion(true);
+          } else {
+            setShowLowVersionError(true);
           }
-          setShowLowVersionError(true);
+
           resolve();
         })
         .catch((error) => {
@@ -381,7 +380,7 @@ function N64ctrlpak() {
     ChromeSamples.log("Requesting Bluetooth Device...");
     navigator.bluetooth
       .requestDevice({
-        filters: [{ name: "BlueRetro" }],
+        filters: [{ namePrefix: "BlueRetro" }],
         optionalServices: [brUuid[0]],
       })
       .then((device) => {
@@ -448,7 +447,8 @@ function N64ctrlpak() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            This version is not compatible with N64 controller pak managment! make sure to flash version 1.6.1 or higher!
+            This version is not compatible with N64 controller pak managment!
+            make sure to flash version 1.6.1 or higher!
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -504,14 +504,7 @@ function N64ctrlpak() {
                   >
                     Read
                   </button>
-                  <button
-                    id="btnPakWrite"
-                    onClick={() => {
-                      pakWrite();
-                    }}
-                  >
-                    Write
-                  </button>
+                  
                   <hr style={{ width: "100%" }} />
                   <button
                     id="fileSelector"
@@ -523,6 +516,16 @@ function N64ctrlpak() {
                       ? filesContent[0].name
                       : "Select .mpk"}
                   </button>
+                  {filesContent.length > 0 ? (
+                    <button
+                      id="btnPakWrite"
+                      onClick={() => {
+                        pakWrite();
+                      }}
+                    >
+                      Write
+                    </button>
+                  ) : null}
                   <hr style={{ width: "100%" }} />
                   <Button
                     variant="danger"
