@@ -107,6 +107,7 @@ function Home() {
                   <N64ctrlpak
                     btDevice={bluetoothDevice}
                     setBtDevice={setBluetoothDevice}
+                    btService={btService}
                     version={version}
                   />
                 }

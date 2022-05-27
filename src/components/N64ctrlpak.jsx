@@ -16,7 +16,6 @@ import Stack from "@mui/material/Stack";
 import { Divider, Typography } from "@mui/material";
 import { NavLink } from "react-router-dom";
 
-let brService = null;
 var cancel = 0;
 
 function N64ctrlpak(props) {
@@ -24,15 +23,7 @@ function N64ctrlpak(props) {
   const [show, setShow] = useState(false);
   const [showLowVersionError, setShowLowVersionError] = useState(false);
   const handleClose = () => setShow(false);
-  /*const handleCloseWarning = () => {
-    setShowLowVersionError(false);
-    if (bluetoothDevice.gatt.connected) {
-      bluetoothDevice.gatt.disconnect();
-    }
-    setBtConnected(false);
-  };*/
   const handleFormat = () => setShow(true);
-  //const [btConnected, setBtConnected] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
@@ -47,9 +38,9 @@ function N64ctrlpak(props) {
 
   const myrange = [1, 2, 3, 4];
 
-  const getBrVersion = useCallback((brService) => {
+  const getBrVersion = useCallback(() => {
     return new Promise(function (resolve, reject) {
-      brService
+      props.btService
         .getCharacteristic(brUuid[9])
         .then((chrc) => {
           return chrc.readValue();
@@ -59,6 +50,7 @@ function N64ctrlpak(props) {
           let temp = enc.decode(value).split(" ")[0].split("v")[1];
           if (versionCompare("1.6.1", temp) <= 0) {
             setOkVersion(true);
+            setShowButtons(true);
           } else {
             setShowLowVersionError(true);
           }
@@ -69,10 +61,12 @@ function N64ctrlpak(props) {
           resolve();
         });
     });
-  }, []);
+  }, [props.btService]);
 
   useEffect(() => {
-    props.btDevice.gatt
+    console.log(props.btService);
+    getBrVersion(props.btService);
+    /*props.btDevice.gatt
       .connect()
       .then((server) => {
         return server.getPrimaryService(brUuid[0]);
@@ -87,8 +81,8 @@ function N64ctrlpak(props) {
       })
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
-      });
-  }, [props.btDevice, getBrVersion]);
+      });*/
+  }, [props.btService, getBrVersion]);
 
   const versionCompare = (v1, v2) => {
     // vnum stores each numeric
@@ -319,7 +313,7 @@ function N64ctrlpak(props) {
       var offset = new Uint32Array(1);
       let ctrl_chrc = null;
       setShowProgress(true);
-      brService
+      props.btService
         .getCharacteristic(brUuid[10])
         .then((chrc) => {
           ctrl_chrc = chrc;
@@ -327,7 +321,7 @@ function N64ctrlpak(props) {
           return ctrl_chrc.writeValue(offset);
         })
         .then((_) => {
-          return brService.getCharacteristic(brUuid[11]);
+          return props.btService.getCharacteristic(brUuid[11]);
         })
         .then((chrc) => {
           startTime.current = performance.now();
@@ -353,16 +347,15 @@ function N64ctrlpak(props) {
     var offset = new Uint32Array(1);
     let ctrl_chrc = null;
 
-    brService
+    props.btService
       .getCharacteristic(brUuid[10])
       .then((chrc) => {
-        console.log("formatting");
         ctrl_chrc = chrc;
         offset[0] = Number(pak) * pakSize;
         return ctrl_chrc.writeValue(offset);
       })
       .then((_) => {
-        return brService.getCharacteristic(brUuid[11]);
+        return props.btService.getCharacteristic(brUuid[11]);
       })
       .then((chrc) => {
         startTime.current = performance.now();
