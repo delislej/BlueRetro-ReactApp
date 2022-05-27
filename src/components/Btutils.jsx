@@ -357,26 +357,6 @@ function writeInputCfg(cfgId, cfg, brService) {
   });
 }
 
-export const getAppVersion = (brService) => {
-  return new Promise(function (resolve, reject) {
-    ChromeSamples.log("Get Api version CHRC...");
-    brService
-      .getCharacteristic(brUuid[9])
-      .then((chrc) => {
-        ChromeSamples.log("Reading App version...");
-        return chrc.readValue();
-      })
-      .then((value) => {
-        var enc = new TextDecoder("utf-8");
-        ChromeSamples.log("App version: " + enc.decode(value));
-        resolve();
-      })
-      .catch((error) => {
-        resolve();
-      });
-  });
-};
-
 export function savePresetInput(presets, presetNumber, brService, input) {
   //make sure preset is not placeholder before we do anything
   if (presetNumber !== -1) {

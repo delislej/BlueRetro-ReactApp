@@ -5,21 +5,15 @@ import {
   ota_abort,
   ota_end,
   ota_start,
-  mtu,
-  getAppVersion,
+  mtu
 } from "./Btutils";
-import Logbox from "./Logbox";
 import { ChromeSamples } from "./Logbox";
 import { useFilePicker } from "use-file-picker";
 
-var bluetoothDevice;
-let brService;
-
-function Ota() {
+function Ota(props) {
   const [progress, setProgress] = useState(0);
   const [showCancel, setShowCancel] = useState(false);
   const [showUpdate, setShowUpdate] = useState(true);
-  const [btConnected, setBtConnected] = useState(false);
   const cancel = useRef(0);
   const startTime = useRef(0);
   const [openFileSelector, { filesContent, clear, loading }] = useFilePicker({
@@ -40,56 +34,23 @@ function Ota() {
     cancel.current = 1;
     setProgress(0);
     setShowCancel(false);
-    setBtConnected(false);
-  };
-
-  const onDisconnected = () => {
-    ChromeSamples.log("> Bluetooth Device disconnected");
-    cancel.current = 0;
-    setBtConnected(false);
-  };
-
-  const btConn = () => {
-    ChromeSamples.clearLog();
-    cancel.current = 0;
-    ChromeSamples.log("Requesting Bluetooth Device...");
-    navigator.bluetooth
-      .requestDevice({
-        filters: [{ namePrefix: 'BlueRetro' }],
-        optionalServices: [brUuid[0]],
-      })
-      .then((device) => {
-        ChromeSamples.log("Connecting to GATT Server...");
-        bluetoothDevice = device;
-        bluetoothDevice.addEventListener(
-          "gattserverdisconnected",
-          onDisconnected
-        );
-        return bluetoothDevice.gatt.connect();
-      })
-      .then((server) => {
-        ChromeSamples.log("Getting BlueRetro Service...");
-        return server.getPrimaryService(brUuid[0]);
-      })
-      .then((service) => {
-        brService = service;
-        return getAppVersion(brService);
-      })
-      .then((_) => {
-        ChromeSamples.log("Init Cfg DOM...");
-        setBtConnected(true);
-      })
-      .catch((error) => {
-        ChromeSamples.log("Argh! " + error);
-      });
   };
 
   const writeFirmware = (data) => {
     setShowUpdate(false);
     var cmd = new Uint8Array(1);
     let ctrl_chrc = null;
-    brService
-      .getCharacteristic(brUuid[7])
+    var brService;
+    props.btDevice.gatt
+      .connect()
+      .then((server) => {
+        ChromeSamples.log("Getting BlueRetro Service...");
+        return server.getPrimaryService(brUuid[0]);
+      })
+      .then((service) => {
+        brService = service;
+        return service.getCharacteristic(brUuid[7]);
+      })
       .then((chrc) => {
         ctrl_chrc = chrc;
         cmd[0] = ota_start;
@@ -156,27 +117,7 @@ function Ota() {
           <div style={{ margin: "auto", width: "50%" }}>
             <h1 className="font-weight-light">OTA Firmware Update</h1>
             <div>
-              {!btConnected && (
-                <div id="divBtConn">
-                  <button
-                    id="btConn"
-                    onClick={() => {
-                      setProgress(0);
-                      btConn();
-                    }}
-                  >
-                    Connect BlueRetro
-                  </button>
-                  <br />
-                  <small>
-                    <i>
-                      Disconnect all controllers from BlueRetro before
-                      connecting for update.
-                    </i>
-                  </small>
-                </div>
-              )}
-              {btConnected && (
+              {props.btDevice && (
                 <div>
                   <div id="divFwSelect">
                     Select firmware:
@@ -223,7 +164,6 @@ function Ota() {
             </div>
           </div>
         </div>
-        <Logbox />
       </div>
     </div>
   );

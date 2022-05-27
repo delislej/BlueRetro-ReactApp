@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Modal, Button } from "react-bootstrap";
-import Logbox, { ChromeSamples } from "./Logbox";
-import { brUuid, mtu, block, pakSize, getAppVersion } from "./Btutils";
+import { ChromeSamples } from "./Logbox";
+import { brUuid, mtu, block, pakSize } from "./Btutils";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import { useFilePicker } from "use-file-picker";
 import Select from "react-select";
@@ -11,23 +11,23 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { NavLink } from "react-router-dom";
 
-var bluetoothDevice;
 let brService = null;
 var cancel = 0;
 
-function N64ctrlpak() {
+function N64ctrlpak(props) {
   const startTime = useRef(0);
   const [show, setShow] = useState(false);
   const [showLowVersionError, setShowLowVersionError] = useState(false);
   const handleClose = () => setShow(false);
-  const handleCloseWarning = () => {
+  /*const handleCloseWarning = () => {
     setShowLowVersionError(false);
     if (bluetoothDevice.gatt.connected) {
       bluetoothDevice.gatt.disconnect();
     }
     setBtConnected(false);
-  };
+  };*/
   const handleFormat = () => setShow(true);
   const [btConnected, setBtConnected] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
@@ -44,30 +44,56 @@ function N64ctrlpak() {
 
   const myrange = [1, 2, 3, 4];
 
-  const getBrVersion = (brService) => {
-    return new Promise(function (resolve, reject) {
-      brService
-        .getCharacteristic(brUuid[9])
-        .then((chrc) => {
-          return chrc.readValue();
-        })
-        .then((value) => {
-          var enc = new TextDecoder("utf-8");
-          let temp = enc.decode(value).split(" ")[0].split("v")[1];
-          console.log(temp);
-          if (versionCompare("1.6.1", temp) <= 0 || temp === "1.6-1-gaaaadc3") {
-            setOkVersion(true);
-          } else {
-            setShowLowVersionError(true);
-          }
+  const getBrVersion = useCallback(
+    (brService) => {
+      return new Promise(function (resolve, reject) {
+        brService
+          .getCharacteristic(brUuid[9])
+          .then((chrc) => {
+            return chrc.readValue();
+          })
+          .then((value) => {
+            var enc = new TextDecoder("utf-8");
+            let temp = enc.decode(value).split(" ")[0].split("v")[1];
+            if (
+              versionCompare("1.6.1", temp) <= 0 ||
+              temp === "1.6-1-gaaaadc3"
+            ) {
+              setOkVersion(true);
+            } else {
+              setShowLowVersionError(true);
+            }
 
-          resolve();
-        })
-        .catch((error) => {
-          resolve();
-        });
-    });
-  };
+            resolve();
+          })
+          .catch((error) => {
+            resolve();
+          });
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    props.btDevice.gatt
+      .connect()
+      .then((server) => {
+        ChromeSamples.log("Getting BlueRetro Service...");
+        return server.getPrimaryService(brUuid[0]);
+      })
+      .then((service) => {
+        brService = service;
+        getBrVersion(service);
+      })
+      .then((_) => {
+        ChromeSamples.log("Init Cfg DOM...");
+        setBtConnected(true);
+        setShowButtons(true);
+      })
+      .catch((error) => {
+        ChromeSamples.log("Argh! " + error);
+      });
+  }, [props.btDevice, getBrVersion]);
 
   const versionCompare = (v1, v2) => {
     // vnum stores each numeric
@@ -367,15 +393,7 @@ function N64ctrlpak() {
       });
   };
 
-  const onDisconnected = () => {
-    ChromeSamples.log("> Bluetooth Device disconnected");
-    cancel = 0;
-    setShowProgress(false);
-    setShowButtons(false);
-    setBtConnected(false);
-  };
-
-  const btConn = () => {
+  /*const btConn = () => {
     ChromeSamples.clearLog();
     ChromeSamples.log("Requesting Bluetooth Device...");
     navigator.bluetooth
@@ -409,7 +427,7 @@ function N64ctrlpak() {
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
       });
-  };
+  };*/
 
   return (
     <div className="about">
@@ -438,7 +456,7 @@ function N64ctrlpak() {
 
       <Dialog
         open={showLowVersionError}
-        onClose={handleCloseWarning}
+        //onClose={handleCloseWarning}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
@@ -452,7 +470,9 @@ function N64ctrlpak() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseWarning}>Close</Button>
+          <NavLink to="/">
+            <Button>Close</Button>
+          </NavLink>
         </DialogActions>
       </Dialog>
 
@@ -462,7 +482,7 @@ function N64ctrlpak() {
             <button
               id="btConn"
               onClick={() => {
-                btConn();
+                //btConn();
               }}
             >
               Connect BlueRetro
@@ -504,7 +524,7 @@ function N64ctrlpak() {
                   >
                     Read
                   </button>
-                  
+
                   <hr style={{ width: "100%" }} />
                   <button
                     id="fileSelector"
@@ -558,7 +578,6 @@ function N64ctrlpak() {
             </div>
           </div>
         )}
-        <Logbox />
       </div>
     </div>
   );

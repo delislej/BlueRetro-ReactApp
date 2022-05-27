@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 //import Select from "react-select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { brUuid, savePresetInput } from "./Btutils";
-import Logbox, { ChromeSamples } from "./Logbox";
+import { savePresetInput } from "./Btutils";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
@@ -14,13 +13,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Paper from "@mui/material/Paper";
 import { Divider, Typography } from "@mui/material";
 
-var bluetoothDevice;
-
-function Presets() {
-  const spiff = useRef("default");
-  //blue retro service ID used for saving preset
-  const [brService, setBrService] = useState(null);
-
+function Presets(props) {
   //flag to render selection menus
   const [pageInit, setPageInit] = useState(false);
 
@@ -49,6 +42,30 @@ function Presets() {
 
   const myrange = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
+  const handleConsoleChange = useCallback((obj, presets, consoles) => {
+    setGameConsole(obj.target.value);
+    setSelectedPreset(-1);
+    setDescription("");
+    //add "select preset first as -1 to prevent trying to save the placeholder"
+    let list = [{ value: -1, label: "select a preset" }];
+    //add presets to the list that match the selected console type
+    if (obj.target.value !== "Select Console" && consoles.length > 1) {
+      for (let i = 0; i < presets.length; i++) {
+        if (presets[i].console === obj.target.value) {
+          list.push({ value: i, label: presets[i].name });
+        }
+      }
+    }
+    //no filter selected, show whole preset list
+    else {
+      for (let i = 0; i < presets.length; i++) {
+        list.push({ value: i, label: presets[i].name });
+      }
+    }
+    
+    setPresetList(list);
+  },[]);
+
   useEffect(() => {
     //check if we have local file list, and that it is not too old
     (async function () {
@@ -73,12 +90,12 @@ function Presets() {
             arr.push(json[i].name);
           }
           localStorage.setItem("fileNames", JSON.stringify(arr));
-          let temp = getPresets(arr);
-          setPresets(temp);
+          let presets = getPresets(arr);
+          setPresets(presets);
           //push all console names from JSON files
           let consoles = [];
-          for (let i = 0; i < temp.length; i++) {
-            consoles.push(temp[i].console);
+          for (let i = 0; i < presets.length; i++) {
+            consoles.push(presets[i].console);
           }
           let consoleArr = [{ value: "Select Console" }];
           //filter out non-unique items
@@ -86,16 +103,16 @@ function Presets() {
           for (let i = 0; i < consoles.length; i++) {
             consoleArr.push({ value: consoles[i] });
           }
-
           setConsoles(consoleArr);
+          //use consoleArr and presets to set starting filter
         } else {
-          let temp = getPresets(JSON.parse(localStorage.getItem("fileNames")));
-          setPresets(temp);
+          let presets = getPresets(JSON.parse(localStorage.getItem("fileNames")));
+          setPresets(presets);
 
           //push all console names from JSON files
           let consoles = [];
-          for (let i = 0; i < temp.length; i++) {
-            consoles.push(temp[i].console);
+          for (let i = 0; i < presets.length; i++) {
+            consoles.push(presets[i].console);
           }
           let consoleArr = [{ value: "Select Console" }];
           //filter out non-unique items
@@ -103,157 +120,51 @@ function Presets() {
           for (let i = 0; i < consoles.length; i++) {
             consoleArr.push({ value: consoles[i] });
           }
-
           setConsoles(consoleArr);
+          //use consoleArr and presets to set starting filter
+          switch (props.brSpiffs) {
+            case "n64":
+              handleConsoleChange({ target: { value: "N64" } }, presets, consoleArr);
+              break;
+            case "nes":
+              handleConsoleChange({ target: { value: "NES" } }, presets, consoleArr);
+              break;
+            case "cdi":
+              handleConsoleChange({ target: { value: "CD-i" } }, presets, consoleArr);
+              break;
+            case "dc":
+              handleConsoleChange({ target: { value: "DC" } }, presets, consoleArr);
+              break;
+            case "gc":
+              handleConsoleChange({ target: { value: "GC" } }, presets, consoleArr);
+              break;
+            case "jag":
+              handleConsoleChange({ target: { value: "Jaguar" } }, presets, consoleArr);
+              break;
+            default:
+              handleConsoleChange({ target: { value: "Select Console" } }, presets, consoleArr);
+          }
+          setPageInit(true);
+          
         }
       } catch (e) {
         console.error(e);
       }
     })();
-  }, []);
+  }, [props.brSpiffs, handleConsoleChange]);
 
   const handleShowAllConsoles = () => {
-    console.log(!showAllConsoles);
-    brConsoleFilter(spiff.current);
+    handleConsoleChange({ target: { value: "Select Console" } }, presets, consoles);
     setShowAllConsoles(!showAllConsoles);
   }
-
-  const btConn = () => {
-    ChromeSamples.log("Requesting Bluetooth Device...");
-    navigator.bluetooth
-      .requestDevice({
-        filters: [{ namePrefix: 'BlueRetro' }],
-        optionalServices: [brUuid[0]],
-      })
-      .then((device) => {
-        ChromeSamples.log("Connecting to GATT Server...");
-        bluetoothDevice = device;
-        bluetoothDevice.addEventListener(
-          "gattserverdisconnected",
-          onDisconnected
-        );
-        return bluetoothDevice.gatt.connect();
-      })
-      .then((server) => {
-        ChromeSamples.log("Getting BlueRetro Service...");
-        return server.getPrimaryService(brUuid[0]);
-      })
-      .then((service) => {
-        ChromeSamples.log("Init Cfg DOM...");
-        initInputSelect();
-        getAppVersion(service);
-        setBrService(service);
-        setPageInit(true);
-      })
-      .catch((error) => {
-        ChromeSamples.log("Argh! " + error);
-      });
-  };
-
-  const getAppVersion = (brService) => {
-    return new Promise(function (resolve, reject) {
-      ChromeSamples.log("Get Api version CHRC...");
-      brService
-        .getCharacteristic(brUuid[9])
-        .then((chrc) => {
-          ChromeSamples.log("Reading App version...");
-          return chrc.readValue();
-        })
-        .then((value) => {
-          var enc = new TextDecoder("utf-8");
-          ChromeSamples.log("App version: " + enc.decode(value));
-          let temp = enc.decode(value).split(" ")[1].split("_spiffs")[0];
-          spiff.current = temp;
-          brConsoleFilter(temp);
-          resolve();
-        })
-        .catch((error) => {
-          resolve();
-        });
-    });
-  };
-
-  const brConsoleFilter = (conName) => {
-    switch (conName) {
-      case "n64":
-        handleConsoleChange({ target: { value: "N64" } });
-        break;
-      case "nes":
-        handleConsoleChange({ target: { value: "NES" } });
-        break;
-      case "cdi":
-        handleConsoleChange({ target: { value: "CD-i" } });
-        break;
-      case "dc":
-        handleConsoleChange({ target: { value: "DC" } });
-        break;
-      case "gc":
-        handleConsoleChange({ target: { value: "GC" } });
-        break;
-      case "jag":
-        handleConsoleChange({ target: { value: "Jaguar" } });
-        break;
-      default:
-        handleConsoleChange({ target: { value: "Select Console" } });
-    }
-  };
 
   const handleControllerChange = (event) => {
     setController(event.target.value);
   };
 
-  const onDisconnected = () => {
-    ChromeSamples.log("> Bluetooth Device disconnected");
-    setPageInit(false);
-  };
-
-  const initInputSelect = () => {
-    //push all console names from JSON files
-    let consoles = [];
-    for (var i = 0; i < presets.length; i++) {
-      consoles.push(presets[i].console);
-    }
-    let consoleArr = [{ value: "Select Console" }];
-    //filter out non-unique items
-    consoles = consoles.filter(onlyUnique);
-    for (let i = 0; i < consoles.length; i++) {
-      consoleArr.push({ value: consoles[i] });
-    }
-
-    setConsoles(consoleArr);
-  };
-
   //standard function to filter out non-unique items from an array
   const onlyUnique = (value, index, self) => {
     return self.indexOf(value) === index;
-  };
-
-  //handle react select labels
-  const handleConsoleChange = (obj) => {
-    setGameConsole(obj.target.value);
-    setSelectedPreset(-1);
-    setDescription("");
-    setPresetList(populateConsolePresets(obj.target.value, presets, consoles));
-  };
-
-  const populateConsolePresets = (selectedConsole) => {
-    //add "select preset first as -1 to prevent trying to save the placeholder"
-    let list = [{ value: -1, label: "select a preset" }];
-    //add presets to the list that match the selected console type
-    if (selectedConsole !== "Select Console" && consoles.length > 1) {
-      for (let i = 0; i < presets.length; i++) {
-        if (presets[i].console === selectedConsole) {
-          list.push({ value: i, label: presets[i].name });
-        }
-      }
-    }
-    //no filter selected, show whole preset list
-    else {
-      for (let i = 0; i < presets.length; i++) {
-        list.push({ value: i, label: presets[i].name });
-      }
-    }
-    return list;
   };
 
   //handle react select label
@@ -286,26 +197,6 @@ function Presets() {
 
   return (
     <div className="Presets">
-      {!pageInit && (
-        <div id="divBtConn">
-          <button
-            style={{ borderRadius: "12px", margin: "auto" }}
-            id="btBtn"
-            onClick={() => {
-              btConn();
-            }}
-          >
-            Connect BlueRetro
-          </button>
-          <br />
-          <small>
-            <i>
-              Disconnect all controllers from BlueRetro before connecting for
-              configuration.
-            </i>
-          </small>
-        </div>
-      )}
       {pageInit && (
         <div id="divInputCfg">
           <h2>Preset Configuration</h2>
@@ -321,7 +212,6 @@ function Presets() {
               <Box
                 sx={{
                   mx: "auto",
-                  p: 2,
                   width: "95%",
                 }}
               >
@@ -354,7 +244,7 @@ function Presets() {
                       </InputLabel>
                       <Select
                         value={gameConsole}
-                        onChange={(x) => handleConsoleChange(x)}
+                        onChange={(x) => handleConsoleChange(x, presets, consoles)}
                       >
                         {consoles.map((console, index) => (
                           <MenuItem key={index + 50} value={console.value}>
@@ -397,7 +287,7 @@ function Presets() {
                         savePresetInput(
                           presets,
                           selectedPreset,
-                          brService,
+                          props.btService,
                           controller
                         );
                       }}
@@ -411,7 +301,6 @@ function Presets() {
           </div>
         </div>
       )}
-      <Logbox />
     </div>
   );
 }
