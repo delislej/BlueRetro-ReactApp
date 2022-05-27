@@ -32,7 +32,7 @@ function N64ctrlpak(props) {
     setBtConnected(false);
   };*/
   const handleFormat = () => setShow(true);
-  const [btConnected, setBtConnected] = useState(false);
+  //const [btConnected, setBtConnected] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
@@ -82,7 +82,7 @@ function N64ctrlpak(props) {
         getBrVersion(service);
       })
       .then((_) => {
-        setBtConnected(true);
+        //setBtConnected(true);
         setShowButtons(true);
       })
       .catch((error) => {
