@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Modal, Button } from "react-bootstrap";
 import { ChromeSamples } from "./Logbox";
 import { brUuid, mtu, block, pakSize } from "./Btutils";
+import Button from "@mui/material/Button";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import { useFilePicker } from "use-file-picker";
 import Select from "react-select";
@@ -11,6 +11,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import { Divider, Typography } from "@mui/material";
 import { NavLink } from "react-router-dom";
 
 let brService = null;
@@ -44,41 +47,34 @@ function N64ctrlpak(props) {
 
   const myrange = [1, 2, 3, 4];
 
-  const getBrVersion = useCallback(
-    (brService) => {
-      return new Promise(function (resolve, reject) {
-        brService
-          .getCharacteristic(brUuid[9])
-          .then((chrc) => {
-            return chrc.readValue();
-          })
-          .then((value) => {
-            var enc = new TextDecoder("utf-8");
-            let temp = enc.decode(value).split(" ")[0].split("v")[1];
-            if (
-              versionCompare("1.6.1", temp) <= 0 ||
-              temp === "1.6-1-gaaaadc3"
-            ) {
-              setOkVersion(true);
-            } else {
-              setShowLowVersionError(true);
-            }
+  const getBrVersion = useCallback((brService) => {
+    return new Promise(function (resolve, reject) {
+      brService
+        .getCharacteristic(brUuid[9])
+        .then((chrc) => {
+          return chrc.readValue();
+        })
+        .then((value) => {
+          var enc = new TextDecoder("utf-8");
+          let temp = enc.decode(value).split(" ")[0].split("v")[1];
+          if (versionCompare("1.6.1", temp) <= 0) {
+            setOkVersion(true);
+          } else {
+            setShowLowVersionError(true);
+          }
 
-            resolve();
-          })
-          .catch((error) => {
-            resolve();
-          });
-      });
-    },
-    []
-  );
+          resolve();
+        })
+        .catch((error) => {
+          resolve();
+        });
+    });
+  }, []);
 
   useEffect(() => {
     props.btDevice.gatt
       .connect()
       .then((server) => {
-        ChromeSamples.log("Getting BlueRetro Service...");
         return server.getPrimaryService(brUuid[0]);
       })
       .then((service) => {
@@ -86,7 +82,6 @@ function N64ctrlpak(props) {
         getBrVersion(service);
       })
       .then((_) => {
-        ChromeSamples.log("Init Cfg DOM...");
         setBtConnected(true);
         setShowButtons(true);
       })
@@ -393,66 +388,34 @@ function N64ctrlpak(props) {
       });
   };
 
-  /*const btConn = () => {
-    ChromeSamples.clearLog();
-    ChromeSamples.log("Requesting Bluetooth Device...");
-    navigator.bluetooth
-      .requestDevice({
-        filters: [{ namePrefix: "BlueRetro" }],
-        optionalServices: [brUuid[0]],
-      })
-      .then((device) => {
-        ChromeSamples.log("Connecting to GATT Server...");
-        bluetoothDevice = device;
-        bluetoothDevice.addEventListener(
-          "gattserverdisconnected",
-          onDisconnected
-        );
-        return bluetoothDevice.gatt.connect();
-      })
-      .then((server) => {
-        ChromeSamples.log("Getting BlueRetro Service...");
-        return server.getPrimaryService(brUuid[0]);
-      })
-      .then((service) => {
-        brService = service;
-        getBrVersion(service);
-        return getAppVersion(brService);
-      })
-      .then((_) => {
-        ChromeSamples.log("Init Cfg DOM...");
-        setBtConnected(true);
-        setShowButtons(true);
-      })
-      .catch((error) => {
-        ChromeSamples.log("Argh! " + error);
-      });
-  };*/
-
   return (
     <div className="about">
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Format Memory Pak</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>This will format your memory pak!</p>{" "}
-          <p>There is no way to undo this!</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleClose}>
-            Close
-          </Button>
-          <Button
-            variant="danger"
-            onClick={() => {
-              pakFormat();
-            }}
-          >
-            Format Memory Pak
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <Dialog open={show}>
+        <DialogTitle>Format Memory Pak</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will format your memory pak!
+            <br />
+            There is no way to undo this!
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Stack spacing={3} sx={{ mx: "auto" }}>
+            <Button
+              variant='outlined'
+              sx={{ color: 'black', backgroundColor: 'red' }}
+              onClick={() => {
+                pakFormat();
+              }}
+            >
+              Format Memory Pak
+            </Button>
+            <Button color="primary" onClick={handleClose}>
+              Close
+            </Button>
+          </Stack>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={showLowVersionError}
@@ -477,105 +440,105 @@ function N64ctrlpak(props) {
       </Dialog>
 
       <div className="container">
-        {!btConnected && (
-          <div id="divBtConn">
-            <button
-              id="btConn"
-              onClick={() => {
-                //btConn();
-              }}
-            >
-              Connect BlueRetro
-            </button>
-            <br />
-            <small>
-              <i>
-                Disconnect all controllers from BlueRetro before connecting for
-                pak management.
-              </i>
-            </small>
-          </div>
-        )}
         {okVersion && (
           <div className="row align-items-center my-5">
-            <Box></Box>
-            <div id="divFileSelect">
-              {showButtons && (
-                <div style={{ display: "flex", flexWrap: "wrap" }}>
-                  <p>Select BlueRetro controller pak bank:</p>
-                  <Select
-                    placeholder="1"
-                    isSearchable={false}
-                    value={pak}
-                    options={myrange.map((merange) => ({
-                      key: merange,
-                      text: merange,
-                      value: merange,
-                    }))}
-                    onChange={(x) => setPak(x)}
-                    getOptionLabel={(x) => x.value}
-                  />
-                  <hr style={{ width: "100%" }} />
-                  <button
-                    id="btnPakRead"
-                    onClick={() => {
-                      pakRead();
-                    }}
-                  >
-                    Read
-                  </button>
+            <Paper
+              sx={{
+                mx: "auto",
+                p: 2,
+                width: "90%",
+                backgroundColor: "#e6eaf3",
+              }}
+            >
+              <Box
+                sx={{
+                  mx: "auto",
+                  width: "95%",
+                }}
+              >
+                <div id="divFileSelect">
+                  {showButtons && (
+                    <Stack spacing={2}>
+                      <Typography>
+                        {" "}
+                        Select BlueRetro controller pak bank:
+                      </Typography>
+                      <Select
+                        placeholder="1"
+                        isSearchable={false}
+                        value={pak}
+                        options={myrange.map((merange) => ({
+                          key: merange,
+                          text: merange,
+                          value: merange,
+                        }))}
+                        onChange={(x) => setPak(x)}
+                        getOptionLabel={(x) => x.value}
+                      />
+                      <Divider />
+                      <Button
+                        id="btnPakRead"
+                        onClick={() => {
+                          pakRead();
+                        }}
+                      >
+                        Read
+                      </Button>
 
-                  <hr style={{ width: "100%" }} />
-                  <button
-                    id="fileSelector"
-                    onClick={() => {
-                      openFileSelector();
-                    }}
-                  >
-                    {filesContent.length > 0
-                      ? filesContent[0].name
-                      : "Select .mpk"}
-                  </button>
-                  {filesContent.length > 0 ? (
+                      <Divider />
+                      <Button
+                        id="fileSelector"
+                        onClick={() => {
+                          openFileSelector();
+                        }}
+                      >
+                        {filesContent.length > 0
+                          ? filesContent[0].name
+                          : "Select .mpk"}
+                      </Button>
+                      {filesContent.length > 0 ? (
+                        <button
+                          id="btnPakWrite"
+                          onClick={() => {
+                            pakWrite();
+                          }}
+                        >
+                          Write
+                        </button>
+                      ) : null}
+                      <Divider />
+                      <Button
+                       variant='outlined'
+                       sx={{ color: 'black', backgroundColor: 'red' }}
+                        id="btnPakFormat"
+                        onClick={() => {
+                          handleFormat();
+                        }}
+                      >
+                        Format
+                      </Button>
+                    </Stack>
+                  )}
+                  {showProgress && (
+                    <div id="divFileTransfer">
+                      <div id="progress_bar">
+                        <ProgressBar now={progress} label={`${progress}%`} />
+                      </div>
+                    </div>
+                  )}
+                  {showCancel && (
                     <button
-                      id="btnPakWrite"
+                      id="btnFileTransferCancel"
                       onClick={() => {
-                        pakWrite();
+                        abortFileTransfer();
                       }}
                     >
-                      Write
+                      Cancel
                     </button>
-                  ) : null}
-                  <hr style={{ width: "100%" }} />
-                  <Button
-                    variant="danger"
-                    id="btnPakFormat"
-                    onClick={() => {
-                      handleFormat();
-                    }}
-                  >
-                    Format
-                  </Button>
+                  )}
                 </div>
-              )}
-              {showProgress && (
-                <div id="divFileTransfer">
-                  <div id="progress_bar">
-                    <ProgressBar now={progress} label={`${progress}%`} />
-                  </div>
-                </div>
-              )}
-              {showCancel && (
-                <button
-                  id="btnFileTransferCancel"
-                  onClick={() => {
-                    abortFileTransfer();
-                  }}
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
+              </Box>
+            </Paper>
           </div>
         )}
       </div>

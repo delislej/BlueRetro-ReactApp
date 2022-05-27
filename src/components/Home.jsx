@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import N64ctrlpak from "./N64ctrlpak";
 import Presets from "./Presets";
 import Ota from "./Ota";
@@ -11,16 +11,18 @@ import { useState } from "react";
 import { brUuid } from "./Btutils";
 import Logbox from "./Logbox";
 import { ChromeSamples } from "./Logbox";
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   const [bluetoothDevice, setBluetoothDevice] = useState(null);
   const [btService, setBtService] = useState(null);
-  const [btConnected, setBtConnected] = useState(null);
+  const [btConnected, setBtConnected] = useState(false);
   const [version, setVersion] = useState("");
   const [brSpiffs, setBrSpiffs] = useState("");
-  
+  const navigate = useNavigate();
 
   const btConn = () => {
+    setBluetoothDevice(null);
     ChromeSamples.clearLog();
     ChromeSamples.log("Requesting Bluetooth Device...");
     navigator.bluetooth
@@ -32,6 +34,7 @@ function Home() {
         ChromeSamples.log("Connecting to GATT Server...");
         device.addEventListener("gattserverdisconnected", onDisconnected);
         setBluetoothDevice(device);
+        console.log(device);
         return device.gatt.connect();
       })
       .then((server) => {
@@ -50,12 +53,14 @@ function Home() {
             var enc = new TextDecoder("utf-8");
             ChromeSamples.log("App version: " + enc.decode(value));
             setVersion(enc.decode(value).split(" ")[0].split("v")[1]);
-            setBrSpiffs(enc.decode(value).split(" ")[1].split("_spiffs")[0]);
+            //we need to search for _external or _internal then slice the game console
+            setBrSpiffs(enc.decode(value).split(" ")[1].split("_external")[0]);
+            navigate("/");
+            setBtConnected(true);
           });
       })
       .then((_) => {
         ChromeSamples.log("Init Cfg DOM...");
-        setBtConnected(true);
       })
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
@@ -64,11 +69,13 @@ function Home() {
 
   const onDisconnected = () => {
     ChromeSamples.log("> Bluetooth Device disconnected");
+    setBluetoothDevice(null);
     setBtConnected(false);
+    navigate("/");
   };
   return (
     <div className="Home">
-      {!btConnected && (
+      { bluetoothDevice === null ? (
         <div id="divBtConn">
           <button
             id="btConn"
@@ -86,12 +93,12 @@ function Home() {
             </i>
           </small>
         </div>
-      )}
+      ) : null}
 
       <div>
-        {btConnected === null ? null : (
-          <Router>
-            <MainNavigation />
+        {bluetoothDevice === null ? null : (
+            <div>
+            {btConnected && <MainNavigation />}
             <Routes>
               <Route path="/" element={<About />} />
               <Route
@@ -100,7 +107,7 @@ function Home() {
                   <N64ctrlpak
                     btDevice={bluetoothDevice}
                     setBtDevice={setBluetoothDevice}
-                    version = {version}
+                    version={version}
                   />
                 }
               />
@@ -110,7 +117,13 @@ function Home() {
               />
               <Route
                 path="/presets"
-                element={<Presets btDevice={bluetoothDevice} brSpiffs={brSpiffs} btService={btService} />}
+                element={
+                  <Presets
+                    btDevice={bluetoothDevice}
+                    brSpiffs={brSpiffs}
+                    btService={btService}
+                  />
+                }
               />
               <Route
                 path="/presetsmaker"
@@ -118,7 +131,7 @@ function Home() {
               />
               <Route path="/ota" element={<Ota btDevice={bluetoothDevice} />} />
             </Routes>
-          </Router>
+            </div>
         )}
         <Logbox />
       </div>
