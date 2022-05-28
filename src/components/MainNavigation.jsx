@@ -43,9 +43,9 @@ function MainNavigation() {
 
   return (
 
-    <AppBar position="static">
+    <AppBar position="static" sx={{marginBottom: "50px"}}>
       <Container maxWidth="lg" disableGutters = {true} >
-        <Toolbar>
+        <Toolbar sx={{p:"2"}}>
             <Typography variant="h6" sx={{flexGrow: 1, fontWeight: 700}}>
               BlueRetro
             </Typography>

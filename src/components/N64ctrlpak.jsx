@@ -66,22 +66,6 @@ function N64ctrlpak(props) {
   useEffect(() => {
     console.log(props.btService);
     getBrVersion(props.btService);
-    /*props.btDevice.gatt
-      .connect()
-      .then((server) => {
-        return server.getPrimaryService(brUuid[0]);
-      })
-      .then((service) => {
-        brService = service;
-        getBrVersion(service);
-      })
-      .then((_) => {
-        //setBtConnected(true);
-        setShowButtons(true);
-      })
-      .catch((error) => {
-        ChromeSamples.log("Argh! " + error);
-      });*/
   }, [props.btService, getBrVersion]);
 
   const versionCompare = (v1, v2) => {

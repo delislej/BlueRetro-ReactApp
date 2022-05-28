@@ -62,9 +62,9 @@ function Presets(props) {
         list.push({ value: i, label: presets[i].name });
       }
     }
-    
+
     setPresetList(list);
-  },[]);
+  }, []);
 
   useEffect(() => {
     //check if we have local file list, and that it is not too old
@@ -106,7 +106,9 @@ function Presets(props) {
           setConsoles(consoleArr);
           //use consoleArr and presets to set starting filter
         } else {
-          let presets = getPresets(JSON.parse(localStorage.getItem("fileNames")));
+          let presets = getPresets(
+            JSON.parse(localStorage.getItem("fileNames"))
+          );
           setPresets(presets);
 
           //push all console names from JSON files
@@ -124,28 +126,55 @@ function Presets(props) {
           //use consoleArr and presets to set starting filter
           switch (props.brSpiffs) {
             case "n64":
-              handleConsoleChange({ target: { value: "N64" } }, presets, consoleArr);
+              handleConsoleChange(
+                { target: { value: "N64" } },
+                presets,
+                consoleArr
+              );
               break;
             case "nes":
-              handleConsoleChange({ target: { value: "NES" } }, presets, consoleArr);
+              handleConsoleChange(
+                { target: { value: "NES" } },
+                presets,
+                consoleArr
+              );
               break;
             case "cdi":
-              handleConsoleChange({ target: { value: "CD-i" } }, presets, consoleArr);
+              handleConsoleChange(
+                { target: { value: "CD-i" } },
+                presets,
+                consoleArr
+              );
               break;
             case "dc":
-              handleConsoleChange({ target: { value: "DC" } }, presets, consoleArr);
+              handleConsoleChange(
+                { target: { value: "DC" } },
+                presets,
+                consoleArr
+              );
               break;
             case "gc":
-              handleConsoleChange({ target: { value: "GC" } }, presets, consoleArr);
+              handleConsoleChange(
+                { target: { value: "GC" } },
+                presets,
+                consoleArr
+              );
               break;
             case "jag":
-              handleConsoleChange({ target: { value: "Jaguar" } }, presets, consoleArr);
+              handleConsoleChange(
+                { target: { value: "Jaguar" } },
+                presets,
+                consoleArr
+              );
               break;
             default:
-              handleConsoleChange({ target: { value: "Select Console" } }, presets, consoleArr);
+              handleConsoleChange(
+                { target: { value: "Select Console" } },
+                presets,
+                consoleArr
+              );
           }
           setPageInit(true);
-          
         }
       } catch (e) {
         console.error(e);
@@ -154,9 +183,13 @@ function Presets(props) {
   }, [props.brSpiffs, handleConsoleChange]);
 
   const handleShowAllConsoles = () => {
-    handleConsoleChange({ target: { value: "Select Console" } }, presets, consoles);
+    handleConsoleChange(
+      { target: { value: "Select Console" } },
+      presets,
+      consoles
+    );
     setShowAllConsoles(!showAllConsoles);
-  }
+  };
 
   const handleControllerChange = (event) => {
     setController(event.target.value);
@@ -198,111 +231,111 @@ function Presets(props) {
   return (
     <div className="Presets">
       {pageInit && (
-        <div id="divInputCfg">
-          
-          <div>
-            <Paper
-              sx={{
-                mx: "auto",
-                my: "auto",
-                p: 2,
-                width: "90%",
-                minHeight: '30vh',
-                maxWidth: "600px"
-              }}
-            >
-              <Box
-                sx={{
-                  mx: "auto",
-                  width: "95%",
-                }}
-              >
-                <Stack spacing={2}>
-                  <FormControl>
-                    <InputLabel id="demo-simple-select-helper-label">
-                      Controller
-                    </InputLabel>
-                    <Select
-                      value={controller}
-                      onChange={(x) => handleControllerChange(x)}
-                    >
-                      {myrange.map((number, index) => (
-                        <MenuItem key={index} value={number}>
-                          {number}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControlLabel
-                    value="Show all Consoles"
-                    control={<Checkbox onChange={ () => {handleShowAllConsoles()}} />}
-                    label="Show all Consoles"
-                    labelPlacement="end"
+        <Paper
+          sx={{
+            mx: "auto",
+            my: "auto",
+            p: 2,
+            width: "90%",
+            minHeight: "30vh",
+            maxWidth: "600px",
+          }}
+        >
+          <Box
+            sx={{
+              mx: "auto",
+              width: "95%",
+            }}
+          >
+            <Stack spacing={2}>
+              <FormControl>
+                <InputLabel id="demo-simple-select-helper-label">
+                  Controller
+                </InputLabel>
+                <Select
+                  value={controller}
+                  onChange={(x) => handleControllerChange(x)}
+                >
+                  {myrange.map((number, index) => (
+                    <MenuItem key={index} value={number}>
+                      {number}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControlLabel
+                value="Show all Consoles"
+                control={
+                  <Checkbox
+                    onChange={() => {
+                      handleShowAllConsoles();
+                    }}
                   />
-                  {showAllConsoles && (
-                    <FormControl>
-                      <InputLabel id="demo-simple-select-helper-label">
-                        Console
-                      </InputLabel>
-                      <Select
-                        value={gameConsole}
-                        onChange={(x) => handleConsoleChange(x, presets, consoles)}
-                      >
-                        {consoles.map((console, index) => (
-                          <MenuItem key={index + 50} value={console.value}>
-                            {console.value}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                  <br />
-                  <FormControl>
-                    <InputLabel id="demo-simple-select-helper-derp">
-                      Preset
-                    </InputLabel>
-                    <Select
-                      value={selectedPreset}
-                      onChange={(x) => handlePresetChange(x)}
-                    >
-                      {presetList.map((presetItem, index) => (
-                        <MenuItem key={index + 100} value={presetItem.value}>
-                          {presetItem.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                }
+                label="Show all Consoles"
+                labelPlacement="end"
+              />
+              {showAllConsoles && (
+                <FormControl>
+                  <InputLabel id="demo-simple-select-helper-label">
+                    Console
+                  </InputLabel>
+                  <Select
+                    value={gameConsole}
+                    onChange={(x) => handleConsoleChange(x, presets, consoles)}
+                  >
+                    {consoles.map((console, index) => (
+                      <MenuItem key={index + 50} value={console.value}>
+                        {console.value}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+              <br />
+              <FormControl>
+                <InputLabel id="demo-simple-select-helper-derp">
+                  Preset
+                </InputLabel>
+                <Select
+                  value={selectedPreset}
+                  onChange={(x) => handlePresetChange(x)}
+                >
+                  {presetList.map((presetItem, index) => (
+                    <MenuItem key={index + 100} value={presetItem.value}>
+                      {presetItem.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-                  <Paper elevation={5}>
-                    <Typography sx={{ height: "100px", overflowY: "scroll" }}>
-                      {description}
-                    </Typography>
-                  </Paper>
-                </Stack>
-                <Divider />
+              <Paper elevation={5}>
+                <Typography sx={{ height: "100px", overflowY: "scroll" }}>
+                  {description}
+                </Typography>
+              </Paper>
+            </Stack>
+            <Divider />
 
-                {validSave && (
-                  <Box sx={{ textAlign: "center" }}>
-                    <Button
-                      id="save"
-                      
-                      onClick={() => {
-                        savePresetInput(
-                          presets,
-                          selectedPreset,
-                          props.btService,
-                          controller
-                        );
-                      }}
-                    >
-                      Save Preset
-                    </Button>
-                  </Box>
-                )}
+            {validSave && (
+              <Box sx={{ textAlign: "center" }}>
+                <Button
+                  id="save"
+                  onClick={() => {
+                    savePresetInput(
+                      presets,
+                      selectedPreset,
+                      props.btService,
+                      controller
+                    );
+                  }}
+                >
+                  Save Preset
+                </Button>
               </Box>
-            </Paper>
-          </div>
-        </div>
+            )}
+          </Box>
+        </Paper>
       )}
     </div>
   );
