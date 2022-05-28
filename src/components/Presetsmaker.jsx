@@ -60,11 +60,6 @@ const Presetsmaker = () => {
     btnPressed.current = button;
   };
 
-  const onDisconnected = () => {
-    ChromeSamples.log("> Bluetooth Device disconnected");
-    setPageInit(false);
-  };
-
   const downloadJson = (obj) => {
     const element = document.createElement("a");
     let temp = new Blob([JSON.stringify(obj)], { type: "application/json" });

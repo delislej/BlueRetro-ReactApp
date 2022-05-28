@@ -382,7 +382,7 @@ function N64ctrlpak(props) {
   };
 
   return (
-    <div className="about">
+    <div>
       <Dialog open={show}>
         <DialogTitle>Format Memory Pak</DialogTitle>
         <DialogContent>
@@ -434,107 +434,102 @@ function N64ctrlpak(props) {
 
       <div className="container">
         {okVersion && (
-          <div className="row align-items-center my-5">
-            <Paper
+          <Paper
+            sx={{
+              m: "auto",
+              p: 2,
+              width: "100%",
+            }}
+          >
+            <Box
               sx={{
-                mx: "auto",
-                p: 2,
-                width: "90%",
-                backgroundColor: "#e6eaf3",
+                m: "auto",
+                width: "95%",
               }}
             >
-              <Box
-                sx={{
-                  mx: "auto",
-                  width: "95%",
-                }}
-              >
-                <div id="divFileSelect">
-                  {showButtons && (
-                    <Stack spacing={3}>
-                      <Typography>
-                        {" "}
-                        Select BlueRetro controller pak bank:
-                      </Typography>
-                      <Select
-                        placeholder="1"
-                        isSearchable={false}
-                        value={pak}
-                        options={myrange.map((merange) => ({
-                          key: merange,
-                          text: merange,
-                          value: merange,
-                        }))}
-                        onChange={(x) => setPak(x)}
-                        getOptionLabel={(x) => x.value}
-                      />
-                      <Divider />
-                      <Button
-                        id="btnPakRead"
-                        onClick={() => {
-                          pakRead();
-                        }}
-                      >
-                        Read
-                      </Button>
+              <div id="divFileSelect">
+                {showButtons && (
+                  <Stack spacing={3}>
+                    <Typography align="center">N64 Controller Pak Managment</Typography>
+                    <Select
+                      placeholder="1"
+                      isSearchable={false}
+                      value={pak}
+                      options={myrange.map((merange) => ({
+                        key: merange,
+                        text: merange,
+                        value: merange,
+                      }))}
+                      onChange={(x) => setPak(x)}
+                      getOptionLabel={(x) => x.value}
+                    />
+                    <Divider />
+                    <Button
+                      id="btnPakRead"
+                      onClick={() => {
+                        pakRead();
+                      }}
+                    >
+                      Read
+                    </Button>
 
-                      <Divider />
-                      <Button
-                        id="fileSelector"
-                        onClick={() => {
-                          openFileSelector();
-                        }}
-                      >
-                        {filesContent.length > 0
-                          ? filesContent[0].name
-                          : "Select .mpk"}
-                      </Button>
-                      {filesContent.length > 0 ? (
-                        <Button
-                        variant="outlined"
-                          id="btnPakWrite"
-                          onClick={() => {
-                            pakWrite();
-                          }}
-                        >
-                          Write
-                        </Button>
-                      ) : null}
-                      <Divider />
+                    <Divider />
+                    <Button
+                      variant="outlined"
+                      id="fileSelector"
+                      onClick={() => {
+                        openFileSelector();
+                      }}
+                    >
+                      {filesContent.length > 0
+                        ? filesContent[0].name
+                        : "Select .mpk"}
+                    </Button>
+                    {filesContent.length > 0 ? (
                       <Button
                         variant="outlined"
-                        sx={{ color: "black", backgroundColor: "red" }}
-                        id="btnPakFormat"
+                        id="btnPakWrite"
                         onClick={() => {
-                          handleFormat();
+                          pakWrite();
                         }}
                       >
-                        Format
+                        Write
                       </Button>
-                    </Stack>
-                  )}
-                </div>
-                <Box>
-                  <Stack spacing={5}>
-                    {showProgress && (
-                      <ProgressBar now={progress} label={`${progress}%`} />
-                    )}
-                    {showCancel && (
-                      <Button
-                        variant="outlined"
-                        id="btnFileTransferCancel"
-                        onClick={() => {
-                          abortFileTransfer();
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    )}
+                    ) : null}
+                    <Divider />
+                    <Button
+                      variant="outlined"
+                      sx={{ color: "black", backgroundColor: "red" }}
+                      id="btnPakFormat"
+                      onClick={() => {
+                        handleFormat();
+                      }}
+                    >
+                      Format
+                    </Button>
                   </Stack>
-                </Box>
+                )}
+              </div>
+              <Box>
+                <Stack spacing={5}>
+                  {showProgress && (
+                    <ProgressBar now={progress} label={`${progress}%`} />
+                  )}
+                  {showCancel && (
+                    <Button
+                      variant="outlined"
+                      id="btnFileTransferCancel"
+                      onClick={() => {
+                        abortFileTransfer();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </Stack>
               </Box>
-            </Paper>
-          </div>
+            </Box>
+          </Paper>
         )}
       </div>
     </div>

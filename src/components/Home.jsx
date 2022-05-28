@@ -1,5 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import { Box } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import N64ctrlpak from "./N64ctrlpak";
 import Presets from "./Presets";
 import Ota from "./Ota";
@@ -11,12 +13,17 @@ import { useState } from "react";
 import { brUuid } from "./Btutils";
 import Logbox from "./Logbox";
 import { ChromeSamples } from "./Logbox";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Paper from "@mui/material/Paper";
 
 function Home() {
   const [bluetoothDevice, setBluetoothDevice] = useState(null);
   const [btService, setBtService] = useState(null);
   const [btConnected, setBtConnected] = useState(false);
+  const [showNavMenu, setShowNavMenu] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
   const [version, setVersion] = useState("");
   const [brSpiffs, setBrSpiffs] = useState("");
   const navigate = useNavigate();
@@ -31,6 +38,7 @@ function Home() {
         optionalServices: [brUuid[0]],
       })
       .then((device) => {
+        setShowLoading(true);
         ChromeSamples.log("Connecting to GATT Server...");
         device.addEventListener("gattserverdisconnected", onDisconnected);
         setBluetoothDevice(device);
@@ -57,6 +65,8 @@ function Home() {
             setBrSpiffs(enc.decode(value).split(" ")[1].split("_external")[0]);
             navigate("/");
             setBtConnected(true);
+            setShowLoading(false);
+            setShowNavMenu(true);
           });
       })
       .then((_) => {
@@ -64,79 +74,87 @@ function Home() {
       })
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
+        navigate("/");
+        setBtConnected(true);
+        setShowLoading(false);
       });
   };
 
   const onDisconnected = () => {
     ChromeSamples.log("> Bluetooth Device disconnected");
+    console.log("on disconnect!");
     setBluetoothDevice(null);
+    setShowNavMenu(false);
     setBtConnected(false);
     navigate("/");
   };
   return (
-    <div className="Home">
-      { bluetoothDevice === null ? (
-        <div id="divBtConn">
-          <button
-            id="btConn"
-            onClick={() => {
-              btConn();
-            }}
-          >
-            Connect BlueRetro
-          </button>
-          <br />
-          <small>
-            <i>
-              Disconnect all controllers from BlueRetro before connecting for
-              pak management.
-            </i>
-          </small>
-        </div>
-      ) : null}
+    <Paper sx={{height: "100vh", display: "flex", flexDirection:"column", backgroundColor: "#e6eaf3"}}>
+      {showNavMenu && <MainNavigation />}
+      
+        <Routes>
+          <Route path="/" element={<About />} />
+          <Route
+            path="/n64ctrlpak"
+            element={
+              <N64ctrlpak
+                btDevice={bluetoothDevice}
+                setBtDevice={setBluetoothDevice}
+                btService={btService}
+                version={version}
+              />
+            }
+          />
+          <Route
+            path="/advancedconfig"
+            element={<Advancedconfig btDevice={bluetoothDevice} />}
+          />
+          <Route
+            path="/presets"
+            element={
+              <Presets
+                btDevice={bluetoothDevice}
+                brSpiffs={brSpiffs}
+                btService={btService}
+              />
+            }
+          />
+          <Route
+            path="/presetsmaker"
+            element={<Presetsmaker btDevice={bluetoothDevice} />}
+          />
+          <Route path="/ota" element={<Ota btDevice={bluetoothDevice} />} />
+        </Routes>
 
-      <div>
-        {bluetoothDevice === null ? null : (
-            <div>
-            {btConnected && <MainNavigation />}
-            <Routes>
-              <Route path="/" element={<About />} />
-              <Route
-                path="/n64ctrlpak"
-                element={
-                  <N64ctrlpak
-                    btDevice={bluetoothDevice}
-                    setBtDevice={setBluetoothDevice}
-                    btService={btService}
-                    version={version}
-                  />
-                }
-              />
-              <Route
-                path="/advancedconfig"
-                element={<Advancedconfig btDevice={bluetoothDevice} />}
-              />
-              <Route
-                path="/presets"
-                element={
-                  <Presets
-                    btDevice={bluetoothDevice}
-                    brSpiffs={brSpiffs}
-                    btService={btService}
-                  />
-                }
-              />
-              <Route
-                path="/presetsmaker"
-                element={<Presetsmaker btDevice={bluetoothDevice} />}
-              />
-              <Route path="/ota" element={<Ota btDevice={bluetoothDevice} />} />
-            </Routes>
-            </div>
-        )}
-        <Logbox />
-      </div>
-    </div>
+        <Stack
+        sx={{
+          alignItems: "center", justifyContent: "center"
+          
+        }}
+      >
+        {showLoading && <CircularProgress />}
+        {bluetoothDevice === null ? (
+          <Box>
+            <Button
+              id="btConn"
+              onClick={() => {
+                btConn();
+              }}
+            >
+              Connect BlueRetro
+            </Button>
+            <br />
+            <small>
+              <i>
+                Disconnect all controllers from BlueRetro before connecting for
+                pak management.
+              </i>
+            </small>
+          </Box>
+        ) : null}
+      </Stack>
+      <Logbox />
+    </Paper>
   );
 }
 

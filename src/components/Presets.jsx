@@ -199,14 +199,13 @@ function Presets(props) {
     <div className="Presets">
       {pageInit && (
         <div id="divInputCfg">
-          <h2>Preset Configuration</h2>
+          
           <div>
             <Paper
               sx={{
                 mx: "auto",
                 p: 2,
-                width: "90%",
-                backgroundColor: "#e6eaf3",
+                width: "90%"
               }}
             >
               <Box

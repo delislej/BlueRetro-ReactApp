@@ -199,17 +199,6 @@ function MainNavigation() {
                     </NavLink>
 
                   </Box>
-
-                  <Box sx={{
-                    display: "flex", 
-                    justifyContent:"center", 
-                    position: "absolute", 
-                    bottom: "0", 
-                    left: "50%", 
-                    transform: "translate(-50%, 0)"}}
-                  >
-
-                  </Box>
                 </Box>
               
             </Drawer>
