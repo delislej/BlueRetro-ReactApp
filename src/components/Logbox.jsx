@@ -42,6 +42,7 @@ function Logbox() {
           mx: "auto",
           p: 2,
           width: "75%",
+          maxWidth: "600px"
         }}
       >
         <Paper sx={{backgroundColor: "#bbdefb" }}>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 //import Select from 'react-select'
 import { brUuid } from "./Btutils";
-import Logbox, { ChromeSamples } from "./Logbox";
+import { ChromeSamples } from "./Logbox";
+import { Typography } from "@mui/material";
+import Box from "@mui/material/Box";
 //import { useGamepads } from 'awesome-react-gamepads';
 var bluetoothDevice;
 
@@ -67,40 +69,6 @@ const Presetsmaker = () => {
     element.download = "userFile.json";
     document.body.appendChild(element);
     element.click();
-  };
-
-  const btConn = () => {
-    ChromeSamples.clearLog();
-    ChromeSamples.log("Requesting Bluetooth Device...");
-    navigator.bluetooth
-      .requestDevice({
-        filters: [{ namePrefix: 'BlueRetro' }],
-        optionalServices: [brUuid[0]],
-      })
-      .then((device) => {
-        ChromeSamples.log("Connecting to GATT Server...");
-        bluetoothDevice = device;
-        bluetoothDevice.addEventListener(
-          "gattserverdisconnected",
-          onDisconnected
-        );
-        return bluetoothDevice.gatt.connect();
-      })
-      .then((server) => {
-        ChromeSamples.log("Getting BlueRetro Service...");
-        return server.getPrimaryService(brUuid[0]);
-      })
-      .then((service) => {
-        
-      })
-      .then((_) => {
-        ChromeSamples.log("Init Cfg DOM...");
-        setButtonList(getBindButtons(n64.current));
-        setPageInit(true);
-      })
-      .catch((error) => {
-        ChromeSamples.log("Argh! " + error);
-      });
   };
 
   useEffect(() => {
@@ -186,38 +154,9 @@ const Presetsmaker = () => {
   };
 
   return (
-    <div className="Blueretro">
-      <div className="container">
-        <div className="row align-items-center my-5">
-          <div className="col-lg-7"></div>
-          <div className="col-lg-5">
-            <h1 className="font-weight-light">Contact</h1>
-            {!pageInit && (
-              <div id="divBtConn">
-                <button
-                  style={{ borderRadius: "12px", margin: "auto" }}
-                  id="btBtn"
-                  onClick={() => {
-                    btConn();
-                  }}
-                >
-                  Connect BlueRetro
-                </button>
-                <br />
-                <small>
-                  <i>
-                    Disconnect all controllers from BlueRetro before connecting
-                    for configuration.
-                  </i>
-                </small>
-              </div>
-            )}
-            {pageInit && makeButtons()}
-          </div>
-          <Logbox />
-        </div>
-      </div>
-    </div>
+   <Box>
+     <Typography>test</Typography>;
+   </Box>
   );
 };
 

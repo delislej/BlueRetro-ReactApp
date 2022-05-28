@@ -204,8 +204,11 @@ function Presets(props) {
             <Paper
               sx={{
                 mx: "auto",
+                my: "auto",
                 p: 2,
-                width: "90%"
+                width: "90%",
+                minHeight: '30vh',
+                maxWidth: "600px"
               }}
             >
               <Box
