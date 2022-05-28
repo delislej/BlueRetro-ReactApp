@@ -142,6 +142,7 @@ function Home() {
               }}
             >
               Connect BlueRetro
+              {btConnected}
             </Button>
             <br />
             <small>

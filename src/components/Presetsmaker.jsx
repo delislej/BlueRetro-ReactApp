@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
+//import React, { useState, useEffect, useRef } from "react";
 //import Select from 'react-select'
-import { brUuid } from "./Btutils";
-import { ChromeSamples } from "./Logbox";
+//import { brUuid } from "./Btutils";
+//import { ChromeSamples } from "./Logbox";
 import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 //import { useGamepads } from 'awesome-react-gamepads';
-var bluetoothDevice;
+//var bluetoothDevice;
 
 const Presetsmaker = () => {
-  var jsonTest = {
+  /*var jsonTest = {
     name: "Default Gamepad only",
     desc: "Generic preset that should be good for most games. Only map gamepad buttons & axes.",
     console: "Default",
@@ -101,7 +101,7 @@ const Presetsmaker = () => {
     return temp;
   };
 
-  /*
+  
   useGamepads({
     onConnect: (gamepad) => ChromeSamples.log('Gamepad Connected: ', gamepad),
     //onUpdate: (gamepad) => console.log(gamepad),
@@ -132,10 +132,10 @@ const Presetsmaker = () => {
     onKonamiSuccess: () => console.log("konami Success")
   });*/
 
-  const makeButtons = () => {
+  /*const makeButtons = () => {
     let buttons = buttonList.map((button) => (
       <div className={"button" + button.key} key={button.key}>
-        {button.element} bound: {/*boundList[button.key]*/}
+        {button.element} bound: {boundList[button.key]}
       </div>
     ));
     return (
@@ -152,12 +152,14 @@ const Presetsmaker = () => {
       </div>
     );
   };
-
+*/
   return (
    <Box>
      <Typography>test</Typography>;
    </Box>
   );
 };
+
+
 
 export default Presetsmaker;
