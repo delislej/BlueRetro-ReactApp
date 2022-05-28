@@ -395,15 +395,15 @@ function N64ctrlpak(props) {
         <DialogActions>
           <Stack spacing={3} sx={{ mx: "auto" }}>
             <Button
-              variant='outlined'
-              sx={{ color: 'black', backgroundColor: 'red' }}
+              variant="outlined"
+              sx={{ color: "black", backgroundColor: "red" }}
               onClick={() => {
                 pakFormat();
               }}
             >
               Format Memory Pak
             </Button>
-            <Button color="primary" onClick={handleClose}>
+            <Button color="primary" variant="outlined" onClick={handleClose}>
               Close
             </Button>
           </Stack>
@@ -451,7 +451,7 @@ function N64ctrlpak(props) {
               >
                 <div id="divFileSelect">
                   {showButtons && (
-                    <Stack spacing={2}>
+                    <Stack spacing={3}>
                       <Typography>
                         {" "}
                         Select BlueRetro controller pak bank:
@@ -490,19 +490,20 @@ function N64ctrlpak(props) {
                           : "Select .mpk"}
                       </Button>
                       {filesContent.length > 0 ? (
-                        <button
+                        <Button
+                        variant="outlined"
                           id="btnPakWrite"
                           onClick={() => {
                             pakWrite();
                           }}
                         >
                           Write
-                        </button>
+                        </Button>
                       ) : null}
                       <Divider />
                       <Button
-                       variant='outlined'
-                       sx={{ color: 'black', backgroundColor: 'red' }}
+                        variant="outlined"
+                        sx={{ color: "black", backgroundColor: "red" }}
                         id="btnPakFormat"
                         onClick={() => {
                           handleFormat();
@@ -512,24 +513,25 @@ function N64ctrlpak(props) {
                       </Button>
                     </Stack>
                   )}
-                  {showProgress && (
-                    <div id="divFileTransfer">
-                      <div id="progress_bar">
-                        <ProgressBar now={progress} label={`${progress}%`} />
-                      </div>
-                    </div>
-                  )}
-                  {showCancel && (
-                    <button
-                      id="btnFileTransferCancel"
-                      onClick={() => {
-                        abortFileTransfer();
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  )}
                 </div>
+                <Box>
+                  <Stack spacing={5}>
+                    {showProgress && (
+                      <ProgressBar now={progress} label={`${progress}%`} />
+                    )}
+                    {showCancel && (
+                      <Button
+                        variant="outlined"
+                        id="btnFileTransferCancel"
+                        onClick={() => {
+                          abortFileTransfer();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </Stack>
+                </Box>
               </Box>
             </Paper>
           </div>
