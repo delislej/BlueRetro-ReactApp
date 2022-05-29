@@ -10,13 +10,13 @@ import Advancedconfig from "./Advancedconfig";
 import Presetsmaker from "./Presetsmaker";
 import MainNavigation from "./MainNavigation";
 import { useState } from "react";
-import { brUuid } from "./Btutils";
+import { brUuid, versionCompare } from "./Btutils";
 import Logbox from "./Logbox";
 import { ChromeSamples } from "./Logbox";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import Paper from "@mui/material/Paper";
+
 
 function Home() {
   const [bluetoothDevice, setBluetoothDevice] = useState(null);
@@ -24,7 +24,7 @@ function Home() {
   const [btConnected, setBtConnected] = useState(false);
   const [showNavMenu, setShowNavMenu] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
-  const [version, setVersion] = useState("");
+  const [allowN64Manager, setAllowN64Manager] = useState(false);
   const [brSpiffs, setBrSpiffs] = useState("");
   const navigate = useNavigate();
 
@@ -60,7 +60,10 @@ function Home() {
           .then((value) => {
             var enc = new TextDecoder("utf-8");
             ChromeSamples.log("App version: " + enc.decode(value));
-            setVersion(enc.decode(value).split(" ")[0].split("v")[1]);
+            let version = enc.decode(value).split(" ")[0].split("v")[1]
+            if (versionCompare("1.6.1", version) <= 0) {
+              setAllowN64Manager(true);
+            }
             //we need to search for _external or _internal then slice the game console
             setBrSpiffs(enc.decode(value).split(" ")[1].split("_external")[0]);
             navigate("/");
@@ -125,9 +128,8 @@ function Home() {
             element={
               <N64ctrlpak
                 btDevice={bluetoothDevice}
-                setBtDevice={setBluetoothDevice}
                 btService={btService}
-                version={version}
+                allowManager={allowN64Manager}
               />
             }
           />

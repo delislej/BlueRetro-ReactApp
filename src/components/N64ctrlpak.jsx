@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChromeSamples } from "./Logbox";
 import { brUuid, mtu, block, pakSize } from "./Btutils";
 import Button from "@mui/material/Button";
@@ -38,70 +38,16 @@ function N64ctrlpak(props) {
 
   const myrange = [1, 2, 3, 4];
 
-  const getBrVersion = useCallback(() => {
-    return new Promise(function (resolve, reject) {
-      props.btService
-        .getCharacteristic(brUuid[9])
-        .then((chrc) => {
-          return chrc.readValue();
-        })
-        .then((value) => {
-          var enc = new TextDecoder("utf-8");
-          let temp = enc.decode(value).split(" ")[0].split("v")[1];
-          if (versionCompare("1.6.1", temp) <= 0) {
-            setOkVersion(true);
-            setShowButtons(true);
-          } else {
-            setShowLowVersionError(true);
-          }
-
-          resolve();
-        })
-        .catch((error) => {
-          resolve();
-        });
-    });
-  }, [props.btService]);
-
   useEffect(() => {
-    console.log(props.btService);
-    getBrVersion(props.btService);
-  }, [props.btService, getBrVersion]);
-
-  const versionCompare = (v1, v2) => {
-    // vnum stores each numeric
-    // part of version
-    var vnum1 = 0,
-      vnum2 = 0;
-
-    // loop until both string are
-    // processed
-    for (var i = 0, j = 0; i < v1.length || j < v2.length; ) {
-      // storing numeric part of
-      // version 1 in vnum1
-      while (i < v1.length && v1[i] !== ".") {
-        vnum1 = vnum1 * 10 + (v1[i] - "0");
-        i++;
-      }
-
-      // storing numeric part of
-      // version 2 in vnum2
-      while (j < v2.length && v2[j] !== ".") {
-        vnum2 = vnum2 * 10 + (v2[j] - "0");
-        j++;
-      }
-
-      if (vnum1 > vnum2) return 1;
-      if (vnum2 > vnum1) return -1;
-
-      // if equal, reset variables and
-      // go for next numeric part
-      vnum1 = vnum2 = 0;
-      i++;
-      j++;
+    console.log(props.allowManager);
+    if(props.allowManager === true) {
+      setOkVersion(true);
+      setShowButtons(true);
+    } else {
+      setShowLowVersionError(true);
     }
-    return 0;
-  };
+    //getBrVersion(props.btService);
+  }, [props.allowManager]);
 
   const pakRead = (evt) => {
     // Reset progress indicator on new file selection.
