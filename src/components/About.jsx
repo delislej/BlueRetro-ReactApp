@@ -4,14 +4,6 @@ import Box from "@mui/material/Box";
 function About() {
   return (
     <div className="Blueretro">
-      <Box
-        sx={{
-          my: 1,
-          mx: "auto",
-          p: 2,
-          width: "75%",
-        }}
-      >
         <h1 className="font-weight-light">About BlueRetro</h1>
 
         <p>
@@ -37,7 +29,7 @@ function About() {
           OTA Update lets you update your blueretro device right from your
           phone/PC over bluetooth.
         </p>
-      </Box>
+      
     </div>
   );
 }

@@ -89,9 +89,35 @@ function Home() {
     navigate("/");
   };
   return (
-    <Paper sx={{height: "100vh", display: "flex", flexDirection:"column", backgroundColor: "#e6eaf3"}}>
-      {showNavMenu && <MainNavigation />}
-      
+    <Box className="home Box">
+      <Stack
+        className="Blueretro"
+        sx={{
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {showNavMenu && <MainNavigation />}
+        {bluetoothDevice === null ? (
+          <Box>
+            <Button
+              id="btConn"
+              onClick={() => {
+                btConn();
+              }}
+            >
+              Connect BlueRetro
+              {btConnected}
+            </Button>
+            <br />
+            <small>
+              <i>
+                Disconnect all controllers from BlueRetro before connecting for
+                pak management.
+              </i>
+            </small>
+          </Box>
+        ) : null}
         <Routes>
           <Route path="/" element={<About />} />
           <Route
@@ -125,37 +151,11 @@ function Home() {
           />
           <Route path="/ota" element={<Ota btDevice={bluetoothDevice} />} />
         </Routes>
-
-        <Stack
-        sx={{
-          alignItems: "center", justifyContent: "center"
-          
-        }}
-      >
         {showLoading && <CircularProgress />}
-        {bluetoothDevice === null ? (
-          <Box>
-            <Button
-              id="btConn"
-              onClick={() => {
-                btConn();
-              }}
-            >
-              Connect BlueRetro
-              {btConnected}
-            </Button>
-            <br />
-            <small>
-              <i>
-                Disconnect all controllers from BlueRetro before connecting for
-                pak management.
-              </i>
-            </small>
-          </Box>
-        ) : null}
+
+        <Logbox />
       </Stack>
-      <Logbox />
-    </Paper>
+    </Box>
   );
 }
 

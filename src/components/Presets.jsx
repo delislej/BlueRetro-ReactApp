@@ -229,25 +229,19 @@ function Presets(props) {
   };
 
   return (
-    <div className="Presets">
+    <Box className="Presets" sx={{
+      mx: "auto",
+      p: 2,
+      width: "90%",
+      maxWidth: "600px"
+    }}>
       {pageInit && (
-        <Paper
-          sx={{
-            mx: "auto",
-            my: "auto",
-            p: 2,
-            width: "90%",
-            minHeight: "30vh",
-            maxWidth: "600px",
-          }}
+        <Paper className="preset paper"
+          sx={{mx: "auto",
+          p: 2,}}
         >
-          <Box
-            sx={{
-              mx: "auto",
-              width: "95%",
-            }}
-          >
-            <Stack spacing={2}>
+          
+            <Stack spacing={2} >
               <FormControl>
                 <InputLabel id="demo-simple-select-helper-label">
                   Controller
@@ -310,34 +304,34 @@ function Presets(props) {
               </FormControl>
 
               <Paper elevation={5}>
-                <Typography sx={{ height: "100px", overflowY: "scroll" }}>
+                <Typography sx={{ height: "125px", overflowY: "scroll", p: 2 }}>
                   {description}
                 </Typography>
               </Paper>
+              {validSave && <Divider />}
+              {validSave && (
+                <Box sx={{ textAlign: "center" }}>
+                  
+                  <Button
+                    id="save"
+                    variant="outlined"
+                    onClick={() => {
+                      savePresetInput(
+                        presets,
+                        selectedPreset,
+                        props.btService,
+                        controller
+                      );
+                    }}
+                  >
+                    Save Preset
+                  </Button>
+                </Box>
+              )}
             </Stack>
-            <Divider />
-
-            {validSave && (
-              <Box sx={{ textAlign: "center" }}>
-                <Button
-                  id="save"
-                  onClick={() => {
-                    savePresetInput(
-                      presets,
-                      selectedPreset,
-                      props.btService,
-                      controller
-                    );
-                  }}
-                >
-                  Save Preset
-                </Button>
-              </Box>
-            )}
-          </Box>
         </Paper>
       )}
-    </div>
+    </Box>
   );
 }
 

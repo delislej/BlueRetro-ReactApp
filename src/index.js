@@ -4,10 +4,13 @@ import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 import Home from "./components/Home";
 import { BrowserRouter } from "react-router-dom";
+import Paper from "@mui/material/Paper"
 
 ReactDOM.render(
+    <Paper className="index paper" sx={{height: "100vh", display: "flex", flexDirection:"column", backgroundColor: "#a6adff", overflowY: "auto"}}>
 <BrowserRouter>
 <Home />
 </BrowserRouter>
+</Paper>
 , document.getElementById("root"));
 serviceWorker.unregister();
