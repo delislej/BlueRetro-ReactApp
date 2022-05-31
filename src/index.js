@@ -1,30 +1,16 @@
 import React from "react";
-import ReactDOM from "react-dom/client";
+import ReactDOM from "react-dom";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import N64ctrlpak from "./components/N64ctrlpak";
 import Home from "./components/Home";
-import Presets from "./components/Presets";
-import Navigation from "./components/Navigation";
-import Ota from "./components/Ota";
-import Advancedconfig from "./components/Advancedconfig";
-import BindController from "./components/Bindcontroller";
+import { BrowserRouter } from "react-router-dom";
+import Paper from "@mui/material/Paper"
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-
-root.render(
-  <Router>
-    <Navigation />
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/n64ctrlpak" element={<N64ctrlpak />} />
-      <Route path="/advancedconfig" element={<Advancedconfig />} />
-      <Route path="/presets" element={<Presets />} />
-      <Route path="/bindcontroller" element={<BindController />} />
-      <Route path="/ota" element={<Ota />} />
-    </Routes>
-  </Router>
-);
-
+ReactDOM.render(
+    <Paper className="index paper" sx={{height: "100vh", display: "flex", flexDirection:"column", backgroundColor: "#a6adff", overflowY: "auto"}}>
+<BrowserRouter>
+<Home />
+</BrowserRouter>
+</Paper>
+, document.getElementById("root"));
 serviceWorker.unregister();
