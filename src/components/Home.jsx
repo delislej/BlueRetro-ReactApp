@@ -23,13 +23,13 @@ function Home() {
   const [showNavMenu, setShowNavMenu] = useState(false);
   const [showLoading, setShowLoading] = useState(false);
   const [allowN64, setAllowN64] = useState(false);
-  const [apiVersion, setApiVersion] = useState(null);
   const [allowPakManager, setAllowPakManager] = useState(false);
-  //const [globalCfg, setGlobalCfg] = useState(null);
+  const [globalCfg, setGlobalCfg] = useState(new Uint8Array(4));
   const [brSpiffs, setBrSpiffs] = useState("");
   const navigate = useNavigate();
 
   const btConn = () => {
+    let apiver = -1;
     setBluetoothDevice(null);
     ChromeSamples.clearLog();
     ChromeSamples.log("Requesting Bluetooth Device...");
@@ -98,12 +98,13 @@ function Home() {
             return chrc.readValue();
           })
           .then((value) => {
-            ChromeSamples.log("Api version size: " + value.byteLength);
-            console.log("api version test: " + value.getUint8(0));
-            setApiVersion(value.getUint8(0));
-            ChromeSamples.log("Api version: " + apiVersion);
+            apiver = value.getUint8(0);
+            ChromeSamples.log("Api version: " + apiver);
           })
           .catch((error) => {
+            setShowNavMenu(false);
+            navigate("/");
+            setShowLoading(false);
             throw new Error(error);
           });
 
@@ -114,22 +115,49 @@ function Home() {
             return chrc.readValue();
           })
           .then((value) => {
+            if (apiver === -1) {
+              setShowNavMenu(false);
+              setBluetoothDevice(null);
+              navigate("/");
+              setShowLoading(false);
+              throw new Error("failed to get API version");
+            }
             ChromeSamples.log("Global Config size: " + value.byteLength);
-            //document.getElementById("systemCfg").value = value.getUint8(0);
-            //document.getElementById("multitapCfg").value = value.getUint8(1);
-            if (apiVersion > 0) {
-              ChromeSamples.log("api > 0");
+            //get global config size from apiVersion
+            var temp = new Uint8Array(2);
+
+            if (apiver > 0) {
+              temp = new Uint8Array(3);
+            }
+            if (apiver > 1) {
+              temp = new Uint8Array(4);
+            }
+
+            //systemCfg value
+            temp[0] = value.getUint8(0);
+            //multitapCfg value
+            temp[1] = value.getUint8(1);
+            if (apiver > 0) {
               //document.getElementById("inquiryMode").value = value.getUint8(2);
+              temp[2] = value.getUint8(2);
             }
-            if (apiVersion > 1) {
-              //document.getElementById("banksel").value = value.getUint8(3);
-              ChromeSamples.log("api > 1");
+            if (apiver > 1) {
+              //bank select value
+              temp[3] = value.getUint8(3);
             }
+            setGlobalCfg(temp);
+          })
+          .catch((error) => {
+            ChromeSamples.log("Argh! " + error);
+            setShowNavMenu(false);
+            navigate("/");
+            setShowLoading(false);
           });
       })
       //on error, print to logbox and force navigate back to home, hide loading for when error occures on connect
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
+        setShowNavMenu(false);
         navigate("/");
         setShowLoading(false);
       });
@@ -138,7 +166,6 @@ function Home() {
   const onDisconnected = () => {
     //print disconnect to logbox, save null to device hook, hide navmenu
     ChromeSamples.log("> Bluetooth Device disconnected");
-    console.log("on disconnect!");
     setBluetoothDevice(null);
     setShowNavMenu(false);
     navigate("/");
@@ -154,7 +181,7 @@ function Home() {
       >
         {showNavMenu && <MainNavigation allowN64={allowN64} />}
         {/* show connect button if device is null*/}
-        
+
         <Routes>
           <Route path="/" element={<About />} />
           <Route
@@ -164,12 +191,18 @@ function Home() {
                 btDevice={bluetoothDevice}
                 btService={btService}
                 allowManager={allowPakManager}
+                globalCfg={globalCfg}
               />
             }
           />
           <Route
             path="/advancedconfig"
-            element={<Advancedconfig btDevice={bluetoothDevice} />}
+            element={
+              <Advancedconfig
+                btDevice={bluetoothDevice}
+                globalCfg={globalCfg}
+              />
+            }
           />
           <Route
             path="/presets"
@@ -188,7 +221,6 @@ function Home() {
           <Route path="/ota" element={<Ota btDevice={bluetoothDevice} />} />
         </Routes>
         {showLoading && <CircularProgress />}
-        
       </Stack>
       <Stack
         className="Blueretro"
@@ -197,7 +229,7 @@ function Home() {
           justifyContent: "center",
         }}
       >
-      {bluetoothDevice === null ? (
+        {bluetoothDevice === null ? (
           <Box>
             <Button
               id="btConn"
@@ -217,7 +249,7 @@ function Home() {
           </Box>
         ) : null}
         <Logbox />
-        </Stack>
+      </Stack>
     </Box>
   );
 }

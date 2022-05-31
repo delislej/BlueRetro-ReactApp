@@ -47,14 +47,20 @@ function N64Configuration(props) {
   const myrange = [1, 2, 3, 4];
 
   useEffect(() => {
-    if(props.btDevice === null){
+    console.log(props.globalCfg);
+    if (props.btDevice === null ) {
       navigate("/");
     }
+    if (props.globalCfg === null) {
+      navigate("/");
+    }
+    
+    setBank(props.globalCfg[3] + 1);
     if (props.allowManager === true) {
       setOkVersion(true);
       setShowButtons(true);
     }
-  }, [props.allowManager, props.btDevice, navigate]);
+  }, [props.allowManager, props.globalCfg, props.btDevice, navigate]);
 
   const pakRead = (evt) => {
     // Reset progress indicator on new file selection.
@@ -318,6 +324,26 @@ function N64Configuration(props) {
       });
   };
 
+  function saveGlobal(memoryBank) {
+    var data = props.globalCfg;
+    data[3] = memoryBank - 1;
+    return new Promise(function(resolve, reject) {
+        ChromeSamples.log('Get Global Config CHRC...');
+        props.btService.getCharacteristic(brUuid[1])
+        .then(chrc => {
+          ChromeSamples.log('Writing Global Config...');
+            return chrc.writeValue(data);
+        })
+        .then(_ => {
+            ChromeSamples.log('Global Config saved');
+            resolve();
+        })
+        .catch(error => {
+            reject(error);
+        });
+    });
+  }
+
   return (
     <div>
       <Dialog open={show}>
@@ -451,21 +477,34 @@ function N64Configuration(props) {
                     <Typography>Controller Slot Config</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <FormControl sx={{ minWidth: "100%" }}>
-                      <InputLabel id="memory bank select">
-                        Controller
-                      </InputLabel>
-                      <Select
-                        value={bank}
-                        onChange={(x) => setBank(x.target.value)}
+                    <Stack spacing={3}>
+                      <FormControl sx={{ minWidth: "100%" }}>
+                        <InputLabel id="memory bank select">
+                          Active Memory Bank
+                        </InputLabel>
+                        <Select
+                          value={bank}
+                          onChange={(x) => {
+                            setBank(x.target.value);
+                          }}
+                        >
+                          {myrange.map((number, index) => (
+                            <MenuItem key={index} value={number}>
+                              {number}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <Button
+                        id="btnPakRead"
+                        variant="outlined"
+                        onClick={() => {
+                          saveGlobal(bank);
+                        }}
                       >
-                        {myrange.map((number, index) => (
-                          <MenuItem key={index} value={number}>
-                            {number}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                        Save
+                      </Button>
+                    </Stack>
                   </AccordionDetails>
                 </Accordion>
               </Stack>
