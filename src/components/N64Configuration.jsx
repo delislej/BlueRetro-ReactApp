@@ -4,24 +4,31 @@ import { brUuid, mtu, block, pakSize } from "./Btutils";
 import Button from "@mui/material/Button";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import { useFilePicker } from "use-file-picker";
-import Select from "react-select";
 import { Box } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { Divider, Typography } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 var cancel = 0;
 
-function N64ctrlpak(props) {
+function N64Configuration(props) {
+  const navigate = useNavigate();
   const startTime = useRef(0);
   const [show, setShow] = useState(false);
-  const [showLowVersionError, setShowLowVersionError] = useState(false);
   const handleClose = () => setShow(false);
   const handleFormat = () => setShow(true);
   const [showProgress, setShowProgress] = useState(false);
@@ -29,7 +36,8 @@ function N64ctrlpak(props) {
   const [showButtons, setShowButtons] = useState(false);
   const [okVersion, setOkVersion] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [pak, setPak] = useState(0);
+  const [pak, setPak] = useState(1);
+  const [bank, setBank] = useState(1);
   const [openFileSelector, { filesContent, clear }] = useFilePicker({
     accept: ".mpk",
     multiple: false,
@@ -39,26 +47,25 @@ function N64ctrlpak(props) {
   const myrange = [1, 2, 3, 4];
 
   useEffect(() => {
-    console.log(props.allowManager);
-    if(props.allowManager === true) {
+    if(props.btDevice === null){
+      navigate("/");
+    }
+    if (props.allowManager === true) {
       setOkVersion(true);
       setShowButtons(true);
-    } else {
-      setShowLowVersionError(true);
     }
-    //getBrVersion(props.btService);
-  }, [props.allowManager]);
+  }, [props.allowManager, props.btDevice, navigate]);
 
   const pakRead = (evt) => {
     // Reset progress indicator on new file selection.
     setProgress(0);
     setShowProgress(true);
     setShowButtons(false);
-    ChromeSamples.log("reading pak");
+    ChromeSamples.log("Reading Memory Pak: " + pak);
     var data = new Uint8Array(pakSize);
     readFile(data)
       .then((value) => {
-        let pakNum = pak + 1;
+        let pakNum = pak;
         downloadFile(
           new Blob([value.buffer], { type: "application/mpk" }),
           "ctrl_pak" + pakNum + ".mpk"
@@ -340,130 +347,152 @@ function N64ctrlpak(props) {
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        open={showLowVersionError}
-        //onClose={handleCloseWarning}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Low Version Warning!"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            This version is not compatible with N64 controller pak managment!
-            make sure to flash version 1.6.1 or higher!
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <NavLink to="/">
-            <Button>Close</Button>
-          </NavLink>
-        </DialogActions>
-      </Dialog>
-
       <div className="container">
-        {okVersion && (
-          <Paper
+        <Paper
+          sx={{
+            m: "auto",
+            p: 2,
+            width: "100%",
+            minWidth: "200px",
+          }}
+        >
+          <Box
             sx={{
               m: "auto",
-              p: 2,
-              width: "100%",
+              width: "95%",
             }}
           >
-            <Box
-              sx={{
-                m: "auto",
-                width: "95%",
-              }}
-            >
-              <div id="divFileSelect">
-                {showButtons && (
-                  <Stack spacing={3}>
-                    <Typography align="center">N64 Controller Pak Managment</Typography>
-                    <Select
-                      placeholder="1"
-                      isSearchable={false}
-                      value={pak}
-                      options={myrange.map((merange) => ({
-                        key: merange,
-                        text: merange,
-                        value: merange,
-                      }))}
-                      onChange={(x) => setPak(x)}
-                      getOptionLabel={(x) => x.value}
-                    />
-                    <Divider />
-                    <Button
-                      id="btnPakRead"
-                      onClick={() => {
-                        pakRead();
-                      }}
-                    >
-                      Read
-                    </Button>
+            {showButtons && (
+              <Stack spacing={3}>
+                <Typography align="center">N64 Configuration</Typography>
+                <Divider />
 
-                    <Divider />
-                    <Button
-                      variant="outlined"
-                      id="fileSelector"
-                      onClick={() => {
-                        openFileSelector();
-                      }}
+                {okVersion && (
+                  <Accordion elevation={18}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls="panel1a-content"
+                      id="panel1a-header"
                     >
-                      {filesContent.length > 0
-                        ? filesContent[0].name
-                        : "Select .mpk"}
-                    </Button>
-                    {filesContent.length > 0 ? (
-                      <Button
-                        variant="outlined"
-                        id="btnPakWrite"
-                        onClick={() => {
-                          pakWrite();
-                        }}
-                      >
-                        Write
-                      </Button>
-                    ) : null}
-                    <Divider />
-                    <Button
-                      variant="outlined"
-                      sx={{ color: "black", backgroundColor: "red" }}
-                      id="btnPakFormat"
-                      onClick={() => {
-                        handleFormat();
-                      }}
-                    >
-                      Format
-                    </Button>
-                  </Stack>
+                      <Typography>Controller Pak Data Managment</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ alignItems: "center" }}>
+                      <Stack spacing={3}>
+                        <FormControl sx={{ minWidth: "100%" }}>
+                          <InputLabel id="memory pak select">
+                            Memory Pak
+                          </InputLabel>
+                          <Select
+                            value={pak}
+                            onChange={(x) => setPak(x.target.value)}
+                          >
+                            {myrange.map((number, index) => (
+                              <MenuItem key={index} value={number}>
+                                {number}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                        <Divider />
+                        <Button
+                          id="btnPakRead"
+                          variant="outlined"
+                          onClick={() => {
+                            pakRead();
+                          }}
+                        >
+                          Read
+                        </Button>
+                        <Divider />
+                        <Button
+                          variant="outlined"
+                          id="fileSelector"
+                          onClick={() => {
+                            openFileSelector();
+                          }}
+                        >
+                          {filesContent.length > 0
+                            ? filesContent[0].name
+                            : "Select .mpk"}
+                        </Button>
+                        {filesContent.length > 0 ? (
+                          <Button
+                            variant="outlined"
+                            id="btnPakWrite"
+                            onClick={() => {
+                              pakWrite();
+                            }}
+                          >
+                            Write
+                          </Button>
+                        ) : null}
+                        <Divider />
+                        <Button
+                          variant="outlined"
+                          sx={{ color: "black", backgroundColor: "red" }}
+                          id="btnPakFormat"
+                          onClick={() => {
+                            handleFormat();
+                          }}
+                        >
+                          Format
+                        </Button>
+                      </Stack>
+                    </AccordionDetails>
+                  </Accordion>
                 )}
-              </div>
-              <Box>
-                <Stack spacing={5}>
-                  {showProgress && (
-                    <ProgressBar now={progress} label={`${progress}%`} />
-                  )}
-                  {showCancel && (
-                    <Button
-                      variant="outlined"
-                      id="btnFileTransferCancel"
-                      onClick={() => {
-                        abortFileTransfer();
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                </Stack>
-              </Box>
+
+                <Accordion elevation={18} sx={{ minWidth: "90%" }}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                  >
+                    <Typography>Controller Slot Config</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <FormControl sx={{ minWidth: "100%" }}>
+                      <InputLabel id="memory bank select">
+                        Controller
+                      </InputLabel>
+                      <Select
+                        value={bank}
+                        onChange={(x) => setBank(x.target.value)}
+                      >
+                        {myrange.map((number, index) => (
+                          <MenuItem key={index} value={number}>
+                            {number}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </AccordionDetails>
+                </Accordion>
+              </Stack>
+            )}
+            <Box>
+              <Stack spacing={5}>
+                {showProgress && (
+                  <ProgressBar now={progress} label={`${progress}%`} />
+                )}
+                {showCancel && (
+                  <Button
+                    variant="outlined"
+                    id="btnFileTransferCancel"
+                    onClick={() => {
+                      abortFileTransfer();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                )}
+              </Stack>
             </Box>
-          </Paper>
-        )}
+          </Box>
+        </Paper>
       </div>
     </div>
   );
 }
 
-export default N64ctrlpak;
+export default N64Configuration;

@@ -216,8 +216,8 @@ export const versionCompare = (v1, v2) => {
   }
   return 0;
 };
-/*var btnList = [
-        Default                      Keyboard             Mouse                PS3                  PS4 / PS5            Wiimote              Wiimote + Classic    Wiimote + Nunchuck   WiiU / Switch Pro    Switch NES           Switch SNES          Switch MD / Genesis  Switch N64           Switch Joycon        Xbox One S / X|S     Steam                NeoGeo (Parallel 1P) PCE                  PCE 6 btns           NES                  SNES                 CD-i                 JVS                  3DO                  Jaguar         Jaguar 6D             PC-FX                VB                          N64                         GameCube             Atari / SMS          MD / Genesis         Saturn               Dreamcast            PSX / PS2           
+export const btnList = [
+        /*Default                      Keyboard             Mouse                PS3                  PS4 / PS5            Wiimote              Wiimote + Classic    Wiimote + Nunchuck   WiiU / Switch Pro    Switch NES           Switch SNES          Switch MD / Genesis  Switch N64           Switch Joycon        Xbox One S / X|S     Steam                NeoGeo (Parallel 1P) PCE                  PCE 6 btns           NES                  SNES                 CD-i                 JVS                  3DO                  Jaguar         Jaguar 6D             PC-FX                VB                          N64                         GameCube             Atari / SMS          MD / Genesis         Saturn               Dreamcast            PSX / PS2           */
         ['GP: LX Left;  KB: A',       'KB: A',             '',                  'Left stick left',   'Left stick left',   '',                '[C] Left stick left',  '[N] Stick left',   'Left stick left',   '',                  '',                  '',                  'Stick left',        'Stick left (H)',    'Left stick left',   'Left pad left',     '',                  '',                  '',                  '',                  '',                  'Stick left',        'Stick left',        '*Stick left',       '8 (Y)',   'Left stick left (X)',    '',                  '',                         'Stick left',               'Left stick left',   '',                  '',                  '*Stick left',       'Left stick left',   'Left stick left',  ],
         ['GP: LX Right; KB: D',       'KB: D',             '',                  'Left stick right',  'Left stick right',  '',                '[C] Left stick right', '[N] Stick right',  'Left stick right',  '',                  '',                  '',                  'Stick right',       'Stick right (H)',   'Left stick right',  'Left pad right',    '',                  '',                  '',                  '',                  '',                  'Stick right',       'Stick right',       '*Stick right',      '6',       'Left stick right (X)',   '',                  '',                         'Stick right',              'Left stick right',  '',                  '',                  '*Stick right',      'Left stick right',  'Left stick right', ],
         ['GP: LY Down;  KB: S',       'KB: S',             '',                  'Left stick down',   'Left stick down',   '',                '[C] Left stick down',  '[N] Stick down',   'Left stick down',   '',                  '',                  '',                  'Stick down',        'Stick down (H)',    'Left stick down',   'Left pad down',     '',                  '',                  '',                  '',                  '',                  'Stick down',        'Stick down',        '*Stick down',       '7 (Z)',   'Left stick down (Y)',    '',                  '',                         'Stick down',               'Left stick down',   '',                  '',                  '*Stick down',       'Left stick down',   'Left stick down',  ],
@@ -334,7 +334,27 @@ export const versionCompare = (v1, v2) => {
         ['KB: R Alt',                 'KB: R Alt',         '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',            '',                   '',                  '',                         '',                         '',                  '',                  '',                  '',                  '',                  '',                 ],
         ['KB: R Win',                 'KB: R Win',         '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',                  '',            '',                   '',                  '',                         '',                         '',                  '',                  '',                  '',                  '',                  '',                 ],
     ];
-*/
+
+
+export function getApiVersion(brService) {
+  return new Promise(function(resolve, reject) {
+      ChromeSamples.log('Get Api version CHRC...');
+      brService.getCharacteristic(brUuid[6])
+      .then(chrc => {
+        ChromeSamples.log('Reading Api version...');
+          return chrc.readValue();
+      })
+      .then(value => {
+        ChromeSamples.log('Api version size: ' + value.byteLength);
+          let apiVersion = value.getUint8(0);
+          ChromeSamples.log('Api version: ' + apiVersion);
+          resolve();
+      })
+      .catch(error => {
+          reject(error);
+      });
+  });
+}
 
 function writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
   return new Promise(function (resolve, reject) {

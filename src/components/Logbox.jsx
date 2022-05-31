@@ -42,7 +42,7 @@ function Logbox() {
     maxWidth: "600px", }}>
       <pre
         id="log"
-        style={{ margin: ".5em 0", whiteSpace: "pre-wrap", overflowY: "auto", maxHeight: "100px", fontStyle: "italic" }}
+        style={{ margin: ".5em 0", whiteSpace: "pre-wrap", overflowY: "auto", maxHeight: "100px", fontStyle: "italic", minHeight: "100px" }}
       ></pre>
     </Paper>
   );

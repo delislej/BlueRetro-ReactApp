@@ -1,12 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Accordion from "@mui/material/Accordion";
 import Box from "@mui/material/Box";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { btnList } from "./Btutils"
 
 function Advancedconfig() {
+  useEffect(()=>{
+    var col0 = btnList.map(d => d[28]); // [ 'a1', 'b1', 'c1' ]
+    
+      console.log(col0);
+    
+    
+  
+  },[]);
   return (
     <div className="Blueretro">
       <Box

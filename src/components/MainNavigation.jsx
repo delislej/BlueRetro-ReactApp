@@ -19,7 +19,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { NavLink } from "react-router-dom";
 
-function MainNavigation() {
+function MainNavigation(props) {
 
   /*
   react useState hook to save the current open/close state of the drawer,
@@ -40,7 +40,7 @@ function MainNavigation() {
     //changes the function state according to the value of open
     setState(open);
   };
-
+  
   return (
 
     <AppBar position="static" sx={{marginBottom: "25px"}}>
@@ -82,14 +82,14 @@ function MainNavigation() {
                     </ListItemButton>
                     </NavLink>
 
-                    <NavLink to="/n64ctrlpak">
+                    {props.allowN64 && <NavLink to="/n64config">
                     <ListItemButton>
                       <ListItemIcon>
                         <FolderIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
-                      <ListItemText primary="N64 controller pak manager" />
+                      <ListItemText primary="N64 Config" />
                     </ListItemButton>
-                    </NavLink>
+                    </NavLink>}
 
                     <NavLink to="/presets">
                     <ListItemButton>
@@ -162,14 +162,14 @@ function MainNavigation() {
                     </ListItemButton>
                     </NavLink>
 
-                    <NavLink to="/n64ctrlpak">
+                    {props.allowN64 && <NavLink to="/n64config">
                     <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
                         <FolderIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
-                      <ListItemText primary="N64 controller pak manager" />
+                      <ListItemText primary="N64 Config" />
                     </ListItemButton>
-                    </NavLink>
+                    </NavLink>}
 
                     <NavLink to="/presets">
                     <ListItemButton onClick={toggleDrawer(false)}>

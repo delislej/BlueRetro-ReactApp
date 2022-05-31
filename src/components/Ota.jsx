@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import {
   brUuid,
@@ -9,8 +9,10 @@ import {
 } from "./Btutils";
 import { ChromeSamples } from "./Logbox";
 import { useFilePicker } from "use-file-picker";
+import { useNavigate } from "react-router-dom";
 
 function Ota(props) {
+  const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
   const [showCancel, setShowCancel] = useState(false);
   const [showUpdate, setShowUpdate] = useState(true);
@@ -21,6 +23,12 @@ function Ota(props) {
     multiple: false,
     readAs: "ArrayBuffer",
   });
+
+  useEffect(() => {
+    if(props.btDevice === null){
+      navigate("/");
+    }
+  }, [props.btDevice, navigate]);
 
   const firmwareUpdate = () => {
     // Reset progress indicator on new file selection.

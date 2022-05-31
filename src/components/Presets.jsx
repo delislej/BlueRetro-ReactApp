@@ -12,8 +12,10 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Paper from "@mui/material/Paper";
 import { Divider, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 function Presets(props) {
+  const navigate = useNavigate();
   //flag to render selection menus
   const [pageInit, setPageInit] = useState(false);
 
@@ -67,6 +69,13 @@ function Presets(props) {
   }, []);
 
   useEffect(() => {
+    if(props.btDevice === null){
+      navigate("/");
+    }
+  }, [props.btDevice, navigate]);
+
+  useEffect(() => {
+    
     //check if we have local file list, and that it is not too old
     (async function () {
       try {
