@@ -57,11 +57,22 @@ function Home() {
         // save service to hook for access from all components
         setBtService(service);
         //access app version characteristic
-        await getAppVersion(service);
+        
+
+        
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         await getApiVersion(service);
 
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         await getGlobalCfg(service);
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        await getAppVersion(service);
+
       })
       //on error, print to logbox and force navigate back to home, hide loading for when error occures on connect
       .catch((error) => {
