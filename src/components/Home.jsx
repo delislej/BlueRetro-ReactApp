@@ -29,7 +29,7 @@ function Home() {
   const navigate = useNavigate();
   var apiver = -1;
 
-  const btConn = async () => {
+  const btConn = () => {
     setBluetoothDevice(null);
     ChromeSamples.clearLog();
     ChromeSamples.log("Requesting Bluetooth Device...");
@@ -57,22 +57,18 @@ function Home() {
         // save service to hook for access from all components
         setBtService(service);
         //access app version characteristic
-        
 
-        
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         await getApiVersion(service);
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         await getGlobalCfg(service);
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         await getAppVersion(service);
-
       })
       //on error, print to logbox and force navigate back to home, hide loading for when error occures on connect
       .catch((error) => {
@@ -83,7 +79,7 @@ function Home() {
       });
   };
 
-  const getAppVersion = async (service) => {
+  const getAppVersion = (service) => {
     return new Promise((resolve) => {
       service
         .getCharacteristic(brUuid[9])
@@ -118,7 +114,7 @@ function Home() {
     });
   };
 
-  const getApiVersion = async (service) => {
+  const getApiVersion = (service) => {
     return new Promise((resolve) => {
       service
         .getCharacteristic(brUuid[6])
@@ -140,7 +136,7 @@ function Home() {
     });
   };
 
-  const getGlobalCfg = async (service) => {
+  const getGlobalCfg = (service) => {
     return new Promise((resolve) => {
       service
         .getCharacteristic(brUuid[1])
