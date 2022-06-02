@@ -90,8 +90,8 @@ function Home() {
             setShowLoading(false);
             setShowNavMenu(true);
           });
-
-        service
+          ChromeSamples.log("getting api version");
+          service
           .getCharacteristic(brUuid[6])
           .then((chrc) => {
             ChromeSamples.log("Reading Api version...");
@@ -108,7 +108,8 @@ function Home() {
             throw new Error(error);
           });
 
-        service
+          ChromeSamples.log("getting global config");
+          service
           .getCharacteristic(brUuid[1])
           .then((chrc) => {
             ChromeSamples.log("Reading Global Config...");
