@@ -24,7 +24,7 @@ function Home() {
   const [showLoading, setShowLoading] = useState(false);
   const [allowN64, setAllowN64] = useState(false);
   const [allowPakManager, setAllowPakManager] = useState(false);
-  const [globalCfg, setGlobalCfg] = useState(new Uint8Array(4));
+  const [globalCfg, setGlobalCfg] = useState(new Uint8Array(4).fill(255));
   const [brSpiffs, setBrSpiffs] = useState("");
   const navigate = useNavigate();
 
@@ -201,6 +201,7 @@ function Home() {
               <Advancedconfig
                 btDevice={bluetoothDevice}
                 globalCfg={globalCfg}
+                btService={btService}
               />
             }
           />

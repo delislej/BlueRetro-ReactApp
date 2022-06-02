@@ -51,7 +51,7 @@ function N64Configuration(props) {
     if (props.btDevice === null ) {
       navigate("/");
     }
-    if (props.globalCfg === null) {
+    if (props.globalCfg[0] === 255) {
       navigate("/");
     }
     
@@ -380,6 +380,7 @@ function N64Configuration(props) {
             p: 2,
             width: "100%",
             minWidth: "200px",
+            marginBottom: "25px"
           }}
         >
           <Box
