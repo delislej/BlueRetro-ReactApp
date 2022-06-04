@@ -18,7 +18,6 @@ import SystemUpdateIcon from '@mui/icons-material/SystemUpdate';
 import GamepadIcon from '@mui/icons-material/Gamepad';
 import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
 import SettingsIcon from '@mui/icons-material/Settings';
-import ImageIcon from "@mui/icons-material/Image";
 import SdCardIcon from '@mui/icons-material/SdCard';
 import { NavLink } from "react-router-dom";
 
@@ -46,7 +45,7 @@ function MainNavigation(props) {
   
   return (
 
-    <AppBar position="static" sx={{marginBottom: "25px"}}>
+    <AppBar position="static" sx={{marginBottom: "25px", width: "100%"}}>
       <Container maxWidth="lg" disableGutters = {true} >
         <Toolbar sx={{p:"2"}}>
             <Typography variant="h6" sx={{flexGrow: 1, fontWeight: 700}}>

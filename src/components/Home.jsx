@@ -58,15 +58,14 @@ function Home() {
         setBtService(service);
         //access app version characteristic
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         await getApiVersion(service);
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         await getGlobalCfg(service);
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         await getAppVersion(service);
       })
@@ -101,8 +100,8 @@ function Home() {
           } else {
             setBrSpiffs(enc.decode(value).split(" ")[1].split("_internal")[0]);
           }
-
-          if (enc.decode(value).search("n64") !== 1) {
+          console.log(enc.decode(value).search("n64"));
+          if (enc.decode(value).search("n64") !== -1) {
             setAllowN64(true);
           }
           //navigate to home component and hide loading/show navbar
@@ -168,7 +167,6 @@ function Home() {
           //multitapCfg value
           temp[1] = value.getUint8(1);
           if (apiver > 0) {
-            //document.getElementById("inquiryMode").value = value.getUint8(2);
             temp[2] = value.getUint8(2);
           }
           if (apiver > 1) {
@@ -195,10 +193,11 @@ function Home() {
     navigate("/");
   };
   return (
-    <Box className="home Box">
+    <Box className="home Box" display="flex" flexWrap="wrap" flexDirection="column" justifyContent="center" alignItems="center">
       <Stack
         className="Blueretro"
         sx={{
+          width: '100%',
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -234,6 +233,7 @@ function Home() {
             element={
               <Presets
                 btDevice={bluetoothDevice}
+                globalCfg={globalCfg}
                 brSpiffs={brSpiffs}
                 btService={btService}
               />
@@ -243,7 +243,10 @@ function Home() {
             path="/presetsmaker"
             element={<Presetsmaker btDevice={bluetoothDevice} />}
           />
-          <Route path="/ota" element={<Ota btDevice={bluetoothDevice} />} />
+          <Route path="/ota" element={<Ota 
+          btDevice={bluetoothDevice} 
+          globalCfg={globalCfg}
+          />} />
         </Routes>
         {showLoading && <CircularProgress />}
       </Stack>
@@ -258,6 +261,7 @@ function Home() {
           <Box>
             <Button
               id="btConn"
+              variant="outlined"
               onClick={() => {
                 btConn();
               }}

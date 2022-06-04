@@ -1,15 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import ProgressBar from "react-bootstrap/ProgressBar";
-import {
-  brUuid,
-  ota_abort,
-  ota_end,
-  ota_start,
-  mtu
-} from "./Btutils";
+import { brUuid, ota_abort, ota_end, ota_start, mtu } from "./Btutils";
 import { ChromeSamples } from "./Logbox";
 import { useFilePicker } from "use-file-picker";
 import { useNavigate } from "react-router-dom";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import { Divider } from "@mui/material";
 
 function Ota(props) {
   const navigate = useNavigate();
@@ -25,10 +23,13 @@ function Ota(props) {
   });
 
   useEffect(() => {
-    if(props.btDevice === null){
+    if (props.btDevice === null) {
       navigate("/");
     }
-  }, [props.btDevice, navigate]);
+    if (props.globalCfg[0] === 255) {
+      navigate("/");
+    }
+  }, [props.btDevice, props.globalCfg, navigate]);
 
   const firmwareUpdate = () => {
     // Reset progress indicator on new file selection.
@@ -109,6 +110,8 @@ function Ota(props) {
                 (performance.now() - startTime.current) / 1000 +
                 " sec"
             );
+            setShowCancel(false);
+            setProgress(0);
             resolve();
           }
         })
@@ -119,61 +122,40 @@ function Ota(props) {
   };
 
   return (
-    <div className="about">
-      <div className="container">
-        <div>
-          <div style={{ margin: "auto", width: "50%" }}>
-            <h1 className="font-weight-light">OTA Firmware Update</h1>
-            <div>
-              {props.btDevice && (
-                <div>
-                  <div id="divFwSelect">
-                    Select firmware:
-                    {!showCancel && !loading && (
-                      <button
-                        id="fileSelector"
-                        onClick={() => {
-                          openFileSelector();
-                        }}
-                      >
-                        {filesContent.length > 0
-                          ? filesContent[0].name
-                          : "Select .bin"}
-                      </button>
-                    )}
-                    {filesContent.length > 0 ? (
-                      showUpdate === true ? (
-                        <button
-                          id="btnFwUpdate"
-                          onClick={() => firmwareUpdate()}
-                        >
-                          Update Firmware
-                        </button>
-                      ) : null
-                    ) : null}
-                  </div>
-                  <div id="divFwUpdate">
-                    <div id="progress_bar">
-                      {showCancel && (
-                        <ProgressBar now={progress} label={`${progress}%`} />
-                      )}
-                    </div>
-                    {showCancel && (
-                      <button
-                        id="btnFwUpdateCancel"
-                        onClick={() => abortFwUpdate()}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Paper sx={{p:2, marginBottom: "25px", minWidth: "50%", maxWidth:"75%"}}>
+      <h1 className="font-weight-light">OTA Firmware Update</h1>
+      <Stack spacing={3}>
+      {!showCancel && !loading && (
+        <Button
+          variant="outlined"
+          id="fileSelector"
+          onClick={() => {
+            openFileSelector();
+          }}
+        >
+          {filesContent.length > 0 ? filesContent[0].name : "Select Firmware .bin"}
+        </Button>
+      )}
+      
+      {filesContent.length > 0 ? (
+        showUpdate === true ? (
+          <Button
+            variant="outlined"
+            id="btnFwUpdate"
+            onClick={() => firmwareUpdate()}
+          >
+            Update Firmware
+          </Button>
+        ) : null
+      ) : null}
+      {showCancel && <ProgressBar now={progress} label={`${progress}%`} />}
+      {showCancel && (
+        <Button id="btnFwUpdateCancel" onClick={() => abortFwUpdate()}>
+          Cancel
+        </Button>
+      )}
+      </Stack>
+    </Paper>
   );
 }
 
