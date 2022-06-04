@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Accordion from "@mui/material/Accordion";
-import Box from "@mui/material/Box";
 import { brUuid, sys_deep_sleep, sys_reset } from "./Btutils";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -14,7 +13,6 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { Divider, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { btnList } from "./Btutils";
 import { useNavigate } from "react-router-dom";
 import { ChromeSamples } from "./Logbox";
 
@@ -54,6 +52,7 @@ function Advancedconfig(props) {
   const [controller, setController] = useState(0);
   const [controllerMode, setControllerMode] = useState(0);
   const [controllerAccessory, setControllerAccessory] = useState(0);
+  const [inUse, setInUse] = useState(false);
 
   const [system, setSystem] = useState("");
   const [multiTap, setMultiTap] = useState("");
@@ -71,6 +70,10 @@ function Advancedconfig(props) {
   }, [props.globalCfg, navigate]);
 
   function saveGlobal() {
+    if(inUse === true) {
+      ChromeSamples.log("Device is in use!");
+      return null;
+    }
     var data = props.globalCfg;
     data[0] = system;
     data[1] = multiTap;
@@ -85,15 +88,22 @@ function Advancedconfig(props) {
         })
         .then((_) => {
           ChromeSamples.log("Global Config saved");
+          setInUse(false);
           resolve();
         })
         .catch((error) => {
+          setInUse(false);
           reject(error);
         });
     });
   }
 
   function saveOutput() {
+    if(inUse === true) {
+      ChromeSamples.log("Device is in use!");
+      return null;
+    }
+    setInUse(true);
     var data = new Uint8Array(2);
     data[0] = controllerMode;
     data[1] = controllerAccessory;
@@ -122,9 +132,12 @@ function Advancedconfig(props) {
             //document.getElementById("outputSaveMouse").style.display = "block";
           }
           ChromeSamples.log("Output " + cfgId + " Config saved");
+          ChromeSamples.log("Please power cycle your BlueRetro device");
+          setInUse(false);
           resolve();
         })
         .catch((error) => {
+          setInUse(false);
           reject(error);
         });
     });
@@ -169,7 +182,7 @@ function Advancedconfig(props) {
   return (
     <Paper
       sx={{
-        width: "75%",
+        width: "66%",
         p: 2,
         marginBottom: "25px",
       }}
@@ -310,7 +323,9 @@ function Advancedconfig(props) {
                 </Select>
               </FormControl>
               <AccordionActions>
-                <Button id="btnPakRead" variant="outlined" onClick={() => {}}>
+                <Button id="saveOutput" variant="outlined" onClick={() => {
+                  saveOutput();
+                }}>
                   Save Config
                 </Button>
               </AccordionActions>

@@ -56,9 +56,8 @@ function Home() {
       .then(async (service) => {
         // save service to hook for access from all components
         setBtService(service);
-        //access app version characteristic
 
-
+        //access app version characteristics with a wait to avoid errors
         await getApiVersion(service);
 
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -100,7 +99,7 @@ function Home() {
           } else {
             setBrSpiffs(enc.decode(value).split(" ")[1].split("_internal")[0]);
           }
-          console.log(enc.decode(value).search("n64"));
+          //if n64 is found, we unhide the menu option
           if (enc.decode(value).search("n64") !== -1) {
             setAllowN64(true);
           }
@@ -193,11 +192,18 @@ function Home() {
     navigate("/");
   };
   return (
-    <Box className="home Box" display="flex" flexWrap="wrap" flexDirection="column" justifyContent="center" alignItems="center">
+    <Box
+      className="home Box"
+      display="flex"
+      flexWrap="wrap"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+    >
       <Stack
         className="Blueretro"
         sx={{
-          width: '100%',
+          width: "100%",
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -243,10 +249,10 @@ function Home() {
             path="/presetsmaker"
             element={<Presetsmaker btDevice={bluetoothDevice} />}
           />
-          <Route path="/ota" element={<Ota 
-          btDevice={bluetoothDevice} 
-          globalCfg={globalCfg}
-          />} />
+          <Route
+            path="/ota"
+            element={<Ota btDevice={bluetoothDevice} globalCfg={globalCfg} />}
+          />
         </Routes>
         {showLoading && <CircularProgress />}
       </Stack>

@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
-import { Divider } from "@mui/material";
 
 function Ota(props) {
   const navigate = useNavigate();
@@ -122,7 +121,7 @@ function Ota(props) {
   };
 
   return (
-    <Paper sx={{p:2, marginBottom: "25px", minWidth: "50%", maxWidth:"75%"}}>
+    <Paper sx={{p:2, marginBottom: "25px", minWidth: "66%", maxWidth:"75%"}}>
       <h1 className="font-weight-light">OTA Firmware Update</h1>
       <Stack spacing={3}>
       {!showCancel && !loading && (

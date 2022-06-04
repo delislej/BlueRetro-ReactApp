@@ -47,7 +47,6 @@ function N64Configuration(props) {
   const bankRange = [1, 2, 3, 4, ];
 
   useEffect(() => {
-    console.log(props.globalCfg);
     if (props.btDevice === null) {
       navigate("/");
     }
@@ -56,7 +55,6 @@ function N64Configuration(props) {
     }
 
     setBank(props.globalCfg[3] + 1);
-    console.log(props.allowManager);
     if (props.allowManager === true) {
       setOkVersion(true);
       setShowButtons(true);
@@ -213,7 +211,6 @@ function N64Configuration(props) {
           }
         })
         .catch((error) => {
-          console.log("error in readRecursive: " + error);
           reject(error);
         });
     });
@@ -353,8 +350,7 @@ function N64Configuration(props) {
   return (
     <Paper
       sx={{
-        width: "75%",
-        maxWidth: '600px',
+        width: "66%",
         marginBottom: "25px",
         p: 2,
       }}
