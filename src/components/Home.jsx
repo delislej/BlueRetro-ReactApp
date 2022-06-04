@@ -10,9 +10,10 @@ import Advancedconfig from "./Advancedconfig";
 import Presetsmaker from "./Presetsmaker";
 import MainNavigation from "./MainNavigation";
 import { useState } from "react";
-import { brUuid, versionCompare } from "./Btutils";
+import { brUuid } from "../utils/constants" 
+import versionCompare from "../utils/versionCompare";
 import Logbox from "./Logbox";
-import { ChromeSamples } from "./Logbox";
+import ChromeSamples from "../utils/ChromeSamples";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";

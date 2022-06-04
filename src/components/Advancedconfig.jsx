@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Accordion from "@mui/material/Accordion";
-import { brUuid, sys_deep_sleep, sys_reset } from "./Btutils";
+import { brUuid, sys_deep_sleep, sys_reset } from "../utils/constants";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionActions from "@mui/material/AccordionActions";
@@ -14,7 +14,7 @@ import Stack from "@mui/material/Stack";
 import { Divider, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
-import { ChromeSamples } from "./Logbox";
+import ChromeSamples from "../utils/ChromeSamples";
 
 function Advancedconfig(props) {
   var systemCfg = [

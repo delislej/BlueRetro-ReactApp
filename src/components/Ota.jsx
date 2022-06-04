@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import ProgressBar from "react-bootstrap/ProgressBar";
-import { brUuid, ota_abort, ota_end, ota_start, mtu } from "./Btutils";
-import { ChromeSamples } from "./Logbox";
+import { brUuid, ota_abort, ota_end, ota_start, mtu } from "../utils/constants";
+import ChromeSamples from "../utils/ChromeSamples";
 import { useFilePicker } from "use-file-picker";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";

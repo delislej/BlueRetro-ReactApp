@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChromeSamples } from "./Logbox";
-import { brUuid, mtu, block, pakSize } from "./Btutils";
+import ChromeSamples from "../utils/ChromeSamples";
+import { brUuid, mtu, block, pakSize } from "../utils/constants";
 import Button from "@mui/material/Button";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import { useFilePicker } from "use-file-picker";
