@@ -14,9 +14,11 @@ import Divider from "@mui/material/Divider";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import FolderIcon from "@mui/icons-material/Folder";
-import ImageIcon from "@mui/icons-material/Image";
-import DescriptionIcon from "@mui/icons-material/Description";
+import SystemUpdateIcon from '@mui/icons-material/SystemUpdate';
+import GamepadIcon from '@mui/icons-material/Gamepad';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SdCardIcon from '@mui/icons-material/SdCard';
 import { NavLink } from "react-router-dom";
 
 function MainNavigation(props) {
@@ -43,7 +45,7 @@ function MainNavigation(props) {
   
   return (
 
-    <AppBar position="static" sx={{marginBottom: "25px"}}>
+    <AppBar position="static" sx={{marginBottom: "25px", width: "100%"}}>
       <Container maxWidth="lg" disableGutters = {true} >
         <Toolbar sx={{p:"2"}}>
             <Typography variant="h6" sx={{flexGrow: 1, fontWeight: 700}}>
@@ -75,7 +77,7 @@ function MainNavigation(props) {
                   <NavLink to="/advancedconfig">
                     <ListItemButton>
                       <ListItemIcon>
-                        <ImageIcon sx={{color: "primary.main"}}/>
+                        <SettingsIcon sx={{color: "primary.main"}}/>
                       </ListItemIcon>
                       <ListItemText primary="Advanced Config" />
                       
@@ -85,7 +87,7 @@ function MainNavigation(props) {
                     {props.allowN64 && <NavLink to="/n64config">
                     <ListItemButton>
                       <ListItemIcon>
-                        <FolderIcon sx={{color: "primary.main"}} />
+                        <SdCardIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
                       <ListItemText primary="N64 Config" />
                     </ListItemButton>
@@ -94,7 +96,7 @@ function MainNavigation(props) {
                     <NavLink to="/presets">
                     <ListItemButton>
                       <ListItemIcon>
-                        <FolderIcon sx={{color: "primary.main"}} />
+                        <SportsEsportsIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
                       <ListItemText primary="Presets" />
                     </ListItemButton>
@@ -103,7 +105,7 @@ function MainNavigation(props) {
                     <NavLink to="/presetsmaker">
                     <ListItemButton>
                       <ListItemIcon>
-                        <FolderIcon sx={{color: "primary.main"}} />
+                        <GamepadIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
                       <ListItemText primary="Preset Maker (unfinished/ not working)" />
                     </ListItemButton>
@@ -112,14 +114,11 @@ function MainNavigation(props) {
                     <NavLink to="/ota">
                     <ListItemButton>
                       <ListItemIcon>
-                        <DescriptionIcon sx={{color: "primary.main"}}/>
+                        <SystemUpdateIcon sx={{color: "primary.main"}}/>
                       </ListItemIcon >
                       <ListItemText primary="OTA update" />
                     </ListItemButton>
                     </NavLink>
-
-                    
-
                   </Box>
 
             
@@ -155,7 +154,7 @@ function MainNavigation(props) {
                   <NavLink to="/advancedconfig">
                     <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
-                        <ImageIcon sx={{color: "primary.main"}}/>
+                        <SettingsIcon sx={{color: "primary.main"}}/>
                       </ListItemIcon>
                       <ListItemText primary="Advanced Config" />
                       
@@ -165,7 +164,7 @@ function MainNavigation(props) {
                     {props.allowN64 && <NavLink to="/n64config">
                     <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
-                        <FolderIcon sx={{color: "primary.main"}} />
+                        <SdCardIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
                       <ListItemText primary="N64 Config" />
                     </ListItemButton>
@@ -174,7 +173,7 @@ function MainNavigation(props) {
                     <NavLink to="/presets">
                     <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
-                        <FolderIcon sx={{color: "primary.main"}} />
+                        <SportsEsportsIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
                       <ListItemText primary="Presets" />
                     </ListItemButton>
@@ -183,7 +182,7 @@ function MainNavigation(props) {
                     <NavLink to="/presetsmaker">
                     <ListItemButton onClick={toggleDrawer(false)}>
                       <ListItemIcon>
-                        <FolderIcon sx={{color: "primary.main"}} />
+                        <GamepadIcon sx={{color: "primary.main"}} />
                       </ListItemIcon>
                       <ListItemText primary="Preset Maker" />
                     </ListItemButton>
@@ -192,7 +191,7 @@ function MainNavigation(props) {
                     <NavLink to="/ota" onClick={toggleDrawer(false)}>
                     <ListItemButton>
                       <ListItemIcon>
-                        <DescriptionIcon sx={{color: "primary.main"}}/>
+                        <SystemUpdateIcon sx={{color: "primary.main"}}/>
                       </ListItemIcon >
                       <ListItemText primary="OTA update" />
                     </ListItemButton>

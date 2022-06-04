@@ -27,6 +27,10 @@ export const ota_abort = 0xde;
 
 export const ota_end = 0x5a;
 
+export const sys_deep_sleep = 0x37;
+
+export const sys_reset = 0x38;
+
 export const btn = {
   PAD_LX_LEFT: 0,
   PAD_LX_RIGHT: 1,

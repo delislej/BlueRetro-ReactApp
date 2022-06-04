@@ -35,10 +35,9 @@ export const ChromeSamples = {
 function Logbox() {
   return (
     <Paper sx={{ backgroundColor: "#bbdefb",
-    mx: "auto",
     marginBottom: "10px",
     p: 1,
-    width: "75%",
+    width: "100%",
     maxWidth: "600px", }}>
       <pre
         id="log"

@@ -1,8 +1,9 @@
 import React from "react";
+import Paper from "@mui/material/Paper";
 
 function About() {
   return (
-    <div className="Blueretro">
+    <Paper className="Blueretro" sx={{p:2, width: "66%", marginBottom: "25px"}}>
         <h1 className="font-weight-light">About BlueRetro</h1>
 
         <p>
@@ -10,7 +11,7 @@ function About() {
           consoles.
         </p>
 
-        <p>(coming soon) More advanced settings for specific consoles.</p>
+        <p>Advanced settings lets you configure controller settings such as rumble and special controller types. It also allows for advance settings such as deep sleep and Factory Reset</p>
 
         <p>
           N64 controller pak manager lets you read/write/format your N64
@@ -29,7 +30,7 @@ function About() {
           phone/PC over bluetooth.
         </p>
       
-    </div>
+    </Paper>
   );
 }
 

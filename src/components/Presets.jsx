@@ -72,7 +72,10 @@ function Presets(props) {
     if(props.btDevice === null){
       navigate("/");
     }
-  }, [props.btDevice, navigate]);
+    if (props.globalCfg[0] === 255) {
+      navigate("/");
+    }
+  }, [props.btDevice, props.globalCfg, navigate]);
 
   useEffect(() => {
     
@@ -99,6 +102,7 @@ function Presets(props) {
             arr.push(json[i].name);
           }
           localStorage.setItem("fileNames", JSON.stringify(arr));
+
           let presets = getPresets(arr);
           setPresets(presets);
           //push all console names from JSON files
@@ -239,10 +243,8 @@ function Presets(props) {
 
   return (
     <Box className="Presets" sx={{
-      mx: "auto",
-      p: 2,
-      width: "90%",
-      maxWidth: "600px"
+      width: "66%",
+      marginBottom:"25px"
     }}>
       {pageInit && (
         <Paper className="preset paper"
