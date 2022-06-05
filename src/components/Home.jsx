@@ -10,7 +10,7 @@ import Advancedconfig from "./Advancedconfig";
 import Presetsmaker from "./Presetsmaker";
 import MainNavigation from "./MainNavigation";
 import { useState } from "react";
-import { brUuid } from "../utils/constants" 
+import { brUuid } from "../utils/constants";
 import versionCompare from "../utils/versionCompare";
 import Logbox from "./Logbox";
 import ChromeSamples from "../utils/ChromeSamples";
@@ -70,7 +70,6 @@ function Home() {
         await getAppVersion(service);
 
         await new Promise((resolve) => setTimeout(resolve, 500));
-
       })
       //on error, print to logbox and force navigate back to home, hide loading for when error occures on connect
       .catch((error) => {
@@ -195,7 +194,7 @@ function Home() {
     setShowNavMenu(false);
     navigate("/");
   };
-  
+
   return (
     <Box
       className="home Box"
@@ -256,7 +255,13 @@ function Home() {
           />
           <Route
             path="/ota"
-            element={<Ota btDevice={bluetoothDevice} globalCfg={globalCfg} />}
+            element={
+              <Ota
+                btDevice={bluetoothDevice}
+                globalCfg={globalCfg}
+                btService={btService}
+              />
+            }
           />
         </Routes>
         {showLoading && <CircularProgress />}
