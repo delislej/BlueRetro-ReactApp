@@ -1,5 +1,4 @@
 import { mtu, block } from "../utils/constants";
-import ChromeSamples from "./ChromeSamples"
 
 export const n64WriteRecursive = (chrc, data, offset, transferProgressHook, cancelRef) => {
     return new Promise(function (resolve, reject) {
@@ -20,12 +19,6 @@ export const n64WriteRecursive = (chrc, data, offset, transferProgressHook, canc
           if (offset < data.byteLength) {
             resolve(n64WriteRecursive(chrc, data, offset, transferProgressHook, cancelRef));
           } else {
-            //setProgress(100);
-            ChromeSamples.log(
-              "File upload done. Took: " +
-                "Math.round(performance.now() - startTime.current) / 1000" +
-                " sec"
-            );
             resolve();
           }
         })

@@ -1,5 +1,5 @@
 import { brUuid } from "./constants";
-import writeWriteRecursive from "./writeWriteRecursive";
+import presetWriteRecursive from "./presetWriteRecursive";
 
 export function writeInputCfg(cfgId, cfg, brService) {
     return new Promise(function (resolve, reject) {
@@ -16,7 +16,7 @@ export function writeInputCfg(cfgId, cfg, brService) {
           inputCtrl[0] = Number(cfgId);
           inputCtrl[1] = 0;
           data_chrc = chrc;
-          return writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc);
+          return presetWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc);
         })
         .then((_) => {
           resolve(cfg);

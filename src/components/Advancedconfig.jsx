@@ -64,7 +64,6 @@ function Advancedconfig(props) {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
-    console.log(props.globalCfg);
     if (props.globalCfg[0] === 255) {
       navigate("/");
     }

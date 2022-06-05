@@ -1,6 +1,6 @@
 import ChromeSamples from "./ChromeSamples";
 
-export function writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
+export function presetWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
     return new Promise(function (resolve, reject) {
       ChromeSamples.log("Set Input Ctrl CHRC... " + inputCtrl[1]);
       ctrl_chrc
@@ -18,7 +18,7 @@ export function writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
           ChromeSamples.log("Input Data Written");
           inputCtrl[1] += Number(512);
           if (inputCtrl[1] < cfg.byteLength) {
-            resolve(writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc));
+            resolve(presetWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc));
           } else {
             resolve();
           }
@@ -29,4 +29,4 @@ export function writeWriteRecursive(cfg, inputCtrl, ctrl_chrc, data_chrc) {
     });
   }
 
-  export default writeWriteRecursive;
+  export default presetWriteRecursive;

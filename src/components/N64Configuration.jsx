@@ -99,6 +99,11 @@ function N64Configuration(props) {
     setShowCancel(true);
     startTime.current = performance.now();
     n64WriteFile(props.btService, filesContent[0].content.slice(0, pakSize), pak, setProgress, cancel).then((_) => {
+      ChromeSamples.log(
+        "File upload done. Took: " +
+          Math.round(performance.now() - startTime.current) / 1000 +
+          " sec"
+      );
       clear();
       setShowButtons(true);
       setShowCancel(false);
@@ -135,6 +140,11 @@ function N64Configuration(props) {
     setShowCancel(true);
     startTime.current = performance.now();
     n64WriteFile(props.btService, makeFormattedPak().buffer, pak, setProgress, cancel).then((_) => {
+      ChromeSamples.log(
+        "File upload done. Took: " +
+          Math.round(performance.now() - startTime.current) / 1000 +
+          " sec"
+      );
       setShowButtons(true);
       setShowCancel(false);
       setShowProgress(false);

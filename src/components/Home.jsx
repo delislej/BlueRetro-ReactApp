@@ -195,6 +195,7 @@ function Home() {
     setShowNavMenu(false);
     navigate("/");
   };
+  
   return (
     <Box
       className="home Box"
