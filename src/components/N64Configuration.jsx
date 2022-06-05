@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import ChromeSamples from "../utils/ChromeSamples";
-import { brUuid, pakSize } from "../utils/constants";
+import { pakSize } from "../utils/constants";
 import Button from "@mui/material/Button";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import { useFilePicker } from "use-file-picker";
@@ -26,6 +26,7 @@ import downloadFile from "../utils/downloadFile";
 import saveGlobalCfg from "../utils/saveGlobalCfg";
 import makeFormattedPak from "../utils/makeFormattedPak";
 import n64WriteFile from "../utils/n64WriteFile";
+import n64ReadFile from "../utils/n64ReadFile";
 
 function N64Configuration(props) {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ function N64Configuration(props) {
     readAs: "ArrayBuffer",
   });
 
-  const bankRange = [1, 2, 3, 4, ];
+  const bankRange = [1, 2, 3, 4];
 
   useEffect(() => {
     if (props.btDevice === null) {
@@ -66,29 +67,36 @@ function N64Configuration(props) {
     }
   }, [props.allowManager, props.globalCfg, props.btDevice, navigate]);
 
+  const toggleView = () => {
+    setShowButtons(!showButtons);
+    setShowProgress(!showProgress);
+    setShowCancel(!showCancel);
+  };
+
   const pakRead = (evt) => {
     // Reset progress indicator on new file selection.
+    startTime.current = performance.now();
     setProgress(0);
-    setShowProgress(true);
-    setShowButtons(false);
+    toggleView();
     ChromeSamples.log("Reading Memory Pak: " + pak);
-    var data = new Uint8Array(pakSize);
-    readFile(data)
+    n64ReadFile(props.btService, pak, setProgress, cancel)
       .then((value) => {
+        setProgress(100);
+        ChromeSamples.log(
+          "File download done. Took: " +
+            Math.round(performance.now() - startTime.current) / 1000 +
+            " sec"
+        );
         let pakNum = pak;
         downloadFile(
           new Blob([value.buffer], { type: "application/mpk" }),
           "ctrl_pak" + pakNum + ".mpk"
         );
-        setShowProgress(false);
-        setShowCancel(false);
-        setShowButtons(true);
+        toggleView();
       })
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
-        setShowCancel(false);
-        setShowProgress(false);
-        setShowButtons(true);
+        toggleView();
         cancel.current = 0;
       });
   };
@@ -98,36 +106,27 @@ function N64Configuration(props) {
     setShowProgress(true);
     setShowCancel(true);
     startTime.current = performance.now();
-    n64WriteFile(props.btService, filesContent[0].content.slice(0, pakSize), pak, setProgress, cancel).then((_) => {
-      ChromeSamples.log(
-        "File upload done. Took: " +
-          Math.round(performance.now() - startTime.current) / 1000 +
-          " sec"
-      );
-      clear();
-      setShowButtons(true);
-      setShowCancel(false);
-      setShowProgress(false);
-    })
-    .catch((error) => {
-      ChromeSamples.log("Argh! " + error);
-      setShowButtons(true);
-      setShowCancel(false);
-      setShowProgress(false);
-      cancel.current = 0;
-    });
-  };
-
-  const abortFileTransfer = () => {
-    cancel.current = 1;
-  };
-
-  const transferProgress = (total, loaded) => {
-    var percentLoaded = Math.round((loaded / total) * 100);
-    // Increase the progress bar length.
-    if (percentLoaded < 100) {
-      setProgress(percentLoaded);
-    }
+    n64WriteFile(
+      props.btService,
+      filesContent[0].content.slice(0, pakSize),
+      pak,
+      setProgress,
+      cancel
+    )
+      .then((_) => {
+        ChromeSamples.log(
+          "File upload done. Took: " +
+            Math.round(performance.now() - startTime.current) / 1000 +
+            " sec"
+        );
+        clear();
+        toggleView();
+      })
+      .catch((error) => {
+        ChromeSamples.log("Argh! " + error);
+        toggleView();
+        cancel.current = 0;
+      });
   };
 
   // Init function taken from MPKEdit by bryc:
@@ -135,91 +134,28 @@ function N64Configuration(props) {
   const pakFormat = (evt) => {
     handleClose();
     setProgress(0);
-    setShowButtons(false);
-    setShowProgress(true);
-    setShowCancel(true);
+    toggleView();
     startTime.current = performance.now();
-    n64WriteFile(props.btService, makeFormattedPak().buffer, pak, setProgress, cancel).then((_) => {
-      ChromeSamples.log(
-        "File upload done. Took: " +
-          Math.round(performance.now() - startTime.current) / 1000 +
-          " sec"
-      );
-      setShowButtons(true);
-      setShowCancel(false);
-      setShowProgress(false);
-    })
-    .catch((error) => {
-      ChromeSamples.log("Argh! " + error);
-      setShowButtons(true);
-      setShowCancel(false);
-      setShowProgress(false);
-      cancel.current = 0;
-    });
-  };
-
-  const readRecursive = (chrc, data, offset) => {
-    return new Promise(function (resolve, reject) {
-      if (cancel.current === 1) {
-        throw new Error("Cancelled");
-      }
-      transferProgress(pakSize, offset);
-      chrc
-        .readValue()
-        .then((value) => {
-          var tmp = new Uint8Array(value.buffer);
-          data.set(tmp, offset);
-          offset += value.byteLength;
-          if (offset < pakSize) {
-            resolve(readRecursive(chrc, data, offset));
-          } else {
-            setProgress(100);
-            setShowCancel(false);
-            ChromeSamples.log(
-              "File download done. Took: " +
-                Math.round(performance.now() - startTime.current) / 1000 +
-                " sec"
-            );
-            resolve(data);
-          }
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  };
-
-  const readFile = (data) => {
-    setShowCancel(true);
-    return new Promise(function (resolve, reject) {
-      var offset = new Uint32Array(1);
-      let ctrl_chrc = null;
-      setShowProgress(true);
-      props.btService
-        .getCharacteristic(brUuid[10])
-        .then((chrc) => {
-          ctrl_chrc = chrc;
-          offset[0] = Number(pak) * pakSize;
-          return ctrl_chrc.writeValue(offset);
-        })
-        .then((_) => {
-          return props.btService.getCharacteristic(brUuid[11]);
-        })
-        .then((chrc) => {
-          startTime.current = performance.now();
-          return readRecursive(chrc, data, 0);
-        })
-        .then((_) => {
-          offset[0] = 0;
-          return ctrl_chrc.writeValue(offset);
-        })
-        .then((_) => {
-          resolve(data);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+    n64WriteFile(
+      props.btService,
+      makeFormattedPak().buffer,
+      pak,
+      setProgress,
+      cancel
+    )
+      .then((_) => {
+        ChromeSamples.log(
+          "File upload done. Took: " +
+            Math.round(performance.now() - startTime.current) / 1000 +
+            " sec"
+        );
+        toggleView();
+      })
+      .catch((error) => {
+        ChromeSamples.log("Argh! " + error);
+        toggleView();
+        cancel.current = 0;
+      });
   };
 
   return (
@@ -389,7 +325,7 @@ function N64Configuration(props) {
                 variant="outlined"
                 id="btnFileTransferCancel"
                 onClick={() => {
-                  abortFileTransfer();
+                  cancel.current = 1;
                 }}
               >
                 Cancel

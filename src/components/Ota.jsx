@@ -36,7 +36,12 @@ function Ota(props) {
     setProgress(0);
     setShowUpdate(false);
     setShowCancel(true);
-    otaWriteFirmware(props.btService, filesContent[0].content, setProgress, cancel)
+    otaWriteFirmware(
+      props.btService,
+      filesContent[0].content,
+      setProgress,
+      cancel
+    )
       .then((_) => {
         setShowCancel(false);
         setProgress(0);
@@ -53,13 +58,6 @@ function Ota(props) {
         clear();
         setShowUpdate(true);
       });
-  };
-
-  const abortFwUpdate = () => {
-    ChromeSamples.log("aborting");
-    cancel.current = 1;
-    setProgress(0);
-    setShowCancel(false);
   };
 
   return (
@@ -95,7 +93,15 @@ function Ota(props) {
         ) : null}
         {showCancel && <ProgressBar now={progress} label={`${progress}%`} />}
         {showCancel && (
-          <Button id="btnFwUpdateCancel" onClick={() => abortFwUpdate()}>
+          <Button
+            id="btnFwUpdateCancel"
+            onClick={() => {
+              ChromeSamples.log("aborting");
+              cancel.current = 1;
+              setProgress(0);
+              setShowCancel(false);
+            }}
+          >
             Cancel
           </Button>
         )}
