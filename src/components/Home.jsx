@@ -68,6 +68,9 @@ function Home() {
         await new Promise((resolve) => setTimeout(resolve, 500));
 
         await getAppVersion(service);
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
       })
       //on error, print to logbox and force navigate back to home, hide loading for when error occures on connect
       .catch((error) => {

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Accordion from "@mui/material/Accordion";
-import { brUuid, sys_deep_sleep, sys_reset } from "../utils/constants";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionActions from "@mui/material/AccordionActions";
@@ -15,6 +14,11 @@ import { Divider, Typography } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
 import ChromeSamples from "../utils/ChromeSamples";
+import setReset from "../utils/setReset";
+import setDeepSleep from "../utils/setDeepSleep";
+import saveGlobalCfg from "../utils/saveGlobalCfg";
+import saveOutputCfg from "../utils/saveOutputCfg"
+
 
 function Advancedconfig(props) {
   var systemCfg = [
@@ -69,114 +73,43 @@ function Advancedconfig(props) {
     setInquiry(props.globalCfg[2]);
   }, [props.globalCfg, navigate]);
 
-  function saveGlobal() {
-    if(inUse === true) {
-      ChromeSamples.log("Device is in use!");
-      return null;
-    }
-    var data = props.globalCfg;
-    data[0] = system;
-    data[1] = multiTap;
-    data[2] = inquiry;
-    return new Promise(function (resolve, reject) {
-      ChromeSamples.log("Get Global Config CHRC...");
-      props.btService
-        .getCharacteristic(brUuid[1])
-        .then((chrc) => {
-          ChromeSamples.log("Writing Global Config...");
-          return chrc.writeValue(data);
-        })
-        .then((_) => {
-          ChromeSamples.log("Global Config saved");
-          setInUse(false);
-          resolve();
-        })
-        .catch((error) => {
-          setInUse(false);
-          reject(error);
-        });
-    });
-  }
-
-  function saveOutput() {
-    if(inUse === true) {
-      ChromeSamples.log("Device is in use!");
-      return null;
-    }
-    setInUse(true);
-    var data = new Uint8Array(2);
-    data[0] = controllerMode;
-    data[1] = controllerAccessory;
-    var cfgId = controller;
-    return new Promise(function (resolve, reject) {
-      ChromeSamples.log("Get Output " + cfgId + " CTRL CHRC...");
-      props.btService
-        .getCharacteristic(brUuid[2])
-        .then((chrc) => {
-          ChromeSamples.log("Set Output " + cfgId + " on CTRL chrc...");
-          var outputCtrl = new Uint16Array(1);
-          outputCtrl[0] = Number(cfgId);
-          return chrc.writeValue(outputCtrl);
-        })
-        .then((_) => {
-          ChromeSamples.log("Get Output " + cfgId + " DATA CHRC...");
-          return props.btService.getCharacteristic(brUuid[3]);
-        })
-        .then((chrc) => {
-          ChromeSamples.log("Writing Output " + cfgId + " Config...");
-          return chrc.writeValue(data);
-        })
-        .then((_) => {
-          //document.getElementById("outputSaveText").style.display = "block";
-          if (data[0] === 3) {
-            //document.getElementById("outputSaveMouse").style.display = "block";
-          }
-          ChromeSamples.log("Output " + cfgId + " Config saved");
-          ChromeSamples.log("Please power cycle your BlueRetro device");
-          setInUse(false);
-          resolve();
-        })
-        .catch((error) => {
-          setInUse(false);
-          reject(error);
-        });
-    });
-  }
-
-  function setDeepSleep(evt) {
-    var cmd = new Uint8Array(1);
-    let ctrl_chrc = null;
-    props.btService
-      .getCharacteristic(brUuid[7])
-      .then((chrc) => {
-        ctrl_chrc = chrc;
-        cmd[0] = sys_deep_sleep;
-        return ctrl_chrc.writeValue(cmd);
-      })
-      .catch((error) => {
-        ChromeSamples.log("Argh! " + error);
-        return ctrl_chrc.writeValue(cmd);
-      });
-  }
-
-  function setReset(evt) {
-    var cmd = new Uint8Array(1);
-    let ctrl_chrc = null;
-    props.btService
-      .getCharacteristic(brUuid[7])
-      .then((chrc) => {
-        ctrl_chrc = chrc;
-        cmd[0] = sys_reset;
-        return ctrl_chrc.writeValue(cmd);
-      })
-      .catch((error) => {
-        ChromeSamples.log("Argh! " + error);
-        return ctrl_chrc.writeValue(cmd);
-      });
-  }
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
+  };
+
+  const handleSaveOutput = async () => {
+    if (inUse === true) {
+      ChromeSamples.log("Device is in use!");
+    } else {
+      setInUse(true);
+    var data = new Uint8Array(2);
+    data[0] = controllerMode;
+    data[1] = controllerAccessory;
+    let cfgId = controller;
+    setInUse(true);
+    saveOutputCfg(props.btService, data, cfgId)
+    .then((_)=>{setInUse(false);})
+    .catch((error) => {setInUse(false);});
+    
+    }
+  }
+
+  const handleSaveGlobal = async () => {
+    if (inUse === true) {
+      ChromeSamples.log("Device is in use!");
+    } else {
+      setInUse(true);
+      let globalCfg = props.globalCfg;
+      globalCfg[0] = system;
+      globalCfg[1] = multiTap;
+      globalCfg[2] = inquiry;
+      await saveGlobalCfg(props.btService, globalCfg);
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setInUse(false);
+    }
   };
 
   return (
@@ -205,7 +138,7 @@ function Advancedconfig(props) {
           <AccordionDetails sx={{ alignItems: "center" }}>
             <Stack spacing={3}>
               <FormControl>
-                <InputLabel id="memory pak select">System</InputLabel>
+                <InputLabel id="System select">System</InputLabel>
                 <Select
                   value={system}
                   onChange={(x) => setSystem(x.target.value)}
@@ -250,7 +183,7 @@ function Advancedconfig(props) {
                   id="btnPakRead"
                   variant="outlined"
                   onClick={() => {
-                    saveGlobal();
+                    handleSaveGlobal();
                   }}
                 >
                   Save Config
@@ -323,9 +256,13 @@ function Advancedconfig(props) {
                 </Select>
               </FormControl>
               <AccordionActions>
-                <Button id="saveOutput" variant="outlined" onClick={() => {
-                  saveOutput();
-                }}>
+                <Button
+                  id="saveOutput"
+                  variant="outlined"
+                  onClick={() => {
+                    handleSaveOutput();
+                  }}
+                >
                   Save Config
                 </Button>
               </AccordionActions>
@@ -354,7 +291,7 @@ function Advancedconfig(props) {
                 id="sysReset"
                 variant="outlined"
                 onClick={() => {
-                  setReset();
+                  setReset(props.btService);
                 }}
               >
                 Deep Sleep
@@ -363,7 +300,7 @@ function Advancedconfig(props) {
                 id="sysDeepSleep"
                 variant="outlined"
                 onClick={() => {
-                  setDeepSleep();
+                  setDeepSleep(props.btService);
                 }}
               >
                 Reset BlueRetro Device
