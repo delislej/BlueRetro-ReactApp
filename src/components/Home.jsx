@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { Box } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import CircularProgress from "@mui/material/CircularProgress";
 import N64Configuration from "./N64Configuration";
 import Presets from "./Presets";
@@ -89,35 +90,40 @@ function Home() {
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        await getAppVersion(service).then((value) => {
-          var enc = new TextDecoder("utf-8");
-          ChromeSamples.log("App version: " + enc.decode(value));
-          let version = enc.decode(value).split(" ")[0].split("v")[1];
-          //check if BR version allows for n64 memory pak management, if so save true to hook
-          if (versionCompare("1.6.1", version) <= 0) {
-            setAllowPakManager(true);
-          }
-          //we need to search for _external or _internal then slice the game console
-          if (enc.decode(value).search("internal") === -1) {
-            setBrSpiffs(enc.decode(value).split(" ")[1].split("_external")[0]);
-          } else {
-            setBrSpiffs(enc.decode(value).split(" ")[1].split("_internal")[0]);
-          }
-          //if n64 is found, we unhide the menu option
-          if (enc.decode(value).search("n64") !== -1) {
-            setAllowN64(true);
-          }
-          //navigate to home component and hide loading/show navbar
-          navigate("/");
-          setShowLoading(false);
-          setShowNavMenu(true);
-        })
-        .catch((error) => {
-          ChromeSamples.log("Argh! " + error);
-          setShowNavMenu(false);
-          navigate("/");
-          setShowLoading(false);
-        });
+        await getAppVersion(service)
+          .then((value) => {
+            var enc = new TextDecoder("utf-8");
+            ChromeSamples.log("App version: " + enc.decode(value));
+            let version = enc.decode(value).split(" ")[0].split("v")[1];
+            //check if BR version allows for n64 memory pak management, if so save true to hook
+            if (versionCompare("1.6.1", version) <= 0) {
+              setAllowPakManager(true);
+            }
+            //we need to search for _external or _internal then slice the game console
+            if (enc.decode(value).search("internal") === -1) {
+              setBrSpiffs(
+                enc.decode(value).split(" ")[1].split("_external")[0]
+              );
+            } else {
+              setBrSpiffs(
+                enc.decode(value).split(" ")[1].split("_internal")[0]
+              );
+            }
+            //if n64 is found, we unhide the menu option
+            if (enc.decode(value).search("n64") !== -1) {
+              setAllowN64(true);
+            }
+            //navigate to home component and hide loading/show navbar
+            navigate("/");
+            setShowLoading(false);
+            setShowNavMenu(true);
+          })
+          .catch((error) => {
+            ChromeSamples.log("Argh! " + error);
+            setShowNavMenu(false);
+            navigate("/");
+            setShowLoading(false);
+          });
 
         await new Promise((resolve) => setTimeout(resolve, 500));
       })
@@ -159,7 +165,40 @@ function Home() {
         {/* show connect button if device is null*/}
 
         <Routes>
-          <Route path="/" element={<About />} />
+          <Route
+            path="/"
+            element={
+              <About
+                button={
+                  bluetoothDevice === null ? (
+                    <Grid item>
+                      <Stack spacing={3}>
+                        <Button
+                          id="btConn"
+                          variant="outlined"
+                          onClick={() => {
+                            btConn();
+                          }}
+                        >
+                          Connect BlueRetro
+                        </Button>
+                        <br />
+                        <small>
+                          <i>
+                            Disconnect all controllers from BlueRetro before
+                            connecting for pak management.
+                          </i>
+                        </small>
+                      </Stack>
+                    </Grid>
+                  ) : null
+                }
+                loadingCircle={
+                  <Grid container item justifyContent="center">{showLoading && <CircularProgress />}</Grid>
+                }
+              />
+            }
+          />
           <Route
             path="/n64config"
             element={
@@ -207,35 +246,15 @@ function Home() {
             }
           />
         </Routes>
-        {showLoading && <CircularProgress />}
       </Stack>
       <Stack
         className="Blueretro"
         sx={{
           alignItems: "center",
           justifyContent: "center",
+          width: "250px",
         }}
       >
-        {bluetoothDevice === null ? (
-          <Box>
-            <Button
-              id="btConn"
-              variant="outlined"
-              onClick={() => {
-                btConn();
-              }}
-            >
-              Connect BlueRetro
-            </Button>
-            <br />
-            <small>
-              <i>
-                Disconnect all controllers from BlueRetro before connecting for
-                pak management.
-              </i>
-            </small>
-          </Box>
-        ) : null}
         <Logbox />
       </Stack>
     </Box>
