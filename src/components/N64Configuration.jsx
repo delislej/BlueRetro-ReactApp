@@ -161,7 +161,7 @@ function N64Configuration(props) {
   return (
     <Paper
       sx={{
-        width: "66%",
+        width: {xs:"90%", lg:"66%"},
         marginBottom: "25px",
         p: 2,
       }}

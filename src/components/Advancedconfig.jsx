@@ -114,7 +114,7 @@ function Advancedconfig(props) {
   return (
     <Paper
       sx={{
-        width: "66%",
+        width: {xs:"90%", lg:"66%"},
         p: 2,
         marginBottom: "25px",
       }}

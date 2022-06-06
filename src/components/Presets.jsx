@@ -243,7 +243,7 @@ function Presets(props) {
 
   return (
     <Box className="Presets" sx={{
-      width: "66%",
+      width: {xs:"90%", lg:"66%"},
       marginBottom:"25px"
     }}>
       {pageInit && (

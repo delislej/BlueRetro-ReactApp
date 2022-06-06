@@ -12,7 +12,7 @@ function About() {
   return (
     <Paper
       className="Blueretro"
-      sx={{ p: 2, width: "90%", marginBottom: "25px" }}
+      sx={{ p: 2, width: {xs:"90%", lg:"66%"}, marginBottom: "25px" }}
     >
       <Stack spacing={3}>
         <h1 className="font-weight-light">About BlueRetro</h1>

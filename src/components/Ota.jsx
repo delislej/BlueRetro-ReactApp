@@ -62,7 +62,10 @@ function Ota(props) {
 
   return (
     <Paper
-      sx={{ p: 2, marginBottom: "25px", minWidth: "66%", maxWidth: "75%" }}
+      sx={{ p: 2, 
+        marginBottom: "25px", 
+        width: {xs:"90%", lg:"66%"},
+        }}
     >
       <h1 className="font-weight-light">OTA Firmware Update</h1>
       <Stack spacing={3}>
