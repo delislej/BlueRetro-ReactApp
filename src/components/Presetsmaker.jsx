@@ -59,6 +59,7 @@ const Presetsmaker = (props) => {
     useState(-1);
   const [consoleController, setConsoleController] = useState([]);
   const [selects, setSelects] = useState(null);
+  const [input, setInput] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -80,7 +81,7 @@ const Presetsmaker = (props) => {
       return { value: index, label: value };
     });
     setGcControllerOptions(gcCons);
-  }, []);
+  },[]);
 
   const handleGcControllerChange = (gcCon) => {
     console.log(gcCon.value);
@@ -161,6 +162,10 @@ const Presetsmaker = (props) => {
     console.log(consoleController);
   };
 
+  const handleInputChange = (x) =>{
+    setInput(x.value);
+  }
+
   const printBindings = () => {
     var buttonKeys = Object.keys(btn);
     //console.log(buttonKeys);
@@ -188,8 +193,8 @@ const Presetsmaker = (props) => {
       } else {
         for (let j = 0; j < consoleController[i].bindings.length; j++) {
           let arr = [];
-          arr.push(buttonKeys[consoleController[i].value]);
           arr.push(buttonKeys[consoleController[i].bindings[j].value]);
+          arr.push(buttonKeys[consoleController[i].value]);
           arr.push(0);
           arr.push(100);
           arr.push(50);
@@ -202,12 +207,23 @@ const Presetsmaker = (props) => {
       }
     }
     json.map = tempMap;
-    savePresetInput(json, props.btService, 1);
+    console.log(tempMap);
+    savePresetInput(json, props.btService, input);
   };
 
   return (
     <Box>
       <Typography>Bindings</Typography>
+      <Select
+        defaultValue={""}
+        name="input"
+        options={new Array(12).keys()}
+        onChange={(x) => {
+          handleInputChange(x);
+        }}
+        className="basic-multi-select"
+        classNamePrefix="select"
+      />
       <Select
         defaultValue={""}
         name="colors"
