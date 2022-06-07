@@ -7,7 +7,7 @@ import { Button } from "@mui/material";
 import Box from "@mui/material/Box";
 //import { useGamepads } from 'awesome-react-gamepads';
 //var bluetoothDevice;
-import { btnList } from "../utils/constants";
+import { btnList, btn } from "../utils/constants";
 
 const Presetsmaker = () => {
   const controllers = [
@@ -72,7 +72,7 @@ const Presetsmaker = () => {
 
   const handleGcControllerChange = (gcCon) => {
     console.log(gcCon.value);
-    setSelectedGameConsoleController(gcCon.value + 16)
+    setSelectedGameConsoleController(gcCon.value + 16);
     var gameConsoleController = btnList.map(function (value, index) {
       return { value: index, label: value[gcCon.value + 16], bindings: [] };
     });
@@ -87,10 +87,10 @@ const Presetsmaker = () => {
     }
     console.log(temp);
     setConsoleController(temp);
-  }
+  };
 
   const handleControllerChange = (con) => {
-    setSelectedController(con.value)
+    setSelectedController(con.value);
     var bluetoothController = btnList.map(function (value, index) {
       return { value: index, label: value[con.value] };
     });
@@ -104,24 +104,25 @@ const Presetsmaker = () => {
     }
     console.log(temp2);
     setController(temp2);
-  }
+  };
 
-  const handleButtonBind = (index, bindings) =>{
-    console.log("index: " +index);
+  const handleButtonBind = (index, bindings) => {
+    console.log("index: " + index);
     console.log("bindings: ");
     console.log(bindings);
     console.log(consoleController[index]);
     var temp = consoleController;
-    temp[index].bindings=bindings;
+    temp[index].bindings = bindings;
     setConsoleController(temp);
-  }
+  };
 
   const createSelects = (gcCon, con) => {
     //console.log(controllers.length);
     console.log("gcCon: " + gcCon + " " + "Con: " + con);
-    if(gcCon === -1 || con === -1)
-    { return null;}
-    
+    if (gcCon === -1 || con === -1) {
+      return null;
+    }
+
     var selectTemp = [];
     consoleController.forEach((element, index) => {
       selectTemp.push(
@@ -135,9 +136,9 @@ const Presetsmaker = () => {
             isClearable={false}
             name="colors"
             options={controller}
-            onChange={(x)=>{handleButtonBind(index, x);}
-          
-          }
+            onChange={(x) => {
+              handleButtonBind(index, x);
+            }}
             className="basic-multi-select"
             classNamePrefix="select"
           />
@@ -149,8 +150,47 @@ const Presetsmaker = () => {
   };
 
   const printBindings = () => {
-    console.log(consoleController);
-  }
+    var buttonKeys = Object.keys(btn);
+    //console.log(buttonKeys);
+    let json = {
+      name: "preset maker json",
+      desc: "used as a shell for making presets",
+      console: "NA",
+      map: [],
+    };
+    let tempMap = [];
+
+    for (let i = 0; i < consoleController.length; i++) {
+      if (consoleController[i].bindings.length < 1) {
+        let arr = [];
+        arr.push(buttonKeys[consoleController[i].value]);
+        arr.push(buttonKeys[consoleController[i].value]);
+        arr.push(0);
+        arr.push(100);
+        arr.push(50);
+        arr.push(135);
+        arr.push(0);
+        arr.push(0);
+        arr.push(0);
+        tempMap.push(arr);
+      } else {
+        for (let j = 0; j < consoleController[i].bindings.length; j++) {
+          let arr = [];
+          arr.push(buttonKeys[consoleController[i].value]);
+          arr.push(buttonKeys[consoleController[i].bindings[j].value]);
+          arr.push(0);
+          arr.push(100);
+          arr.push(50);
+          arr.push(135);
+          arr.push(0);
+          arr.push(0);
+          arr.push(0);
+          tempMap.push(arr);
+        }
+      }
+    }
+    console.log(tempMap);
+  };
 
   return (
     <Box>
@@ -159,7 +199,9 @@ const Presetsmaker = () => {
         defaultValue={""}
         name="colors"
         options={gcControllerOptions}
-        onChange={(x)=>{handleGcControllerChange(x)}}
+        onChange={(x) => {
+          handleGcControllerChange(x);
+        }}
         className="basic-multi-select"
         classNamePrefix="select"
       />
@@ -167,7 +209,9 @@ const Presetsmaker = () => {
         defaultValue={""}
         name="colors"
         options={controllerOptions}
-        onChange={(x)=>{handleControllerChange(x)}}
+        onChange={(x) => {
+          handleControllerChange(x);
+        }}
         className="basic-multi-select"
         classNamePrefix="select"
       />
