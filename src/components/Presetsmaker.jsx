@@ -8,8 +8,10 @@ import Box from "@mui/material/Box";
 //import { useGamepads } from 'awesome-react-gamepads';
 //var bluetoothDevice;
 import { btnList, btn } from "../utils/constants";
+import savePresetInput from "../utils/savePresetInput";
+import { useNavigate } from "react-router-dom";
 
-const Presetsmaker = () => {
+const Presetsmaker = (props) => {
   const controllers = [
     "Default",
     "Keyboard",
@@ -57,6 +59,16 @@ const Presetsmaker = () => {
     useState(-1);
   const [consoleController, setConsoleController] = useState([]);
   const [selects, setSelects] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (props.btDevice === null) {
+      navigate("/");
+    }
+    if (props.globalCfg[0] === 255) {
+      navigate("/");
+    }
+  }, [props.btDevice, props.globalCfg, navigate]);
 
   useEffect(() => {
     var cons = controllers.map(function (value, index) {
@@ -189,7 +201,8 @@ const Presetsmaker = () => {
         }
       }
     }
-    console.log(tempMap);
+    json.map = tempMap;
+    savePresetInput(json, props.btService, 1);
   };
 
   return (

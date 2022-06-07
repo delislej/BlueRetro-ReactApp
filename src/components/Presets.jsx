@@ -326,12 +326,13 @@ function Presets(props) {
                     id="save"
                     variant="outlined"
                     onClick={() => {
+                      if(selectedPreset !== -1){
                       savePresetInput(
-                        presets,
-                        selectedPreset,
+                        presets[selectedPreset],
                         props.btService,
                         controller
                       );
+                    }
                     }}
                   >
                     Save Preset

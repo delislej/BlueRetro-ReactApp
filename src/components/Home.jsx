@@ -233,7 +233,11 @@ function Home() {
           />
           <Route
             path="/presetsmaker"
-            element={<Presetsmaker btDevice={bluetoothDevice} />}
+            element={<Presetsmaker 
+              btDevice={bluetoothDevice}
+              globalCfg={globalCfg}
+              btService={btService}
+               />}
           />
           <Route
             path="/ota"
