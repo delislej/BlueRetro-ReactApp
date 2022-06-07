@@ -10,6 +10,7 @@ import Box from "@mui/material/Box";
 import { btnList, btn } from "../utils/constants";
 import savePresetInput from "../utils/savePresetInput";
 import { useNavigate } from "react-router-dom";
+import { set } from "local-storage";
 
 const Presetsmaker = (props) => {
   const controllers = [
@@ -51,6 +52,7 @@ const Presetsmaker = (props) => {
     "Dreamcast",
     "PSX / PS2",
   ];
+  const myrange = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const [controller, setController] = useState([]);
   const [controllerOptions, setControllerOptions] = useState([]);
   const [gcControllerOptions, setGcControllerOptions] = useState([]);
@@ -60,6 +62,8 @@ const Presetsmaker = (props) => {
   const [consoleController, setConsoleController] = useState([]);
   const [selects, setSelects] = useState(null);
   const [input, setInput] = useState(1);
+  const [inputOptions, setInputOptions] = useState({value: 0, label:0});
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -81,6 +85,13 @@ const Presetsmaker = (props) => {
       return { value: index, label: value };
     });
     setGcControllerOptions(gcCons);
+
+    var inputs = myrange.map(function (input, index) {
+      return { value: index, label: input };
+    });
+
+    setInputOptions(inputs);
+
   },[]);
 
   const handleGcControllerChange = (gcCon) => {
@@ -163,7 +174,7 @@ const Presetsmaker = (props) => {
   };
 
   const handleInputChange = (x) =>{
-    setInput(x.value);
+    setInput(x.value + 1);
   }
 
   const printBindings = () => {
@@ -217,7 +228,7 @@ const Presetsmaker = (props) => {
       <Select
         defaultValue={""}
         name="input"
-        options={new Array(12).keys()}
+        options={inputOptions}
         onChange={(x) => {
           handleInputChange(x);
         }}
