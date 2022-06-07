@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { Box } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import CircularProgress from "@mui/material/CircularProgress";
 import N64Configuration from "./N64Configuration";
 import Presets from "./Presets";
@@ -10,12 +11,16 @@ import Advancedconfig from "./Advancedconfig";
 import Presetsmaker from "./Presetsmaker";
 import MainNavigation from "./MainNavigation";
 import { useState } from "react";
-import { brUuid, versionCompare } from "./Btutils";
+import { brUuid } from "../utils/constants";
+import versionCompare from "../utils/versionCompare";
 import Logbox from "./Logbox";
-import { ChromeSamples } from "./Logbox";
+import ChromeSamples from "../utils/ChromeSamples";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
+import getApiVersion from "../utils/getApiVersion";
+import getGlobalCfg from "../utils/getGlobalCfg";
+import getAppVersion from "../utils/getAppVersion";
 
 function Home() {
   const [bluetoothDevice, setBluetoothDevice] = useState(null);
@@ -58,15 +63,69 @@ function Home() {
         setBtService(service);
 
         //access app version characteristics with a wait to avoid errors
-        await getApiVersion(service);
+        await getApiVersion(service)
+          .then((value) => {
+            apiver = value.getUint8(0);
+            ChromeSamples.log("Api version: " + apiver);
+          })
+          .catch((error) => {
+            setShowNavMenu(false);
+            navigate("/");
+            setShowLoading(false);
+            throw new Error(error);
+          });
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        await getGlobalCfg(service);
+        await getGlobalCfg(service, apiver)
+          .then((value) => {
+            setGlobalCfg(value);
+          })
+          .catch((error) => {
+            ChromeSamples.log("Argh! " + error);
+            setShowNavMenu(false);
+            navigate("/");
+            setShowLoading(false);
+          });
 
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        await getAppVersion(service);
+        await getAppVersion(service)
+          .then((value) => {
+            var enc = new TextDecoder("utf-8");
+            ChromeSamples.log("App version: " + enc.decode(value));
+            let version = enc.decode(value).split(" ")[0].split("v")[1];
+            //check if BR version allows for n64 memory pak management, if so save true to hook
+            if (versionCompare("1.6.1", version) <= 0) {
+              setAllowPakManager(true);
+            }
+            //we need to search for _external or _internal then slice the game console
+            if (enc.decode(value).search("internal") === -1) {
+              setBrSpiffs(
+                enc.decode(value).split(" ")[1].split("_external")[0]
+              );
+            } else {
+              setBrSpiffs(
+                enc.decode(value).split(" ")[1].split("_internal")[0]
+              );
+            }
+            //if n64 is found, we unhide the menu option
+            if (enc.decode(value).search("n64") !== -1) {
+              setAllowN64(true);
+            }
+            //navigate to home component and hide loading/show navbar
+            navigate("/");
+            setShowLoading(false);
+            setShowNavMenu(true);
+          })
+          .catch((error) => {
+            ChromeSamples.log("Argh! " + error);
+            setShowNavMenu(false);
+            navigate("/");
+            setShowLoading(false);
+          });
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
       })
       //on error, print to logbox and force navigate back to home, hide loading for when error occures on connect
       .catch((error) => {
@@ -77,113 +136,6 @@ function Home() {
       });
   };
 
-  const getAppVersion = (service) => {
-    return new Promise((resolve) => {
-      service
-        .getCharacteristic(brUuid[9])
-        .then((chrc) => {
-          ChromeSamples.log("Reading App version...");
-          return chrc.readValue();
-        })
-        .then((value) => {
-          var enc = new TextDecoder("utf-8");
-          ChromeSamples.log("App version: " + enc.decode(value));
-          let version = enc.decode(value).split(" ")[0].split("v")[1];
-          //check if BR version allows for n64 memory pak management, if so save true to hook
-          if (versionCompare("1.6.1", version) <= 0) {
-            setAllowPakManager(true);
-          }
-          //we need to search for _external or _internal then slice the game console
-          if (enc.decode(value).search("internal") === -1) {
-            setBrSpiffs(enc.decode(value).split(" ")[1].split("_external")[0]);
-          } else {
-            setBrSpiffs(enc.decode(value).split(" ")[1].split("_internal")[0]);
-          }
-          //if n64 is found, we unhide the menu option
-          if (enc.decode(value).search("n64") !== -1) {
-            setAllowN64(true);
-          }
-          //navigate to home component and hide loading/show navbar
-          navigate("/");
-          setShowLoading(false);
-          setShowNavMenu(true);
-        });
-      resolve();
-    });
-  };
-
-  const getApiVersion = (service) => {
-    return new Promise((resolve) => {
-      service
-        .getCharacteristic(brUuid[6])
-        .then((chrc) => {
-          ChromeSamples.log("Reading Api version...");
-          return chrc.readValue();
-        })
-        .then((value) => {
-          apiver = value.getUint8(0);
-          ChromeSamples.log("Api version: " + apiver);
-        })
-        .catch((error) => {
-          setShowNavMenu(false);
-          navigate("/");
-          setShowLoading(false);
-          throw new Error(error);
-        });
-      resolve();
-    });
-  };
-
-  const getGlobalCfg = (service) => {
-    return new Promise((resolve) => {
-      service
-        .getCharacteristic(brUuid[1])
-        .then((chrc) => {
-          ChromeSamples.log("Reading Global Config...");
-          return chrc.readValue();
-        })
-        .then((value) => {
-          if (apiver === -1) {
-            setShowNavMenu(false);
-            setBluetoothDevice(null);
-            navigate("/");
-            setShowLoading(false);
-            throw new Error("failed to get API version");
-          }
-          ChromeSamples.log("Global Config size: " + value.byteLength);
-          //get global config size from apiVersion
-          var temp = new Uint8Array(2);
-
-          if (apiver > 0) {
-            temp = new Uint8Array(3);
-          }
-          if (apiver > 1) {
-            temp = new Uint8Array(4);
-          }
-
-          //systemCfg value
-          temp[0] = value.getUint8(0);
-          //multitapCfg value
-          temp[1] = value.getUint8(1);
-          if (apiver > 0) {
-            temp[2] = value.getUint8(2);
-          }
-          if (apiver > 1) {
-            //bank select value
-            temp[3] = value.getUint8(3);
-          }
-          setGlobalCfg(temp);
-          resolve();
-        })
-        .catch((error) => {
-          ChromeSamples.log("Argh! " + error);
-          setShowNavMenu(false);
-          navigate("/");
-          setShowLoading(false);
-        });
-    });
-  };
-
   const onDisconnected = () => {
     //print disconnect to logbox, save null to device hook, hide navmenu
     ChromeSamples.log("> Bluetooth Device disconnected");
@@ -191,6 +143,7 @@ function Home() {
     setShowNavMenu(false);
     navigate("/");
   };
+
   return (
     <Box
       className="home Box"
@@ -212,7 +165,40 @@ function Home() {
         {/* show connect button if device is null*/}
 
         <Routes>
-          <Route path="/" element={<About />} />
+          <Route
+            path="/"
+            element={
+              <About
+                button={
+                  bluetoothDevice === null ? (
+                    <Grid item>
+                      <Stack spacing={3}>
+                        <Button
+                          id="btConn"
+                          variant="outlined"
+                          onClick={() => {
+                            btConn();
+                          }}
+                        >
+                          Connect BlueRetro
+                        </Button>
+                        <br />
+                        <small>
+                          <i>
+                            Disconnect all controllers from BlueRetro before
+                            connecting for pak management.
+                          </i>
+                        </small>
+                      </Stack>
+                    </Grid>
+                  ) : null
+                }
+                loadingCircle={
+                  <Grid container item justifyContent="center">{showLoading && <CircularProgress />}</Grid>
+                }
+              />
+            }
+          />
           <Route
             path="/n64config"
             element={
@@ -251,38 +237,24 @@ function Home() {
           />
           <Route
             path="/ota"
-            element={<Ota btDevice={bluetoothDevice} globalCfg={globalCfg} />}
+            element={
+              <Ota
+                btDevice={bluetoothDevice}
+                globalCfg={globalCfg}
+                btService={btService}
+              />
+            }
           />
         </Routes>
-        {showLoading && <CircularProgress />}
       </Stack>
       <Stack
         className="Blueretro"
         sx={{
           alignItems: "center",
           justifyContent: "center",
+          width: "250px",
         }}
       >
-        {bluetoothDevice === null ? (
-          <Box>
-            <Button
-              id="btConn"
-              variant="outlined"
-              onClick={() => {
-                btConn();
-              }}
-            >
-              Connect BlueRetro
-            </Button>
-            <br />
-            <small>
-              <i>
-                Disconnect all controllers from BlueRetro before connecting for
-                pak management.
-              </i>
-            </small>
-          </Box>
-        ) : null}
         <Logbox />
       </Stack>
     </Box>

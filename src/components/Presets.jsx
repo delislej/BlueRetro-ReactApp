@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-//import Select from "react-select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import { savePresetInput } from "./Btutils";
+import savePresetInput from "../utils/savePresetInput";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
@@ -243,7 +242,7 @@ function Presets(props) {
 
   return (
     <Box className="Presets" sx={{
-      width: "66%",
+      width: {xs:"90%", lg:"66%"},
       marginBottom:"25px"
     }}>
       {pageInit && (

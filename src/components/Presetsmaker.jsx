@@ -1,165 +1,193 @@
-//import React, { useState, useEffect, useRef } from "react";
-//import Select from 'react-select'
+import React, { useState, useEffect } from "react";
+import Select from "react-select";
 //import { brUuid } from "./Btutils";
 //import { ChromeSamples } from "./Logbox";
 import { Typography } from "@mui/material";
+import { Button } from "@mui/material";
 import Box from "@mui/material/Box";
 //import { useGamepads } from 'awesome-react-gamepads';
 //var bluetoothDevice;
+import { btnList } from "../utils/constants";
 
 const Presetsmaker = () => {
-  /*var jsonTest = {
-    name: "Default Gamepad only",
-    desc: "Generic preset that should be good for most games. Only map gamepad buttons & axes.",
-    console: "Default",
-    map: [
-      ["PAD_LX_LEFT", "PAD_LX_LEFT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LX_RIGHT", "PAD_LX_RIGHT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LY_DOWN", "PAD_LY_DOWN", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LY_UP", "PAD_LY_UP", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RX_LEFT", "PAD_RX_LEFT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RX_RIGHT", "PAD_RX_RIGHT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RY_DOWN", "PAD_RY_DOWN", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RY_UP", "PAD_RY_UP", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LD_LEFT", "PAD_LD_LEFT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LD_RIGHT", "PAD_LD_RIGHT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LD_DOWN", "PAD_LD_DOWN", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LD_UP", "PAD_LD_UP", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RD_LEFT", "PAD_RD_LEFT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RD_RIGHT", "PAD_RD_RIGHT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RD_DOWN", "PAD_RD_DOWN", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RD_UP", "PAD_RD_UP", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RB_LEFT", "PAD_RB_LEFT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RB_RIGHT", "PAD_RB_RIGHT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RB_DOWN", "PAD_RB_DOWN", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RB_UP", "PAD_RB_UP", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_MM", "PAD_MM", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_MS", "PAD_MS", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_MT", "PAD_MT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_MQ", "PAD_MQ", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LM", "PAD_LM", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LS", "PAD_LS", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LT", "PAD_LT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_LJ", "PAD_LJ", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RM", "PAD_RM", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RS", "PAD_RS", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RT", "PAD_RT", 0, 100, 50, 135, 0, 0, 0],
-      ["PAD_RJ", "PAD_RJ", 0, 100, 50, 135, 0, 0, 0],
-    ],
-  };
-
-  //const [brService, setBrService] = useState(null);
-  const [pageInit, setPageInit] = useState(false);
-  const [buttonList, setButtonList] = useState([]);
-  //const [boundList, setBoundList] = useState(Array(32).fill("not Set"));
-  const n64 = useRef([]);
-  const btnPressed = useRef(-1);
-  //const time = useRef(performance.now());
-  const allowButtonRead = useRef(false);
-  const readButton = (button) => {
-    console.log(button);
-    allowButtonRead.current = true;
-    btnPressed.current = button;
-  };
-
-  const downloadJson = (obj) => {
-    const element = document.createElement("a");
-    let temp = new Blob([JSON.stringify(obj)], { type: "application/json" });
-    element.href = URL.createObjectURL(temp);
-    element.download = "userFile.json";
-    document.body.appendChild(element);
-    element.click();
-  };
+  const controllers = [
+    "Default",
+    "Keyboard",
+    "Mouse",
+    "PS3",
+    "PS4 / PS5",
+    "Wiimote",
+    "Wiimote + Classic",
+    "Wiimote + Nunchuck",
+    "WiiU / Switch Pro",
+    "Switch NES",
+    "Switch SNES",
+    "Switch MD / Genesis",
+    "Switch N64",
+    "Switch Joycon",
+    "Xbox One/X|S",
+    "Steam",
+  ];
+  const gameConsoleControllers = [
+    "NeoGeo (Parallel 1P)",
+    "PCE",
+    "PCE 6 btns",
+    "NES",
+    "SNES",
+    "CD-i",
+    "JVS",
+    "3DO",
+    "Jaguar",
+    "Jaguar 6D",
+    "PC-FX",
+    "VB",
+    "N64",
+    "GameCube",
+    "Atari / SMS",
+    "MD / Genesis",
+    "Saturn",
+    "Dreamcast",
+    "PSX / PS2",
+  ];
+  const [controller, setController] = useState([]);
+  const [controllerOptions, setControllerOptions] = useState([]);
+  const [gcControllerOptions, setGcControllerOptions] = useState([]);
+  const [selectedController, setSelectedController] = useState(-1);
+  const [selectedGameConsoleController, setSelectedGameConsoleController] =
+    useState(-1);
+  const [consoleController, setConsoleController] = useState([]);
+  const [selects, setSelects] = useState(null);
 
   useEffect(() => {
-    n64.current = require("../controllers/n64.json");
-  });
+    var cons = controllers.map(function (value, index) {
+      return { value: index, label: value };
+    });
+    setControllerOptions(cons);
 
-  const getBindButtons = (thing) => {
-    let temp = [];
-    //console.log("boundList: " + boundList);
-    for (let i = 0; i < thing.map.length; i++) {
-      if (thing.map[i][1] !== "") {
-        temp.push({
-          element: (
-            <button
-              onClick={() => {
-                if (!allowButtonRead.current === true) {
-                  readButton(i);
-                } else {
-                  console.log("already binding button!");
-                }
-              }}
-            >
-              bind {thing.map[i][1]} button:{" "}
-            </button>
-          ),
-          key: i,
-        });
+    var gcCons = gameConsoleControllers.map(function (value, index) {
+      return { value: index, label: value };
+    });
+    setGcControllerOptions(gcCons);
+  }, []);
+
+  const handleGcControllerChange = (gcCon) => {
+    console.log(gcCon.value);
+    setSelectedGameConsoleController(gcCon.value + 16)
+    var gameConsoleController = btnList.map(function (value, index) {
+      return { value: index, label: value[gcCon.value + 16], bindings: [] };
+    });
+    console.log(gameConsoleController);
+    var temp = [];
+    for (let i = 0; i < gameConsoleController.length; i++) {
+      if (gameConsoleController[i].label === "") {
+        continue;
+      } else {
+        temp.push(gameConsoleController[i]);
       }
     }
-    return temp;
+    console.log(temp);
+    setConsoleController(temp);
+  }
+
+  const handleControllerChange = (con) => {
+    setSelectedController(con.value)
+    var bluetoothController = btnList.map(function (value, index) {
+      return { value: index, label: value[con.value] };
+    });
+    var temp2 = [];
+    for (let i = 0; i < bluetoothController.length; i++) {
+      if (bluetoothController[i].label === "") {
+        continue;
+      } else {
+        temp2.push(bluetoothController[i]);
+      }
+    }
+    console.log(temp2);
+    setController(temp2);
+  }
+
+  const handleButtonBind = (index, bindings) =>{
+    console.log("index: " +index);
+    console.log("bindings: ");
+    console.log(bindings);
+    console.log(consoleController[index]);
+    var temp = consoleController;
+    temp[index].bindings=bindings;
+    setConsoleController(temp);
+  }
+
+  const createSelects = (gcCon, con) => {
+    //console.log(controllers.length);
+    console.log("gcCon: " + gcCon + " " + "Con: " + con);
+    if(gcCon === -1 || con === -1)
+    { return null;}
+    
+    var selectTemp = [];
+    consoleController.forEach((element, index) => {
+      selectTemp.push(
+        <form key={index}>
+          <label id="aria-label" htmlFor="aria-example-input">
+            {element.label}
+          </label>
+          <Select
+            defaultValue={element.value}
+            isMulti
+            isClearable={false}
+            name="colors"
+            options={controller}
+            onChange={(x)=>{handleButtonBind(index, x);}
+          
+          }
+            className="basic-multi-select"
+            classNamePrefix="select"
+          />
+        </form>
+      );
+    });
+    setSelects(selectTemp);
+    console.log(consoleController);
   };
 
-  
-  useGamepads({
-    onConnect: (gamepad) => ChromeSamples.log('Gamepad Connected: ', gamepad),
-    //onUpdate: (gamepad) => console.log(gamepad),
-    onGamepadButtonUp: (button) => {
-      if(allowButtonRead.current === true){
-      let temp = boundList;
-      temp[btnPressed.current] = button.buttonName;
-      setBoundList(temp);
-      time.current = performance.now();
-      allowButtonRead.current = false;
-    }},
-    onGamepadAxesChange: (axes) => {
-      if((allowButtonRead.current === true && axes.value > .5) || (allowButtonRead.current === true && axes.value < -.5)){
-        let foundAxes = axes.axesName;
-        if(axes.value > 0){
-          foundAxes+="+";
-        }
-        else{
-          foundAxes+="-";
-        }
-        console.log("axes detected");
-        let temp = boundList;
-        temp[btnPressed.current] = foundAxes;
-        setBoundList(temp);
-        time.current = performance.now();
-        allowButtonRead.current = false;}
-      },
-    onKonamiSuccess: () => console.log("konami Success")
-  });*/
+  const printBindings = () => {
+    console.log(consoleController);
+  }
 
-  /*const makeButtons = () => {
-    let buttons = buttonList.map((button) => (
-      <div className={"button" + button.key} key={button.key}>
-        {button.element} bound: {boundList[button.key]}
-      </div>
-    ));
-    return (
-      <div>
-        {buttons}
-        <button
-          onClick={() => {
-            downloadJson(jsonTest);
-          }}
-        >
-          {" "}
-          Download Preset{" "}
-        </button>
-      </div>
-    );
-  };
-*/
   return (
-   <Box>
-     <Typography>test</Typography>;
-   </Box>
+    <Box>
+      <Typography>Bindings</Typography>
+      <Select
+        defaultValue={""}
+        name="colors"
+        options={gcControllerOptions}
+        onChange={(x)=>{handleGcControllerChange(x)}}
+        className="basic-multi-select"
+        classNamePrefix="select"
+      />
+      <Select
+        defaultValue={""}
+        name="colors"
+        options={controllerOptions}
+        onChange={(x)=>{handleControllerChange(x)}}
+        className="basic-multi-select"
+        classNamePrefix="select"
+      />
+      <Button
+        onClick={() => {
+          createSelects(selectedGameConsoleController, selectedController);
+        }}
+      >
+        print test
+      </Button>
+      {selects}
+      <Button
+        onClick={() => {
+          printBindings();
+        }}
+      >
+        Print Bindings
+      </Button>
+    </Box>
   );
 };
-
-
 
 export default Presetsmaker;
