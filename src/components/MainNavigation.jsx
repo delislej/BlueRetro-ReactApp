@@ -112,7 +112,7 @@ function MainNavigation(props) {
                 <ListItemIcon>
                   <GamepadIcon sx={{ color: "primary.main" }} />
                 </ListItemIcon>
-                <ListItemText primary="Preset Maker (unfinished/ not working)" />
+                <ListItemText primary="Preset Maker (Work in Progress)" />
               </ListItemButton>
             </NavLink>
 
