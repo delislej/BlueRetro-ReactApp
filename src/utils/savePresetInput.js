@@ -2,10 +2,9 @@ import ChromeSamples from "../utils/ChromeSamples";
 import writeInputCfg from "./writeInputCfg";
 import {btn} from "../utils/constants";
 
-export function savePresetInput(presets, presetNumber, brService, input) {
+export function savePresetInput(preset, brService, input) {
     //make sure preset is not placeholder before we do anything
-    if (presetNumber !== -1) {
-      var nbMapping = presets[presetNumber].map.length;
+      var nbMapping = preset.map.length;
       var cfgSize = nbMapping * 8 + 3;
       var cfg = new Uint8Array(cfgSize);
       var cfgId = input - 1;
@@ -14,16 +13,16 @@ export function savePresetInput(presets, presetNumber, brService, input) {
       cfg[j++] = 0;
       cfg[j++] = nbMapping;
       for (var i = 0; i < nbMapping; i++) {
-        cfg[j++] = btn[presets[presetNumber].map[i][0]];
-        cfg[j++] = btn[presets[presetNumber].map[i][1]];
-        cfg[j++] = presets[presetNumber].map[i][2] + cfgId;
-        cfg[j++] = presets[presetNumber].map[i][3];
-        cfg[j++] = presets[presetNumber].map[i][4];
-        cfg[j++] = presets[presetNumber].map[i][5];
-        cfg[j++] = presets[presetNumber].map[i][6];
+        cfg[j++] = btn[preset.map[i][0]];
+        cfg[j++] = btn[preset.map[i][1]];
+        cfg[j++] = preset.map[i][2] + cfgId;
+        cfg[j++] = preset.map[i][3];
+        cfg[j++] = preset.map[i][4];
+        cfg[j++] = preset.map[i][5];
+        cfg[j++] = preset.map[i][6];
         cfg[j++] =
-          Number(presets[presetNumber].map[i][7]) |
-          (Number(presets[presetNumber].map[i][8]) << 4);
+          Number(preset.map[i][7]) |
+          (Number(preset.map[i][8]) << 4);
       }
   
       return new Promise(function (resolve, reject) {
@@ -36,7 +35,7 @@ export function savePresetInput(presets, presetNumber, brService, input) {
             reject(error);
           });
       });
-    }
+    
   }
 
   export default savePresetInput;
