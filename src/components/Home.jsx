@@ -179,7 +179,7 @@ function Home() {
                     isWebBluetoothEnabled() === false ? (
                       <Grid item>
                         <Stack spacing={1}>
-                          <Typography>please enable web bluetooth! go to chrome://flags/#enable-web-bluetooth-new-permissions-backend in your browser!
+                          <Typography>please enable web bluetooth! web bluetooth is only supported in Chrome and edge. go to chrome://flags/#enable-web-bluetooth-new-permissions-backend in your browser!
                             </Typography>
                         </Stack>
                       </Grid>
