@@ -21,6 +21,8 @@ import Stack from "@mui/material/Stack";
 import getApiVersion from "../utils/getApiVersion";
 import getGlobalCfg from "../utils/getGlobalCfg";
 import getAppVersion from "../utils/getAppVersion";
+import isWebBluetoothEnabled from "../utils/isWebBluetoothEnabled";
+import { Typography } from "@mui/material";
 
 function Home() {
   const [bluetoothDevice, setBluetoothDevice] = useState(null);
@@ -173,7 +175,7 @@ function Home() {
             element={
               <About
                 button={
-                  bluetoothDevice === null ? (
+                  bluetoothDevice === null ? isWebBluetoothEnabled() === false ? <Typography>please enable web bluetooth!</Typography> : (
                     <Grid item>
                       <Stack spacing={1}>
                         <Button
