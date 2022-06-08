@@ -1,70 +1,30 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
-//import { brUuid } from "./Btutils";
-//import { ChromeSamples } from "./Logbox";
 import { Typography } from "@mui/material";
 import { Button } from "@mui/material";
-import Box from "@mui/material/Box";
 //import { useGamepads } from 'awesome-react-gamepads';
 //var bluetoothDevice;
 import { btnList, btn } from "../utils/constants";
 import savePresetInput from "../utils/savePresetInput";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
+import { Paper } from "@mui/material";
+import { gameConsoleControllers } from "../utils/constants";
+import { controllers } from "../utils/constants";
 
 const Presetsmaker = (props) => {
-  const controllers = [
-    "Default",
-    "Keyboard",
-    "Mouse",
-    "PS3",
-    "PS4 / PS5",
-    "Wiimote",
-    "Wiimote + Classic",
-    "Wiimote + Nunchuck",
-    "WiiU / Switch Pro",
-    "Switch NES",
-    "Switch SNES",
-    "Switch MD / Genesis",
-    "Switch N64",
-    "Switch Joycon",
-    "Xbox One/X|S",
-    "Steam",
-  ];
-  const gameConsoleControllers = [
-    "NeoGeo (Parallel 1P)",
-    "PCE",
-    "PCE 6 btns",
-    "NES",
-    "SNES",
-    "CD-i",
-    "JVS",
-    "3DO",
-    "Jaguar",
-    "Jaguar 6D",
-    "PC-FX",
-    "VB",
-    "N64",
-    "GameCube",
-    "Atari / SMS",
-    "MD / Genesis",
-    "Saturn",
-    "Dreamcast",
-    "PSX / PS2",
-  ];
   const myrange = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const [controller, setController] = useState([]);
   const [controllerOptions, setControllerOptions] = useState([]);
   const [gcControllerOptions, setGcControllerOptions] = useState([]);
   const [selectedController, setSelectedController] = useState(-1);
-  const [selectedGameConsoleController, setSelectedGameConsoleController] =
-    useState(-1);
+  const [selectedGameConsoleController, setSelectedGameConsoleController] = useState(-1);
   const [consoleController, setConsoleController] = useState([]);
   const [selects, setSelects] = useState(null);
   const [input, setInput] = useState(1);
   const [inputOptions, setInputOptions] = useState({ value: 0, label: 0 });
   var filterArr = [];
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   /*useEffect(() => {
     if (props.btDevice === null) {
@@ -229,7 +189,7 @@ const Presetsmaker = (props) => {
   };
 
   return (
-    <Box>
+    <Paper>
       <Typography>Bindings</Typography>
       <Select
         defaultValue={""}
@@ -276,7 +236,7 @@ const Presetsmaker = (props) => {
       >
         Save Bindings
       </Button>
-    </Box>
+    </Paper>
   );
 };
 
