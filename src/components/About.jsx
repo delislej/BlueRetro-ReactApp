@@ -62,8 +62,7 @@ function About(props) {
           <Stack direction="row"  gap={1}>
             <SportsEsportsIcon />
             <Typography variant="body1">
-              (Work in Progress) Presets maker will let you make custom presets right
-              from your phone, and bind controls using a controller on your PC
+              (Work in Progress) Presets maker will let you make and use custom presets right from your phone. these presets can be downloaded and shared with others!
             </Typography>
           </Stack>
         </Grid>
