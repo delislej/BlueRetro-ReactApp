@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import CircularProgress from "@mui/material/CircularProgress";
 import N64Configuration from "./N64Configuration";
@@ -161,8 +161,11 @@ function Home() {
           justifyContent: "center",
         }}
       >
-        {showNavMenu && <MainNavigation allowN64={allowN64} />}
-        {/* show connect button if device is null*/}
+        {showNavMenu === true ? (
+          <MainNavigation allowN64={allowN64} />
+        ) : (
+          <Box sx={{ marginBottom: "25px" }}></Box>
+        )}
 
         <Routes>
           <Route
@@ -172,7 +175,7 @@ function Home() {
                 button={
                   bluetoothDevice === null ? (
                     <Grid item>
-                      <Stack spacing={3}>
+                      <Stack spacing={1}>
                         <Button
                           id="btConn"
                           variant="outlined"
@@ -182,19 +185,18 @@ function Home() {
                         >
                           Connect BlueRetro
                         </Button>
-                        <br />
                         <small>
-                          <i>
-                            Disconnect all controllers from BlueRetro before
-                            connecting for pak management.
-                          </i>
+                          Disconnect all controllers from BlueRetro before
+                          connecting for pak management.
                         </small>
                       </Stack>
                     </Grid>
                   ) : null
                 }
                 loadingCircle={
-                  <Grid container item justifyContent="center">{showLoading && <CircularProgress />}</Grid>
+                  <Grid container item justifyContent="center">
+                    {showLoading && <CircularProgress />}
+                  </Grid>
                 }
               />
             }
@@ -233,7 +235,13 @@ function Home() {
           />
           <Route
             path="/presetsmaker"
-            element={<Presetsmaker btDevice={bluetoothDevice} />}
+            element={
+              <Presetsmaker
+                btDevice={bluetoothDevice}
+                globalCfg={globalCfg}
+                btService={btService}
+              />
+            }
           />
           <Route
             path="/ota"
