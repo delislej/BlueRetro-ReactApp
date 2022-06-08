@@ -175,24 +175,32 @@ function Home() {
             element={
               <About
                 button={
-                  bluetoothDevice === null ? isWebBluetoothEnabled() === false ? <Typography>please enable web bluetooth!</Typography> : (
-                    <Grid item>
-                      <Stack spacing={1}>
-                        <Button
-                          id="btConn"
-                          variant="outlined"
-                          onClick={() => {
-                            btConn();
-                          }}
-                        >
-                          Connect BlueRetro
-                        </Button>
-                        <small>
-                          Disconnect all controllers from BlueRetro before
-                          connecting for pak management.
-                        </small>
-                      </Stack>
-                    </Grid>
+                  bluetoothDevice === null ? (
+                    isWebBluetoothEnabled() === false ? (
+                      <Grid item>
+                        <Stack spacing={1}>
+                          <Typography>please enable web bluetooth!</Typography>{" "}
+                        </Stack>
+                      </Grid>
+                    ) : (
+                      <Grid item>
+                        <Stack spacing={1}>
+                          <Button
+                            id="btConn"
+                            variant="outlined"
+                            onClick={() => {
+                              btConn();
+                            }}
+                          >
+                            Connect BlueRetro
+                          </Button>
+                          <small>
+                            Disconnect all controllers from BlueRetro before
+                            connecting for pak management.
+                          </small>
+                        </Stack>
+                      </Grid>
+                    )
                   ) : null
                 }
                 loadingCircle={
