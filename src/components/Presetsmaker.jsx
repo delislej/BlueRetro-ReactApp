@@ -10,6 +10,12 @@ import savePresetInput from "../utils/savePresetInput";
 import { Paper } from "@mui/material";
 import { gameConsoleControllers } from "../utils/constants";
 import { controllers } from "../utils/constants";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import AccordionActions from "@mui/material/AccordionActions";
+import Stack from "@mui/material/Stack";
 
 const Presetsmaker = (props) => {
   const myrange = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -17,11 +23,14 @@ const Presetsmaker = (props) => {
   const [controllerOptions, setControllerOptions] = useState([]);
   const [gcControllerOptions, setGcControllerOptions] = useState([]);
   const [selectedController, setSelectedController] = useState(-1);
-  const [selectedGameConsoleController, setSelectedGameConsoleController] = useState(-1);
+  const [selectedGameConsoleController, setSelectedGameConsoleController] =
+    useState(-1);
   const [consoleController, setConsoleController] = useState([]);
   const [selects, setSelects] = useState(null);
   const [input, setInput] = useState(1);
   const [inputOptions, setInputOptions] = useState({ value: 0, label: 0 });
+  const [expanded, setExpanded] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
   var filterArr = [];
 
   //const navigate = useNavigate();
@@ -117,6 +126,8 @@ const Presetsmaker = (props) => {
           </label>
           <Select
             defaultValue={element.value}
+            placeholder="Default"
+            isSearchable={false}
             isMulti
             filterOption={filterOption}
             isClearable={false}
@@ -136,6 +147,14 @@ const Presetsmaker = (props) => {
 
   const handleInputChange = (x) => {
     setInput(x.value + 1);
+  };
+
+  const handleChange = (panel) => (event, isExpanded) => {
+    if(panel === "panel1"){
+      setIsDisabled(true);
+    }
+    console.log("handle expand");
+    setExpanded(isExpanded ? panel : false);
   };
 
   const filterOption = (option) => {
@@ -189,53 +208,95 @@ const Presetsmaker = (props) => {
   };
 
   return (
-    <Paper>
-      <Typography>Bindings</Typography>
-      <Select
-        defaultValue={""}
-        name="input"
-        options={inputOptions}
-        onChange={(x) => {
-          handleInputChange(x);
-        }}
-        className="basic-multi-select"
-        classNamePrefix="select"
-      />
-      <Select
-        defaultValue={""}
-        name="colors"
-        options={gcControllerOptions}
-        onChange={(x) => {
-          handleGcControllerChange(x);
-        }}
-        className="basic-multi-select"
-        classNamePrefix="select"
-      />
-      <Select
-        defaultValue={""}
-        name="colors"
-        options={controllerOptions}
-        onChange={(x) => {
-          handleControllerChange(x);
-        }}
-        className="basic-multi-select"
-        classNamePrefix="select"
-      />
-      <Button
-        onClick={() => {
-          createSelects(selectedGameConsoleController, selectedController);
-        }}
+    <Paper sx={{ p: 2, marginBottom: "25px", width: { xs: "90%", lg: "66%" } }}>
+      <Accordion elevation={5}
+      expanded={expanded === "panel1"}
+      onChange={handleChange("panel1")}
       >
-        Start
-      </Button>
-      {selects}
-      <Button
-        onClick={() => {
-          saveBindings();
-        }}
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography>select systems</Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ alignItems: "center" }}>
+          <Stack spacing={3}>
+            <Typography>Bindings</Typography>
+            
+            <Select
+              defaultValue={""}
+              isSearchable={false}
+              name="colors"
+              options={gcControllerOptions}
+              onChange={(x) => {
+                handleGcControllerChange(x);
+              }}
+              className="basic-multi-select"
+              classNamePrefix="select"
+            />
+            <Select
+              defaultValue={""}
+              isSearchable={false}
+              name="colors"
+              options={controllerOptions}
+              onChange={(x) => {
+                handleControllerChange(x);
+              }}
+              className="basic-multi-select"
+              classNamePrefix="select"
+            />
+          </Stack>
+        </AccordionDetails>
+        <AccordionActions>
+          <Button
+            onClick={() => {
+              createSelects(selectedGameConsoleController, selectedController);
+              setIsDisabled(false);
+            }}
+          >
+            Start
+          </Button>
+        </AccordionActions>
+      </Accordion>
+      <Accordion elevation={5}
+      expanded={expanded === "panel2"}
+      disabled={isDisabled}
+      onChange={handleChange("panel2")}
       >
-        Save Bindings
-      </Button>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography>select systems</Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ alignItems: "center" }}>
+          <Stack spacing={3} sx={{ height: {xs:"300px", lg:"700"}, overflowY: "auto" }}>
+            {selects}
+          </Stack>
+        </AccordionDetails>
+        <AccordionActions>
+        <Select
+              defaultValue={""}
+              isSearchable={false}
+              name="input"
+              options={inputOptions}
+              onChange={(x) => {
+                handleInputChange(x);
+              }}
+              className="basic-multi-select"
+              classNamePrefix="select"
+            />
+          <Button
+            onClick={() => {
+              saveBindings();
+            }}
+          >
+            Save Bindings
+          </Button>
+        </AccordionActions>
+      </Accordion>
     </Paper>
   );
 };
