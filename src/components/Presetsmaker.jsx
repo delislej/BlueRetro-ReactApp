@@ -224,7 +224,6 @@ const Presetsmaker = (props) => {
         }
       }
     }
-    console.log(tempMap);
     json.map = tempMap;
     savePresetInput(json, props.btService, input);
   };
