@@ -10,7 +10,6 @@ import Box from "@mui/material/Box";
 import { btnList, btn } from "../utils/constants";
 import savePresetInput from "../utils/savePresetInput";
 import { useNavigate } from "react-router-dom";
-import { set } from "local-storage";
 
 const Presetsmaker = (props) => {
   const controllers = [
@@ -62,18 +61,19 @@ const Presetsmaker = (props) => {
   const [consoleController, setConsoleController] = useState([]);
   const [selects, setSelects] = useState(null);
   const [input, setInput] = useState(1);
-  const [inputOptions, setInputOptions] = useState({value: 0, label:0});
+  const [inputOptions, setInputOptions] = useState({ value: 0, label: 0 });
+  var filterArr = [];
 
   const navigate = useNavigate();
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (props.btDevice === null) {
       navigate("/");
     }
     if (props.globalCfg[0] === 255) {
       navigate("/");
     }
-  }, [props.btDevice, props.globalCfg, navigate]);
+  }, [props.btDevice, props.globalCfg, navigate]);*/
 
   useEffect(() => {
     var cons = controllers.map(function (value, index) {
@@ -91,16 +91,14 @@ const Presetsmaker = (props) => {
     });
 
     setInputOptions(inputs);
-
-  },[]);
+    // eslint-disable-next-line
+  }, []);
 
   const handleGcControllerChange = (gcCon) => {
-    console.log(gcCon.value);
     setSelectedGameConsoleController(gcCon.value + 16);
     var gameConsoleController = btnList.map(function (value, index) {
       return { value: index, label: value[gcCon.value + 16], bindings: [] };
     });
-    console.log(gameConsoleController);
     var temp = [];
     for (let i = 0; i < gameConsoleController.length; i++) {
       if (gameConsoleController[i].label === "") {
@@ -109,7 +107,6 @@ const Presetsmaker = (props) => {
         temp.push(gameConsoleController[i]);
       }
     }
-    console.log(temp);
     setConsoleController(temp);
   };
 
@@ -126,23 +123,27 @@ const Presetsmaker = (props) => {
         temp2.push(bluetoothController[i]);
       }
     }
-    console.log(temp2);
     setController(temp2);
+    createSelects(selectedGameConsoleController, selectedController);
   };
 
-  const handleButtonBind = (index, bindings) => {
-    console.log("index: " + index);
-    console.log("bindings: ");
-    console.log(bindings);
-    console.log(consoleController[index]);
+  const handleButtonBind = (index, bindings, actionType) => {
+    if (actionType.action === "select-option") {
+      filterArr.push(actionType.option.value);
+    }
+
+    if (actionType.action === "remove-value") {
+      filterArr = filterArr.filter(function (value) {
+        return value !== actionType.removedValue.value;
+      });
+    }
+
     var temp = consoleController;
     temp[index].bindings = bindings;
     setConsoleController(temp);
   };
 
   const createSelects = (gcCon, con) => {
-    //console.log(controllers.length);
-    console.log("gcCon: " + gcCon + " " + "Con: " + con);
     if (gcCon === -1 || con === -1) {
       return null;
     }
@@ -157,11 +158,12 @@ const Presetsmaker = (props) => {
           <Select
             defaultValue={element.value}
             isMulti
+            filterOption={filterOption}
             isClearable={false}
             name="colors"
             options={controller}
-            onChange={(x) => {
-              handleButtonBind(index, x);
+            onChange={(x, actionType) => {
+              handleButtonBind(index, x, actionType);
             }}
             className="basic-multi-select"
             classNamePrefix="select"
@@ -170,16 +172,21 @@ const Presetsmaker = (props) => {
       );
     });
     setSelects(selectTemp);
-    console.log(consoleController);
   };
 
-  const handleInputChange = (x) =>{
+  const handleInputChange = (x) => {
     setInput(x.value + 1);
-  }
+  };
 
-  const printBindings = () => {
+  const filterOption = (option) => {
+    if (filterArr.includes(option.value)) {
+      return false;
+    }
+    return true;
+  };
+
+  const saveBindings = () => {
     var buttonKeys = Object.keys(btn);
-    //console.log(buttonKeys);
     let json = {
       name: "preset maker json",
       desc: "used as a shell for making presets",
@@ -218,7 +225,6 @@ const Presetsmaker = (props) => {
       }
     }
     json.map = tempMap;
-    console.log(tempMap);
     savePresetInput(json, props.btService, input);
   };
 
@@ -260,15 +266,15 @@ const Presetsmaker = (props) => {
           createSelects(selectedGameConsoleController, selectedController);
         }}
       >
-        print test
+        Start
       </Button>
       {selects}
       <Button
         onClick={() => {
-          printBindings();
+          saveBindings();
         }}
       >
-        Print Bindings
+        Save Bindings
       </Button>
     </Box>
   );
