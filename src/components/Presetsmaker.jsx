@@ -190,7 +190,7 @@ const Presetsmaker = (props) => {
     let json = {
       name: "preset maker json",
       desc: "used as a shell for making presets",
-      console: "NA",
+      console: "N/A",
       map: [],
     };
     let tempMap = [];
@@ -233,7 +233,7 @@ const Presetsmaker = (props) => {
     let json = {
       name: "preset maker json",
       desc: "used as a shell for making presets",
-      console: "NA",
+      console: "N/A",
       map: [],
     };
     let tempMap = [];
@@ -292,13 +292,14 @@ const Presetsmaker = (props) => {
             <Select
               defaultValue={""}
               isSearchable={false}
-              name="colors"
+              name="Game Console Controller"
               options={gcControllerOptions}
               onChange={(x) => {
                 handleGcControllerChange(x);
               }}
               className="basic-multi-select"
               classNamePrefix="select"
+              placeholder="Console Controller"
             />
             <Select
               defaultValue={""}
@@ -310,6 +311,7 @@ const Presetsmaker = (props) => {
               }}
               className="basic-multi-select"
               classNamePrefix="select"
+              placeholder="Bluetooth Controller"
             />
           </Stack>
         </AccordionDetails>
@@ -353,8 +355,9 @@ const Presetsmaker = (props) => {
             sx={{ height: { xs: "300px", lg: "700" }, overflowY: "auto" }}
           >
             <Select
-              defaultValue={""}
+              defaultValue={1}
               isSearchable={false}
+              placeholder="Select Input"
               name="input"
               options={inputOptions}
               onChange={(x) => {
@@ -410,13 +413,14 @@ const Presetsmaker = (props) => {
         <AccordionDetails sx={{ alignItems: "center" }}>
           <Stack spacing={3}>
             <Select
-              defaultValue={""}
+              defaultValue={1}
               isSearchable={false}
               name="input"
               options={inputOptions}
               onChange={(x) => {
                 handleInputChange(x);
               }}
+              placeholder="Select input"
               className="basic-multi-select"
               classNamePrefix="select"
             />
