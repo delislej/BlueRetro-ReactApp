@@ -4,7 +4,6 @@ import { Typography } from "@mui/material";
 import { Button } from "@mui/material";
 import { btnList, btn } from "../utils/constants";
 import savePresetInput from "../utils/savePresetInput";
-import { useNavigate } from "react-router-dom";
 import { Paper } from "@mui/material";
 import { gameConsoleControllers } from "../utils/constants";
 import { controllers } from "../utils/constants";
@@ -36,17 +35,6 @@ const Presetsmaker = (props) => {
     readAs: "Text",
   });
   var filterArr = [];
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (props.btDevice === null) {
-      navigate("/");
-    }
-    if (props.globalCfg[0] === 255) {
-      navigate("/");
-    }
-  }, [props.btDevice, props.globalCfg, navigate]);
 
   useEffect(() => {
     var cons = controllers.map(function (value, index) {
@@ -110,7 +98,6 @@ const Presetsmaker = (props) => {
         return value !== actionType.removedValue.value;
       });
     }
-
     var temp = consoleController;
     temp[index].bindings = bindings;
     setConsoleController(temp);
@@ -123,15 +110,6 @@ const Presetsmaker = (props) => {
     element.download = "userFile.json";
     document.body.appendChild(element);
     element.click();
-  };
-
-  const makeJson = (x, y, z) => {
-    let temp = {
-      gameConsoleController: x,
-      bluetoothController: y,
-      bindings: z,
-    };
-    return temp;
   };
 
   const createSelects = (gcCon, con) => {
@@ -147,7 +125,6 @@ const Presetsmaker = (props) => {
             {element.label}
           </label>
           <Select
-            defaultValue={element.value}
             placeholder="Default"
             isSearchable={false}
             isMulti
@@ -377,19 +354,14 @@ const Presetsmaker = (props) => {
                 saveBindings();
               }}
             >
-              Save Bindings
+              Save to Console
             </Button>
-
             <Button
               variant="outlined"
               onClick={() => {
-                downloadJson(
-                  makeJson(
-                    selectedGameConsoleController,
-                    selectedController,
-                    consoleController
-                  )
-                );
+                downloadJson({
+                  bindings: consoleController,
+                });
               }}
             >
               Save to File

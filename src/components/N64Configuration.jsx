@@ -6,7 +6,6 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 import { useFilePicker } from "use-file-picker";
 import { Box } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -35,8 +34,6 @@ function N64Configuration(props) {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleFormat = () => setShow(true);
-  const [showProgress, setShowProgress] = useState(false);
-  const [showCancel, setShowCancel] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
   const [okVersion, setOkVersion] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -57,7 +54,6 @@ function N64Configuration(props) {
     if (props.globalCfg[0] === 255) {
       navigate("/");
     }
-
     setBank(props.globalCfg[3] + 1);
     if (props.allowManager === true) {
       setOkVersion(true);
@@ -67,20 +63,15 @@ function N64Configuration(props) {
     }
   }, [props.allowManager, props.globalCfg, props.btDevice, navigate]);
 
-  const toggleView = () => {
-    setShowButtons(!showButtons);
-    setShowProgress(!showProgress);
-    setShowCancel(!showCancel);
-  };
-
   const pakRead = (evt) => {
     // Reset progress indicator on new file selection.
+    setShowButtons(false);
     startTime.current = performance.now();
     setProgress(0);
-    toggleView();
     ChromeSamples.log("Reading Memory Pak: " + pak);
     n64ReadFile(props.btService, pak, setProgress, cancel)
       .then((value) => {
+        setShowButtons(true);
         setProgress(100);
         ChromeSamples.log(
           "File download done. Took: " +
@@ -92,19 +83,16 @@ function N64Configuration(props) {
           new Blob([value.buffer], { type: "application/mpk" }),
           "ctrl_pak" + pakNum + ".mpk"
         );
-        toggleView();
       })
       .catch((error) => {
+        setShowButtons(true);
         ChromeSamples.log("Argh! " + error);
-        toggleView();
         cancel.current = 0;
       });
   };
 
   const pakWrite = (evt) => {
     setShowButtons(false);
-    setShowProgress(true);
-    setShowCancel(true);
     startTime.current = performance.now();
     n64WriteFile(
       props.btService,
@@ -120,11 +108,11 @@ function N64Configuration(props) {
             " sec"
         );
         clear();
-        toggleView();
+        setShowButtons(true);
       })
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
-        toggleView();
+        setShowButtons(true);
         cancel.current = 0;
       });
   };
@@ -134,7 +122,7 @@ function N64Configuration(props) {
   const pakFormat = (evt) => {
     handleClose();
     setProgress(0);
-    toggleView();
+    setShowButtons(false);
     startTime.current = performance.now();
     n64WriteFile(
       props.btService,
@@ -149,11 +137,11 @@ function N64Configuration(props) {
             Math.round(performance.now() - startTime.current) / 1000 +
             " sec"
         );
-        toggleView();
+        setShowButtons(true);
       })
       .catch((error) => {
         ChromeSamples.log("Argh! " + error);
-        toggleView();
+        setShowButtons(true);
         cancel.current = 0;
       });
   };
@@ -161,22 +149,21 @@ function N64Configuration(props) {
   return (
     <Paper
       sx={{
-        width: {xs:"90%", lg:"66%"},
+        width: { xs: "90%", lg: "66%" },
         marginBottom: "25px",
         p: 2,
       }}
     >
-      <Dialog open={show}>
+      <Dialog open={show} sx={{ alignItems: "center" }}>
         <DialogTitle>Format Memory Pak</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            This will format your memory pak!
-            <br />
-            There is no way to undo this!
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
           <Stack spacing={3}>
+            <DialogContentText>
+              This will format your memory pak!
+              <br />
+              There is no way to undo this!
+            </DialogContentText>
+
             <Button
               variant="outlined"
               sx={{ color: "black", backgroundColor: "red" }}
@@ -190,7 +177,7 @@ function N64Configuration(props) {
               Close
             </Button>
           </Stack>
-        </DialogActions>
+        </DialogContent>
       </Dialog>
       <Box>
         {showButtons && (
@@ -317,10 +304,10 @@ function N64Configuration(props) {
         )}
         <Box>
           <Stack spacing={5}>
-            {showProgress && (
+            {!showButtons && (
               <ProgressBar now={progress} label={`${progress}%`} />
             )}
-            {showCancel && (
+            {!showButtons && (
               <Button
                 variant="outlined"
                 id="btnFileTransferCancel"
